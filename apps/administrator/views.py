@@ -9,6 +9,7 @@ from django.db.models import Q, Count, Sum
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
 from datetime import timedelta
+from collections import defaultdict
 import json
 
 from .forms import AdminRegisterForm, AdminLoginForm
@@ -50,7 +51,6 @@ def admin_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            # ── Log the login ──────────────────────────────────────────────
             AdminLog.objects.create(
                 admin=user,
                 action='login',
@@ -71,7 +71,6 @@ def admin_login(request):
 # ── Logout ────────────────────────────────────────────────────────────────────
 @login_required
 def admin_logout(request):
-    # ── Log the logout before the session is cleared ───────────────────────
     AdminLog.objects.create(
         admin=request.user,
         action='logout',
@@ -134,6 +133,7 @@ def dashboard(request):
 # ── Analytics ─────────────────────────────────────────────────────────────────
 @login_required
 def analytics(request):
+    # ── Membership trend (monthly / daily / weekly) ───────────────────────
     monthly_qs = (
         Member.objects
         .annotate(month=TruncMonth('created_at'))
@@ -144,9 +144,11 @@ def analytics(request):
     monthly_labels = [entry['month'].strftime('%b %Y') for entry in monthly_qs]
     monthly_data   = [entry['count'] for entry in monthly_qs]
 
+    # ── Membership types ──────────────────────────────────────────────────
     regular_count   = Member.objects.filter(type_of_membership='regular').count()
     associate_count = Member.objects.filter(type_of_membership='associate').count()
 
+    # ── Revenue ───────────────────────────────────────────────────────────
     revenue_qs = (
         Member.objects
         .annotate(month=TruncMonth('date_joined'))
@@ -158,20 +160,78 @@ def analytics(request):
     revenue_data   = [float(entry['total'] or 0) for entry in revenue_qs]
     total_revenue  = sum(revenue_data)
 
+    # ── Gender counts ─────────────────────────────────────────────────────
+    total_members  = Member.objects.count()
+    male_count     = Member.objects.filter(gender='male').count()
+    female_count   = Member.objects.filter(gender='female').count()
+    other_count    = Member.objects.filter(gender='other').count()
+
+    male_percent   = round(male_count   / total_members * 100, 1) if total_members else 0
+    female_percent = round(female_count / total_members * 100, 1) if total_members else 0
+    other_percent  = round(other_count  / total_members * 100, 1) if total_members else 0
+
+    # ── Barangay breakdown ────────────────────────────────────────────────
+    # Reads the first segment of the address field (before the first comma)
+    # which matches the BARANGAYS list format: "Ali-is, Bayawan City, ..."
+    barangay_map = defaultdict(lambda: {'total': 0, 'male': 0, 'female': 0})
+
+    for m in Member.objects.values('address', 'gender'):
+        raw = (m['address'] or '').strip()
+        barangay = raw.split(',')[0].strip() if raw else 'Unknown'
+        barangay_map[barangay]['total'] += 1
+        if m['gender'] == 'male':
+            barangay_map[barangay]['male'] += 1
+        elif m['gender'] == 'female':
+            barangay_map[barangay]['female'] += 1
+
+    # Sort by total descending; cap at 20 rows so the chart stays readable
+    sorted_barangays = sorted(
+        barangay_map.items(),
+        key=lambda x: x[1]['total'],
+        reverse=True,
+    )[:20]
+
+    barangay_labels  = [item[0]                 for item in sorted_barangays]
+    barangay_data    = [item[1]['total']         for item in sorted_barangays]
+    barangay_male    = [item[1]['male']          for item in sorted_barangays]
+    barangay_female  = [item[1]['female']        for item in sorted_barangays]
+
     context = {
-        'total_members':     Member.objects.count(),
+        # ── Stat cards ────────────────────────────────────────────────────
+        'total_members':     total_members,
         'active_members':    Member.objects.filter(is_active=True).count(),
         'regular_members':   regular_count,
         'associate_members': associate_count,
 
-        'monthly_labels': json.dumps(monthly_labels),
-        'monthly_data':   json.dumps(monthly_data),
-        'type_labels':    json.dumps(['Regular', 'Associate']),
-        'type_values':    json.dumps([regular_count, associate_count]),
+        # ── Gender stat cards ─────────────────────────────────────────────
+        'male_members':    male_count,
+        'female_members':  female_count,
+        'other_members':   other_count,
+        'male_percent':    male_percent,
+        'female_percent':  female_percent,
+        'other_percent':   other_percent,
+
+        # ── Membership trend chart ────────────────────────────────────────
+        'monthly_labels':    json.dumps(monthly_labels),
+        'monthly_data':      json.dumps(monthly_data),
+        'chart_months_count': len(monthly_labels),
+
+        # ── Membership type donut ─────────────────────────────────────────
+        'type_labels':  json.dumps(['Regular', 'Associate']),
+        'type_values':  json.dumps([regular_count, associate_count]),
+
+        # ── Revenue bar ───────────────────────────────────────────────────
         'revenue_labels':  json.dumps(revenue_labels),
         'revenue_data':    json.dumps(revenue_data),
         'total_revenue':   f'{total_revenue:,.2f}',
         'revenue_periods': len(revenue_data),
+
+        # ── Barangay chart ────────────────────────────────────────────────
+        'barangay_labels':  json.dumps(barangay_labels),
+        'barangay_data':    json.dumps(barangay_data),
+        'barangay_male':    json.dumps(barangay_male),
+        'barangay_female':  json.dumps(barangay_female),
+        'barangay_count':   len(barangay_labels),
     }
 
     return render(request, 'administrator/analytics.html', context)
@@ -180,13 +240,8 @@ def analytics(request):
 # ── Admin Logs ────────────────────────────────────────────────────────────────
 @login_required
 def admin_logs(request):
-    """
-    Full admin activity log with search, action / severity / date-range
-    filters and 25-per-page pagination.
-    """
     qs = AdminLog.objects.select_related('admin').all()
 
-    # ── Search ────────────────────────────────────────────────
     q = request.GET.get('q', '').strip()
     if q:
         qs = qs.filter(
@@ -198,17 +253,14 @@ def admin_logs(request):
             Q(admin__username__icontains=q)
         )
 
-    # ── Action filter ─────────────────────────────────────────
     action_filter = request.GET.get('action', '').strip()
     if action_filter:
         qs = qs.filter(action=action_filter)
 
-    # ── Severity filter ───────────────────────────────────────
     severity_filter = request.GET.get('severity', '').strip()
     if severity_filter:
         qs = qs.filter(severity=severity_filter)
 
-    # ── Date-range filter ─────────────────────────────────────
     date_range = request.GET.get('date_range', '').strip()
     now = timezone.now()
     if date_range == 'today':
@@ -218,11 +270,9 @@ def admin_logs(request):
     elif date_range == '30d':
         qs = qs.filter(timestamp__gte=now - timedelta(days=30))
 
-    # ── Pagination ────────────────────────────────────────────
     paginator = Paginator(qs, 25)
     page_obj  = paginator.get_page(request.GET.get('page', 1))
 
-    # ── Summary counts (always unfiltered) ────────────────────
     total_logs   = AdminLog.objects.count()
     today_logs   = AdminLog.objects.filter(timestamp__date=now.date()).count()
     warning_logs = AdminLog.objects.filter(severity='warning').count()
@@ -232,15 +282,14 @@ def admin_logs(request):
         'page_obj':          page_obj,
         'action_choices':    AdminLog.ACTION_CHOICES,
         'severity_choices':  AdminLog.SEVERITY_CHOICES,
-        # active filter values (keeps form state on reload)
         'q':                 q,
         'action_filter':     action_filter,
         'severity_filter':   severity_filter,
         'date_range':        date_range,
-        # summary cards
         'total_logs':        total_logs,
         'today_logs':        today_logs,
         'warning_logs':      warning_logs,
         'danger_logs':       danger_logs,
     }
     return render(request, 'administrator/admin_logs.html', context)
+

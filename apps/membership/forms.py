@@ -12,7 +12,7 @@ class MemberForm(forms.ModelForm):
 
     class Meta:
         model = Member
-        exclude = ['account_number', 'age', 'cbu_balance', 'created_at', 'updated_at',
+        exclude = ['account_number', 'age', 'created_at', 'updated_at',
                    'initial_subscription', 'initial_paid_up']
         widgets = {
             'tin': forms.TextInput(attrs={

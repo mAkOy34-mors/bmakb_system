@@ -32,26 +32,26 @@
       {% csrf_token %}
 
       <div class="section-label">Personal Information</div>
-      <div class="row g-3">
-        <div class="col-6">
-          <label class="form-label">First Name</label>
+      <div class="two-columns">
+        <div>
+          <label class="form-label">First Name <span style="color:#ef4444;">*</span></label>
           <input type="text" name="first_name" class="form-control" placeholder="First name" value="{{ form.first_name.value|default:'' }}" required/>
           {{ form.first_name.errors }}
         </div>
-        <div class="col-6">
-          <label class="form-label">Last Name</label>
+        <div>
+          <label class="form-label">Last Name <span style="color:#ef4444;">*</span></label>
           <input type="text" name="last_name" class="form-control" placeholder="Last name" value="{{ form.last_name.value|default:'' }}" required/>
           {{ form.last_name.errors }}
         </div>
-        <div class="col-12">
-          <label class="form-label">Email Address</label>
+        <div class="full-width">
+          <label class="form-label">Email Address <span style="color:#ef4444;">*</span></label>
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
             <input type="email" name="email" class="form-control" placeholder="Email address" value="{{ form.email.value|default:'' }}" required/>
           </div>
           {{ form.email.errors }}
         </div>
-        <div class="col-12">
+        <div class="full-width">
           <label class="form-label">Phone <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-telephone"></i></span>
@@ -61,26 +61,26 @@
       </div>
 
       <div class="section-label">Account Credentials</div>
-      <div class="row g-3">
-        <div class="col-12">
-          <label class="form-label">Username</label>
+      <div class="two-columns">
+        <div class="full-width">
+          <label class="form-label">Username <span style="color:#ef4444;">*</span></label>
           <div class="input-group">
             <span class="input-group-text"><i class="bi bi-person"></i></span>
             <input type="text" name="username" class="form-control" placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required/>
           </div>
           {{ form.username.errors }}
         </div>
-        <div class="col-6">
-          <label class="form-label">Password</label>
+        <div>
+          <label class="form-label">Password <span style="color:#ef4444;">*</span></label>
           <input type="password" name="password1" class="form-control" placeholder="Password" required/>
           {{ form.password1.errors }}
         </div>
-        <div class="col-6">
-          <label class="form-label">Confirm Password</label>
+        <div>
+          <label class="form-label">Confirm Password <span style="color:#ef4444;">*</span></label>
           <input type="password" name="password2" class="form-control" placeholder="Confirm password" required/>
           {{ form.password2.errors }}
         </div>
-        <div class="col-12">
+        <div class="full-width">
           <label class="form-label">Profile Picture <span style="color:var(--muted);font-weight:400">(optional)</span></label>
           <input type="file" name="profile_picture" class="form-control" accept="image/*"/>
         </div>

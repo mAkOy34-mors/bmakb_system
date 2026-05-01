@@ -2,13 +2,17 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'membership/css/member_form.css' %}">
+{% endblock %}
+
 {% block title %}{{ title }} — BMAKB{% endblock %}
 {% block topbar_icon %}person-plus{% endblock %}
 {% block topbar_title %}{{ title }}{% endblock %}
 
 {% block content %}
 
-<div class="d-flex align-items-center gap-2 mb-4">
+<div class="back-button">
   <a href="{% url 'membership:member_list' %}" class="btn-outline">
     <i class="bi bi-arrow-left"></i> Back
   </a>
@@ -25,21 +29,21 @@
       <!-- Identification -->
       <div class="form-card mb-4">
         <div class="form-card-header">
-          <div style="font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;">
-            <i class="bi bi-fingerprint" style="color:var(--teal)"></i> Identification
+          <div class="section-header">
+            <i class="bi bi-fingerprint section-icon"></i> Identification
           </div>
         </div>
         <div class="form-card-body">
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">TIN <span style="color:#ef4444">*</span></label>
+              <label class="form-label">TIN <span class="required-star">*</span></label>
               {{ form.tin }}
               {% if form.tin.errors %}
-                <div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.tin.errors.0 }}</div>
+                <div class="error-text">{{ form.tin.errors.0 }}</div>
               {% endif %}
             </div>
             <div class="col-md-6">
-              <label class="form-label">Type of Membership <span style="color:#ef4444">*</span></label>
+              <label class="form-label">Type of Membership <span class="required-star">*</span></label>
               {{ form.type_of_membership }}
             </div>
           </div>
@@ -49,23 +53,23 @@
       <!-- Personal Information -->
       <div class="form-card mb-4">
         <div class="form-card-header">
-          <div style="font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;">
-            <i class="bi bi-person" style="color:var(--teal)"></i> Personal Information
+          <div class="section-header">
+            <i class="bi bi-person section-icon"></i> Personal Information
           </div>
         </div>
         <div class="form-card-body">
           <div class="row g-3">
             <div class="col-12">
-              <label class="form-label">Full Name <span style="color:#ef4444">*</span></label>
+              <label class="form-label">Full Name <span class="required-star">*</span></label>
               {{ form.name }}
               {% if form.name.errors %}
-                <div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.name.errors.0 }}</div>
+                <div class="error-text">{{ form.name.errors.0 }}</div>
               {% endif %}
             </div>
 
             <!-- Date of Birth -->
             <div class="col-md-4">
-              <label class="form-label">Date of Birth <span style="color:#ef4444">*</span></label>
+              <label class="form-label">Date of Birth <span class="required-star">*</span></label>
               {{ form.date_of_birth }}
             </div>
 
@@ -73,49 +77,36 @@
             <div class="col-md-4">
               <label class="form-label">
                 Age
-                <span style="background:rgba(20,184,166,0.12);color:var(--teal,#14b8a6);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:4px;">AUTO</span>
+                <span class="age-auto-badge">AUTO</span>
               </label>
               <input type="text"
                      id="age-display"
-                     class="form-control"
+                     class="form-control age-display"
                      readonly
                      value="{% if member %}{{ member.age }}{% endif %}"
-                     placeholder="—"
-                     style="background:#f9fafb;color:var(--text);cursor:default;">
-              <div style="font-size:11px;color:var(--muted,#9ca3af);margin-top:2px;">
+                     placeholder="—">
+              <div class="age-hint">
                 Auto-computed from date of birth.
               </div>
             </div>
 
             <div class="col-md-4">
-              <label class="form-label">Gender <span style="color:#ef4444">*</span></label>
+              <label class="form-label">Gender <span class="required-star">*</span></label>
               {{ form.gender }}
             </div>
             <div class="col-md-6">
-              <label class="form-label">Occupation <span style="color:#ef4444">*</span></label>
+              <label class="form-label">Occupation <span class="required-star">*</span></label>
               {{ form.occupation }}
             </div>
 
             <!-- Address with barangay autocomplete -->
             <div class="col-12">
-              <label class="form-label">Address <span style="color:#ef4444">*</span></label>
-              <div style="position:relative;">
+              <label class="form-label">Address <span class="required-star">*</span></label>
+              <div class="address-wrapper">
                 {{ form.address }}
-                <div id="barangay-suggestions" style="
-                  display:none;
-                  position:absolute;
-                  z-index:999;
-                  background:#fff;
-                  border:1px solid var(--border, #e5e7eb);
-                  border-radius:10px;
-                  box-shadow:0 8px 24px rgba(0,0,0,0.10);
-                  width:100%;
-                  max-height:220px;
-                  overflow-y:auto;
-                  margin-top:2px;
-                "></div>
+                <div id="barangay-suggestions" class="barangay-suggestions"></div>
               </div>
-              <div style="font-size:11.5px;color:var(--muted,#9ca3af);margin-top:6px;padding-left:2px;">
+              <div class="address-hint">
                 <i class="bi bi-info-circle"></i> Type a barangay name to get address suggestions.
               </div>
             </div>
@@ -127,8 +118,8 @@
       <!-- Financial Details -->
       <div class="form-card">
         <div class="form-card-header">
-          <div style="font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;">
-            <i class="bi bi-cash-stack" style="color:var(--teal)"></i> Financial Details
+          <div class="section-header">
+            <i class="bi bi-cash-stack section-icon"></i> Financial Details
           </div>
         </div>
         <div class="form-card-body">
@@ -138,7 +129,7 @@
             <div class="col-md-6">
               <label class="form-label">Subscription (per year)</label>
               <div class="input-group">
-                <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">₱</span>
+                <span class="input-group-text currency-prefix">₱</span>
                 {{ form.subscription }}
               </div>
             </div>
@@ -148,37 +139,16 @@
               <label class="form-label">Term (Years)</label>
               <div class="input-group">
                 {{ form.term_years }}
-                <span class="input-group-text" style="border-radius:0 10px 10px 0;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">yr(s)</span>
+                <span class="input-group-text currency-suffix">yr(s)</span>
               </div>
             </div>
 
             <!-- CBU -->
             <div class="col-md-6">
-              <label class="form-label">CBU <span style="font-size:11px;color:var(--muted,#9ca3af);font-weight:400;">(original contribution)</span></label>
+              <label class="form-label">CBU <span class="cbu-hint">(original contribution)</span></label>
               <div class="input-group">
-                <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">₱</span>
+                <span class="input-group-text currency-prefix">₱</span>
                 {{ form.con }}
-              </div>
-            </div>
-
-            <!-- CBU Balance -->
-            <div class="col-md-6">
-              <label class="form-label">
-                CBU Balance
-                <span style="background:rgba(20,184,166,0.12);color:var(--teal,#14b8a6);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:4px;">SAVED TO DB</span>
-              </label>
-              <div class="input-group">
-                <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">₱</span>
-                <input type="text"
-                       id="cbu-balance-display"
-                       class="form-control"
-                       readonly
-                       value="{% if member %}{{ member.cbu_balance }}{% else %}0.00{% endif %}"
-                       style="background:#f9fafb;color:var(--text);cursor:default;">
-              </div>
-              <div id="cbu-balance-hint" style="font-size:11.5px;margin-top:4px;"></div>
-              <div style="font-size:11px;color:var(--muted,#9ca3af);margin-top:2px;">
-                Auto-computed on save: Subscription − CBU. Cannot be edited.
               </div>
             </div>
 
@@ -190,10 +160,10 @@
 
     <!-- RIGHT COLUMN -->
     <div class="col-lg-4">
-      <div class="form-card" style="position:sticky;top:80px;">
+      <div class="form-card sticky-sidebar">
         <div class="form-card-header">
-          <div style="font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;">
-            <i class="bi bi-gear" style="color:var(--teal)"></i> Settings
+          <div class="section-header">
+            <i class="bi bi-gear section-icon"></i> Settings
           </div>
         </div>
         <div class="form-card-body">
@@ -203,30 +173,29 @@
           </div>
 
           <div class="mb-4">
-            <div class="d-flex align-items-center gap-2">
+            <div class="checkbox-wrapper">
               {{ form.is_active }}
               <label class="form-label mb-0">Active Member</label>
             </div>
-            <div style="font-size:12px;color:var(--muted);margin-top:4px;">
+            <div class="helper-text">
               Uncheck to deactivate this member
             </div>
           </div>
 
-          <hr style="border-color:var(--border)"/>
+          <hr class="form-divider"/>
 
-          <button type="submit" class="btn-teal w-100 justify-content-center" style="padding:11px;">
+          <button type="submit" class="btn-teal w-100 justify-content-center submit-btn">
             <i class="bi bi-check-circle"></i> {{ btn_label }}
           </button>
 
-          <a href="{% url 'membership:member_list' %}" class="btn-outline w-100 justify-content-center mt-2" style="padding:10px;">
+          <a href="{% url 'membership:member_list' %}" class="btn-outline w-100 justify-content-center cancel-btn">
             Cancel
           </a>
 
           {% if member %}
-          <hr style="border-color:var(--border)"/>
+          <hr class="form-divider"/>
           <a href="{% url 'membership:member_delete' member.pk %}"
-             class="btn-outline w-100 justify-content-center"
-             style="padding:10px;color:#ef4444;border-color:#fecaca;">
+             class="btn-outline w-100 justify-content-center delete-btn">
             <i class="bi bi-trash"></i> Delete Member
           </a>
           {% endif %}

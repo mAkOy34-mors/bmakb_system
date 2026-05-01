@@ -1,0 +1,151 @@
+/* templates/membership/member_detail.css */
+
+/* Action bar */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-delete {
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+/* Profile card */
+.profile-card-body {
+  padding: 32px 24px;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+  color: white;
+  font-family: 'DM Serif Display', serif;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.profile-occupation {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.profile-account {
+  margin-top: 8px;
+}
+
+.profile-badges {
+  margin-top: 12px;
+}
+
+.profile-info-panel {
+  padding: 0 24px 24px;
+}
+
+/* Info panel */
+.info-panel-bg {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.info-value {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tin-value {
+  font-family: monospace;
+}
+
+/* Section headers */
+.section-header {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-icon {
+  color: var(--teal);
+}
+
+/* Personal info labels */
+.info-label-uppercase {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.info-content {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Financial boxes */
+.financial-box {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.financial-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.financial-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.term-years {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}

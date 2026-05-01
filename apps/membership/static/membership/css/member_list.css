@@ -1,0 +1,43 @@
+/* templates/membership/member_list.css */
+
+.member-count {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.member-occupation {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.member-tin {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.action-btn {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.action-btn-danger {
+  color: #ef4444;
+}
+
+.empty-icon {
+  font-size: 36px;
+  color: var(--border);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.empty-text {
+  font-size: 14px;
+  color: var(--muted);
+}

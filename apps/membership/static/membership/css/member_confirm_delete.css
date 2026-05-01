@@ -1,0 +1,46 @@
+/* templates/membership/member_confirm_delete.css */
+
+/* Delete warning icon circle */
+.warning-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #fef2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 28px;
+  color: #ef4444;
+}
+
+/* Delete title */
+.delete-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* Delete description */
+.delete-description {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+/* Danger button variant */
+.btn-danger {
+  background: #ef4444;
+  padding: 11px;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+/* Form card body with extra padding */
+.form-card-body-delete {
+  padding: 40px 32px;
+}

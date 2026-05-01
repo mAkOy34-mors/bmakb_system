@@ -67,15 +67,6 @@ class Member(models.Model):
         validators=[MinValueValidator(0)],
         help_text='Capital Build-Up — original contribution amount.',
     )
-    cbu_balance = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0.00,
-        editable=False,  # auto-computed, never shown as an editable form field
-        verbose_name='CBU Balance',
-        help_text='Auto-computed: CBU minus annual subscription. Saved to DB.',
-    )
-
     # ── Timestamps ────────────────────────────────────────────────────────────
     date_joined = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -98,10 +89,6 @@ class Member(models.Model):
                 today.year - self.date_of_birth.year
                 - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
             )
-
-        # Auto-compute CBU balance: Subscription minus CBU
-        # Represents the remaining unpaid balance. Zero means fully paid.
-        self.cbu_balance = (self.subscription or 0) - (self.con or 0)
 
         # Auto-generate account number
         if not self.account_number:

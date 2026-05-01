@@ -1,5 +1,10 @@
 <!-- templates/membership/member_detail.html -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'membership/css/member_detail.css' %}">
+{% endblock %}
 
 {% block title %}{{ member.name }} — BMAKB{% endblock %}
 {% block topbar_icon %}person{% endblock %}
@@ -7,15 +12,15 @@
 
 {% block content %}
 
-<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+<div class="action-bar">
   <a href="{% url 'membership:member_list' %}" class="btn-outline">
     <i class="bi bi-arrow-left"></i> Back to Members
   </a>
-  <div class="d-flex gap-2">
+  <div class="action-buttons">
     <a href="{% url 'membership:member_edit' member.pk %}" class="btn-teal">
       <i class="bi bi-pencil"></i> Edit Member
     </a>
-    <a href="{% url 'membership:member_delete' member.pk %}" class="btn-outline" style="color:#ef4444;border-color:#fecaca;">
+    <a href="{% url 'membership:member_delete' member.pk %}" class="btn-outline btn-delete">
       <i class="bi bi-trash"></i> Delete
     </a>
   </div>
@@ -26,16 +31,16 @@
   <!-- Profile Card -->
   <div class="col-lg-4">
     <div class="form-card">
-      <div class="form-card-body text-center" style="padding:32px 24px;">
-        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#3b82f6);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;color:white;font-family:'DM Serif Display',serif;">
+      <div class="form-card-body text-center profile-card-body">
+        <div class="profile-avatar">
           {{ member.name|first|upper }}
         </div>
-        <div style="font-size:20px;font-weight:600;color:var(--text);">{{ member.name }}</div>
-        <div style="font-size:13px;color:var(--muted);margin-top:4px;">{{ member.occupation }}</div>
-        <div class="mt-2">
+        <div class="profile-name">{{ member.name }}</div>
+        <div class="profile-occupation">{{ member.occupation }}</div>
+        <div class="profile-account">
           <span class="acct-badge">{{ member.account_number }}</span>
         </div>
-        <div class="mt-3">
+        <div class="profile-badges">
           {% if member.type_of_membership == 'regular' %}
             <span class="badge-regular">Regular Member</span>
           {% else %}
@@ -49,23 +54,23 @@
           {% endif %}
         </div>
       </div>
-      <div style="padding:0 24px 24px;">
-        <div style="background:#f9fafb;border-radius:10px;padding:16px;">
-          <div class="d-flex justify-content-between mb-2">
-            <span style="font-size:12px;color:var(--muted);">Date Joined</span>
-            <span style="font-size:12px;font-weight:500;">{{ member.date_joined|date:"M d, Y" }}</span>
+      <div class="profile-info-panel">
+        <div class="info-panel-bg">
+          <div class="info-row">
+            <span class="info-label">Date Joined</span>
+            <span class="info-value">{{ member.date_joined|date:"M d, Y" }}</span>
           </div>
-          <div class="d-flex justify-content-between mb-2">
-            <span style="font-size:12px;color:var(--muted);">Age</span>
-            <span style="font-size:12px;font-weight:500;">{{ member.age }} years old</span>
+          <div class="info-row">
+            <span class="info-label">Age</span>
+            <span class="info-value">{{ member.age }} years old</span>
           </div>
-          <div class="d-flex justify-content-between mb-2">
-            <span style="font-size:12px;color:var(--muted);">Gender</span>
-            <span style="font-size:12px;font-weight:500;">{{ member.get_gender_display }}</span>
+          <div class="info-row">
+            <span class="info-label">Gender</span>
+            <span class="info-value">{{ member.get_gender_display }}</span>
           </div>
-          <div class="d-flex justify-content-between">
-            <span style="font-size:12px;color:var(--muted);">TIN</span>
-            <span style="font-size:12px;font-weight:500;font-family:monospace;">{{ member.tin }}</span>
+          <div class="info-row">
+            <span class="info-label">TIN</span>
+            <span class="info-value tin-value">{{ member.tin }}</span>
           </div>
         </div>
       </div>
@@ -78,23 +83,23 @@
     <!-- Personal Info -->
     <div class="form-card mb-4">
       <div class="form-card-header">
-        <div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;">
-          <i class="bi bi-person" style="color:var(--teal)"></i> Personal Information
+        <div class="section-header">
+          <i class="bi bi-person section-icon"></i> Personal Information
         </div>
       </div>
       <div class="form-card-body">
         <div class="row g-3">
           <div class="col-md-6">
-            <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Full Name</div>
-            <div style="font-size:14px;font-weight:500;">{{ member.name }}</div>
+            <div class="info-label-uppercase">Full Name</div>
+            <div class="info-content">{{ member.name }}</div>
           </div>
           <div class="col-md-6">
-            <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Date of Birth</div>
-            <div style="font-size:14px;font-weight:500;">{{ member.date_of_birth|date:"M d, Y" }}</div>
+            <div class="info-label-uppercase">Date of Birth</div>
+            <div class="info-content">{{ member.date_of_birth|date:"M d, Y" }}</div>
           </div>
           <div class="col-12">
-            <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Address</div>
-            <div style="font-size:14px;font-weight:500;">{{ member.address }}</div>
+            <div class="info-label-uppercase">Address</div>
+            <div class="info-content">{{ member.address }}</div>
           </div>
         </div>
       </div>
@@ -103,33 +108,40 @@
     <!-- Financial -->
     <div class="form-card">
       <div class="form-card-header">
-        <div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;">
-          <i class="bi bi-cash-stack" style="color:var(--teal)"></i> Financial Details
+        <div class="section-header">
+          <i class="bi bi-cash-stack section-icon"></i> Financial Details
         </div>
       </div>
       <div class="form-card-body">
         <div class="row g-3">
           {% for label, value in financial_fields %}
           <div class="col-md-6">
-            <div style="background:#f9fafb;border-radius:10px;padding:14px;">
-              <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">{{ label }}</div>
-              <div style="font-size:20px;font-weight:600;color:var(--teal);">₱{{ value|floatformat:2 }}</div>
+            <div class="financial-box">
+              <div class="financial-label">{{ label }}</div>
+              <div class="financial-value">₱{{ value|floatformat:2 }}</div>
             </div>
           </div>
           {% empty %}
-          <div class="col-md-3">
-            <div style="background:#f9fafb;border-radius:10px;padding:14px;">
-              <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Subscription</div>
-              <div style="font-size:20px;font-weight:600;color:var(--teal);">₱{{ member.subscription|floatformat:2 }}</div>
+          <div class="col-md-4">
+            <div class="financial-box">
+              <div class="financial-label">Subscription</div>
+              <div class="financial-value">₱{{ member.subscription|floatformat:2 }}</div>
             </div>
           </div>
-          <div class="col-md-3">
-            <div style="background:#f9fafb;border-radius:10px;padding:14px;">
-              <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">CBU</div>
-              <div style="font-size:20px;font-weight:600;color:var(--teal);">₱{{ member.con|floatformat:2 }}</div>
+          <div class="col-md-4">
+            <div class="financial-box">
+              <div class="financial-label">CBU</div>
+              <div class="financial-value">₱{{ member.con|floatformat:2 }}</div>
             </div>
           </div>
-
+          <div class="col-md-4">
+            <div class="financial-box">
+              <div class="financial-label">Term</div>
+              <div class="financial-value">
+                {{ member.term_years }} <span class="term-years">yr{{ member.term_years|pluralize }}</span>
+              </div>
+            </div>
+          </div>
           {% endfor %}
         </div>
       </div>

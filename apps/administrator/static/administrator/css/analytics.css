@@ -1,0 +1,35 @@
+
+  /* ── Stat card base (no color) ──────────────────────────── */
+  .stat-icon-wrap svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* ── Row 1 — Membership cards ───────────────────────────── */
+  .stat-card.c-blue   { border-top: 3px solid #3b82f6; }
+  .stat-icon-wrap.c-blue   { background: #eff6ff; color: #3b82f6; }
+
+  .stat-card.c-emerald { border-top: 3px solid #10b981; }
+  .stat-icon-wrap.c-emerald { background: #ecfdf5; color: #10b981; }
+
+  .stat-card.c-amber  { border-top: 3px solid #f59e0b; }
+  .stat-icon-wrap.c-amber  { background: #fffbeb; color: #d97706; }
+
+  .stat-card.c-violet { border-top: 3px solid #8b5cf6; }
+  .stat-icon-wrap.c-violet { background: #f5f3ff; color: #8b5cf6; }
+
+  /* ── Row 2 — Gender cards ───────────────────────────────── */
+  .stat-card.c-sky    { border-top: 3px solid #0ea5e9; }
+  .stat-icon-wrap.c-sky    { background: #e0f2fe; color: #0284c7; }
+
+  .stat-card.c-rose   { border-top: 3px solid #f43f5e; }
+  .stat-icon-wrap.c-rose   { background: #fff1f2; color: #f43f5e; }
+
+  .stat-card.c-slate  { border-top: 3px solid #64748b; }
+  .stat-icon-wrap.c-slate  { background: #f1f5f9; color: #64748b; }

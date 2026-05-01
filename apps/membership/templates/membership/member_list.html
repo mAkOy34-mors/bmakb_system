@@ -1,5 +1,10 @@
 <!-- templates/membership/member_list.html -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'membership/css/member_list.css' %}">
+{% endblock %}
 
 {% block title %}Members — BMAKB{% endblock %}
 {% block topbar_icon %}people{% endblock %}
@@ -35,8 +40,8 @@
 </div>
 
 <!-- ── Count ────────────────────────────────────────────────── -->
-<div style="font-size:13px;color:var(--muted);margin-bottom:12px;">
-  Showing <strong style="color:var(--text)">{{ total }}</strong> member{{ total|pluralize }}
+<div class="member-count">
+  Showing <strong>{{ total }}</strong> member{{ total|pluralize }}
   {% if query %} for "<strong>{{ query }}</strong>"{% endif %}
 </div>
 
@@ -63,9 +68,9 @@
           <td><span class="acct-badge">{{ member.account_number }}</span></td>
           <td>
             <strong>{{ member.name }}</strong>
-            <div style="font-size:11px;color:var(--muted)">{{ member.occupation }}</div>
+            <div class="member-occupation">{{ member.occupation }}</div>
           </td>
-          <td style="font-family:monospace;font-size:12px;">{{ member.tin }}</td>
+          <td class="member-tin">{{ member.tin }}</td>
           <td>
             {% if member.type_of_membership == 'regular' %}
               <span class="badge-regular">Regular</span>
@@ -84,14 +89,14 @@
             {% endif %}
           </td>
           <td>
-            <div class="d-flex gap-1">
-              <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;" title="View">
+            <div class="action-buttons">
+              <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline action-btn" title="View">
                 <i class="bi bi-eye"></i>
               </a>
-              <a href="{% url 'membership:member_edit' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;" title="Edit">
+              <a href="{% url 'membership:member_edit' member.pk %}" class="btn-outline action-btn" title="Edit">
                 <i class="bi bi-pencil"></i>
               </a>
-              <a href="{% url 'membership:member_delete' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;color:#ef4444;" title="Delete">
+              <a href="{% url 'membership:member_delete' member.pk %}" class="btn-outline action-btn action-btn-danger" title="Delete">
                 <i class="bi bi-trash"></i>
               </a>
             </div>
@@ -100,8 +105,8 @@
         {% empty %}
         <tr>
           <td colspan="9" class="text-center py-5">
-            <i class="bi bi-people" style="font-size:36px;color:var(--border);display:block;margin-bottom:8px;"></i>
-            <div style="font-size:14px;color:var(--muted);">No members found.</div>
+            <i class="bi bi-people empty-icon"></i>
+            <div class="empty-text">No members found.</div>
             <a href="{% url 'membership:member_add' %}" class="btn-teal mt-3 d-inline-flex">
               <i class="bi bi-person-plus"></i> Add First Member
             </a>

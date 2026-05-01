@@ -1,4 +1,3 @@
-<!-- templates/administrator/analytics.html -->
 {% extends 'base.html' %}
 {% load static %}
 
@@ -6,14 +5,18 @@
 {% block topbar_icon %}bar-chart-2{% endblock %}
 {% block topbar_title %}Analytics{% endblock %}
 
+{% block extra_css %}
+ <link rel="stylesheet" href="{% static 'administrator/css/analytics.css'%}"
+{% endblock %}
+
 {% block content %}
 
-<!-- ── Stat Cards ─────────────────────────────────────────── -->
+<!-- ── Membership Stat Cards ──────────────────────────────── -->
 <div class="row g-3 mb-4">
 
   <div class="col-md-3">
-    <div class="stat-card blue">
-      <div class="stat-icon-wrap blue">
+    <div class="stat-card c-blue">
+      <div class="stat-icon-wrap c-blue">
         <i data-lucide="users" class="lucide-icon"></i>
       </div>
       <div class="stat-label">TOTAL MEMBERS</div>
@@ -23,8 +26,8 @@
   </div>
 
   <div class="col-md-3">
-    <div class="stat-card green">
-      <div class="stat-icon-wrap green">
+    <div class="stat-card c-emerald">
+      <div class="stat-icon-wrap c-emerald">
         <i data-lucide="user-check" class="lucide-icon"></i>
       </div>
       <div class="stat-label">ACTIVE MEMBERS</div>
@@ -34,8 +37,8 @@
   </div>
 
   <div class="col-md-3">
-    <div class="stat-card amber">
-      <div class="stat-icon-wrap amber">
+    <div class="stat-card c-amber">
+      <div class="stat-icon-wrap c-amber">
         <i data-lucide="user-round" class="lucide-icon"></i>
       </div>
       <div class="stat-label">REGULAR MEMBERS</div>
@@ -45,8 +48,8 @@
   </div>
 
   <div class="col-md-3">
-    <div class="stat-card purple">
-      <div class="stat-icon-wrap purple">
+    <div class="stat-card c-violet">
+      <div class="stat-icon-wrap c-violet">
         <i data-lucide="star" class="lucide-icon"></i>
       </div>
       <div class="stat-label">ASSOCIATE MEMBERS</div>
@@ -57,16 +60,69 @@
 
 </div>
 
+<!-- ── Gender Stat Cards ──────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-4">
+    <div class="stat-card c-sky">
+      <div class="stat-icon-wrap c-sky">
+        <!-- Male symbol ♂ -->
+        <svg viewBox="0 0 24 24">
+          <circle cx="10" cy="14" r="5"/>
+          <line x1="14.5" y1="9.5" x2="20" y2="4"/>
+          <polyline points="15 4 20 4 20 9"/>
+        </svg>
+      </div>
+      <div class="stat-label">MALE MEMBERS</div>
+      <div class="stat-value">{{ male_members }}</div>
+      <div class="stat-sub">
+        {% if total_members %}{{ male_percent|floatformat:1 }}% of total{% else %}No data yet{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="stat-card c-rose">
+      <div class="stat-icon-wrap c-rose">
+        <!-- Female symbol ♀ -->
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="9" r="5"/>
+          <line x1="12" y1="14" x2="12" y2="21"/>
+          <line x1="9"  y1="18" x2="15" y2="18"/>
+        </svg>
+      </div>
+      <div class="stat-label">FEMALE MEMBERS</div>
+      <div class="stat-value">{{ female_members }}</div>
+      <div class="stat-sub">
+        {% if total_members %}{{ female_percent|floatformat:1 }}% of total{% else %}No data yet{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="stat-card c-slate">
+      <div class="stat-icon-wrap c-slate">
+        <i data-lucide="user" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">OTHER / UNSPECIFIED</div>
+      <div class="stat-value">{{ other_members }}</div>
+      <div class="stat-sub">
+        {% if total_members %}{{ other_percent|floatformat:1 }}% of total{% else %}No data yet{% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ── Charts Row 1 — Line + Donut ────────────────────────── -->
 <div class="row g-3 mb-4">
 
-  <!-- Line Chart: Monthly Membership Trend -->
   <div class="col-md-7">
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-header-left">
           <div class="chart-title">
-            <i data-lucide="trending-up" style="width:16px;height:16px;color:var(--amber)"></i>
+            <i data-lucide="trending-up" style="width:16px;height:16px;color:#f59e0b"></i>
             Monthly Membership Trend
           </div>
           <div class="chart-sub">{{ chart_months_count|default:"1" }} months of data</div>
@@ -90,13 +146,12 @@
     </div>
   </div>
 
-  <!-- Donut Chart: Membership Types -->
   <div class="col-md-5">
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-header-left">
           <div class="chart-title">
-            <i data-lucide="pie-chart" style="width:16px;height:16px;color:var(--teal)"></i>
+            <i data-lucide="pie-chart" style="width:16px;height:16px;color:#8b5cf6"></i>
             Membership Breakdown
           </div>
           <div class="chart-sub">Regular vs Associate</div>
@@ -113,14 +168,61 @@
 
 </div>
 
-<!-- ── Charts Row 2 — Bar ─────────────────────────────────── -->
+<!-- ── Charts Row 2 — Gender Donut + Barangay Bar ─────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-4">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="users" style="width:16px;height:16px;color:#f43f5e"></i>
+            Gender Breakdown
+          </div>
+          <div class="chart-sub">Male · Female · Other</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="genderChart"
+          data-labels='["Male","Female","Other"]'
+          data-values='[{{ male_members }},{{ female_members }},{{ other_members }}]'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-8">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="map-pin" style="width:16px;height:16px;color:#10b981"></i>
+            Members by Barangay
+          </div>
+          <div class="chart-sub">{{ total_members }} members across {{ barangay_count|default:"0" }} barangays</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="barangayChart"
+          data-labels='{{ barangay_labels|safe|default:"[]" }}'
+          data-values='{{ barangay_data|safe|default:"[]" }}'
+          data-male='{{ barangay_male|safe|default:"[]" }}'
+          data-female='{{ barangay_female|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 3 — Revenue Bar ────────────────────────── -->
 <div class="row g-3 mb-4">
   <div class="col-12">
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-header-left">
           <div class="chart-title">
-            <i data-lucide="bar-chart-2" style="width:16px;height:16px;color:var(--teal)"></i>
+            <i data-lucide="bar-chart-2" style="width:16px;height:16px;color:#0ea5e9"></i>
             Revenue Trend
           </div>
           <div class="chart-sub">
