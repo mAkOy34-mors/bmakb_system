@@ -17,6 +17,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+   {% block extra_css %}{% endblock %}
 </head>
 <body>
 
@@ -40,6 +41,12 @@
      class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
     <i class="bi bi-bar-chart-line"></i> Analytics
   </a>
+
+     <div class="nav-section-label">System</div>
+   <a href="{% url 'administrator:admin_logs' %}"
+     class="nav-link {% if request.resolver_match.url_name == 'admin_logs' %}active{% endif %}">
+     <i class="bi bi-shield-check"></i> Admin Logs
+   </a>
 
     <div class="nav-section-label">Members</div>
     <!-- All Members — only active on list and detail pages -->

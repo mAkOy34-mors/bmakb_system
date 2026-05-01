@@ -1,0 +1,346 @@
+<!-- templates/administrator/admin_logs.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Logs — BMAKB{% endblock %}
+{% block topbar_icon %}shield-check{% endblock %}
+{% block topbar_title %}Admin Activity Logs{% endblock %}
+
+{% block content %}
+
+<!-- ── Summary Stat Cards ────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-6 col-md-3">
+    <div class="stat-card blue">
+      <div class="stat-icon-wrap blue">
+        <i data-lucide="clipboard-list" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TOTAL LOGS</div>
+      <div class="stat-value">{{ total_logs }}</div>
+      <div class="stat-sub">All recorded events</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="stat-card teal">
+      <div class="stat-icon-wrap teal">
+        <i data-lucide="calendar-check" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TODAY</div>
+      <div class="stat-value">{{ today_logs }}</div>
+      <div class="stat-sub">Events logged today</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="stat-card amber">
+      <div class="stat-icon-wrap amber">
+        <i data-lucide="alert-triangle" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">WARNINGS</div>
+      <div class="stat-value">{{ warning_logs }}</div>
+      <div class="stat-sub">Warning-level events</div>
+    </div>
+  </div>
+
+  <div class="col-6 col-md-3">
+    <div class="stat-card red">
+      <div class="stat-icon-wrap red">
+        <i data-lucide="shield-alert" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">CRITICAL</div>
+      <div class="stat-value">{{ danger_logs }}</div>
+      <div class="stat-sub">Danger-level events</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Filter Bar ─────────────────────────────────────────── -->
+<div class="data-card mb-4">
+  <div class="data-card-header" style="flex-wrap:wrap;gap:10px;">
+    <div class="data-card-title">
+      <i data-lucide="filter" class="lucide-icon" style="color:var(--teal)"></i>
+      Filter Logs
+    </div>
+  </div>
+
+  <div style="padding:16px 20px;">
+    <form method="get" id="filterForm">
+      <div class="row g-2 align-items-end">
+
+        <!-- Search -->
+        <div class="col-12 col-md-4">
+          <label class="form-label">Search</label>
+          <div class="search-wrap">
+            <i data-lucide="search" class="lucide-icon"></i>
+            <input type="text"
+                   name="q"
+                   value="{{ q }}"
+                   class="search-input"
+                   style="width:100%"
+                   placeholder="Name, account, description…">
+          </div>
+        </div>
+
+        <!-- Action -->
+        <div class="col-6 col-md-2">
+          <label class="form-label">Action</label>
+          <select name="action" class="form-select" onchange="this.form.submit()">
+            <option value="">All actions</option>
+            {% for val, label in action_choices %}
+              <option value="{{ val }}"{% if action_filter == val %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Severity -->
+        <div class="col-6 col-md-2">
+          <label class="form-label">Severity</label>
+          <select name="severity" class="form-select" onchange="this.form.submit()">
+            <option value="">All levels</option>
+            {% for val, label in severity_choices %}
+              <option value="{{ val }}"{% if severity_filter == val %} selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Date Range -->
+        <div class="col-6 col-md-2">
+          <label class="form-label">Date Range</label>
+          <select name="date_range" class="form-select" onchange="this.form.submit()">
+            <option value="">All time</option>
+            <option value="today"{% if date_range == "today" %} selected{% endif %}>Today</option>
+            <option value="7d"{% if date_range == "7d" %} selected{% endif %}>Last 7 days</option>
+            <option value="30d"{% if date_range == "30d" %} selected{% endif %}>Last 30 days</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-6 col-md-2 d-flex gap-2">
+          <button type="submit" class="btn-teal" style="flex:1;justify-content:center;">
+            <i data-lucide="search" class="lucide-icon"></i> Filter
+          </button>
+          <a href="{% url 'administrator:admin_logs' %}" class="btn-outline" style="padding:9px 12px;" title="Clear filters">
+            <i data-lucide="x" class="lucide-icon"></i>
+          </a>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Logs Table ─────────────────────────────────────────── -->
+<div class="data-card">
+  <div class="data-card-header">
+    <div class="data-card-title">
+      <i data-lucide="scroll-text" class="lucide-icon" style="color:var(--teal)"></i>
+      Activity Log
+      <span style="font-size:12px;font-weight:400;color:var(--muted);margin-left:6px;">
+        {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }}
+      </span>
+    </div>
+  </div>
+
+  {% if page_obj.object_list %}
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th style="width:160px;">Timestamp</th>
+          <th>Admin</th>
+          <th>Action</th>
+          <th>Target</th>
+          <th>Description</th>
+          <th style="width:90px;">Severity</th>
+          <th style="width:110px;">IP Address</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in page_obj %}
+        <tr>
+
+          <!-- Timestamp -->
+          <td>
+            <span style="font-size:12px;font-weight:600;color:var(--text);">
+              {{ log.timestamp|date:"M d, Y" }}
+            </span><br>
+            <span style="font-size:11px;color:var(--muted);">
+              {{ log.timestamp|date:"H:i:s" }}
+            </span>
+          </td>
+
+          <!-- Admin -->
+          <td>
+            {% if log.admin %}
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;border-radius:50%;
+                            background:linear-gradient(135deg,var(--teal),var(--blue));
+                            display:flex;align-items:center;justify-content:center;
+                            color:white;font-size:11px;font-weight:600;flex-shrink:0;">
+                  {{ log.admin.first_name|first|upper }}{{ log.admin.last_name|first|upper }}
+                </div>
+                <span style="font-size:13px;font-weight:500;">{{ log.admin.get_full_name }}</span>
+              </div>
+            {% else %}
+              <span style="color:var(--muted);font-size:12px;">—</span>
+            {% endif %}
+          </td>
+
+          <!-- Action badge -->
+          <td>
+            {% if log.action == "member_add" %}
+              <span class="action-badge action-member_add">
+                <i data-lucide="user-plus" class="lucide-icon" style="width:12px;height:12px;"></i>
+                Member Added
+              </span>
+            {% elif log.action == "member_edit" %}
+              <span class="action-badge action-member_edit">
+                <i data-lucide="pencil" class="lucide-icon" style="width:12px;height:12px;"></i>
+                Member Edited
+              </span>
+            {% elif log.action == "member_delete" %}
+              <span class="action-badge action-member_delete">
+                <i data-lucide="trash-2" class="lucide-icon" style="width:12px;height:12px;"></i>
+                Member Deleted
+              </span>
+            {% elif log.action == "member_view" %}
+              <span class="action-badge action-member_view">
+                <i data-lucide="eye" class="lucide-icon" style="width:12px;height:12px;"></i>
+                Member Viewed
+              </span>
+            {% elif log.action == "login" %}
+              <span class="action-badge action-login">
+                <i data-lucide="log-in" class="lucide-icon" style="width:12px;height:12px;"></i>
+                Admin Login
+              </span>
+            {% elif log.action == "logout" %}
+              <span class="action-badge action-logout">
+                <i data-lucide="log-out" class="lucide-icon" style="width:12px;height:12px;"></i>
+                Admin Logout
+              </span>
+            {% elif log.action == "export" %}
+              <span class="action-badge action-export">
+                <i data-lucide="download" class="lucide-icon" style="width:12px;height:12px;"></i>
+                Data Exported
+              </span>
+            {% else %}
+              <span class="action-badge action-other">
+                <i data-lucide="activity" class="lucide-icon" style="width:12px;height:12px;"></i>
+                {{ log.get_action_display }}
+              </span>
+            {% endif %}
+          </td>
+
+          <!-- Target -->
+          <td>
+            {% if log.target_name %}
+              <span style="font-size:13px;font-weight:500;">{{ log.target_name }}</span><br>
+              {% if log.target_id %}
+                <span class="acct-badge">{{ log.target_id }}</span>
+              {% endif %}
+            {% else %}
+              <span style="color:var(--muted);font-size:12px;">—</span>
+            {% endif %}
+          </td>
+
+          <!-- Description -->
+          <td style="max-width:260px;">
+            {% if log.description %}
+              <span style="font-size:12px;color:var(--muted);
+                           display:-webkit-box;-webkit-line-clamp:2;
+                           -webkit-box-orient:vertical;overflow:hidden;"
+                    title="{{ log.description }}">
+                {{ log.description }}
+              </span>
+            {% else %}
+              <span style="color:var(--muted);font-size:12px;">—</span>
+            {% endif %}
+          </td>
+
+          <!-- Severity -->
+          <td>
+            {% if log.severity == "info" %}
+              <span class="badge-active">Info</span>
+            {% elif log.severity == "warning" %}
+              <span class="badge-associate">Warning</span>
+            {% else %}
+              <span class="badge-inactive">Danger</span>
+            {% endif %}
+          </td>
+
+          <!-- IP -->
+          <td>
+            <span style="font-family:monospace;font-size:11px;color:var(--muted);">
+              {{ log.ip_address|default:"—" }}
+            </span>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <div style="padding:16px 20px;border-top:1px solid var(--border);
+              display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+    <span style="font-size:12px;color:var(--muted);">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      &nbsp;·&nbsp; {{ page_obj.paginator.count }} total entries
+    </span>
+    <div style="display:flex;gap:4px;">
+      {% if page_obj.has_previous %}
+        <a href="?{% if q %}q={{ q }}&{% endif %}{% if action_filter %}action={{ action_filter }}&{% endif %}{% if severity_filter %}severity={{ severity_filter }}&{% endif %}{% if date_range %}date_range={{ date_range }}&{% endif %}page={{ page_obj.previous_page_number }}"
+           class="btn-outline" style="padding:6px 12px;font-size:12px;">
+          <i data-lucide="chevron-left" class="lucide-icon"></i> Prev
+        </a>
+      {% endif %}
+      {% if page_obj.has_next %}
+        <a href="?{% if q %}q={{ q }}&{% endif %}{% if action_filter %}action={{ action_filter }}&{% endif %}{% if severity_filter %}severity={{ severity_filter }}&{% endif %}{% if date_range %}date_range={{ date_range }}&{% endif %}page={{ page_obj.next_page_number }}"
+           class="btn-teal" style="padding:6px 12px;font-size:12px;">
+          Next <i data-lucide="chevron-right" class="lucide-icon"></i>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- Empty state -->
+  <div style="padding:64px 20px;text-align:center;">
+    <div style="width:56px;height:56px;border-radius:16px;background:#f3f4f6;
+                display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px;">
+      <i data-lucide="scroll-text" class="lucide-icon" style="width:24px;height:24px;color:var(--muted);"></i>
+    </div>
+    <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;">No logs found</div>
+    <div style="font-size:13px;color:var(--muted);">
+      {% if q or action_filter or severity_filter or date_range %}
+        No results match your current filters.
+        <a href="{% url 'administrator:admin_logs' %}" style="color:var(--teal);">Clear filters</a>
+      {% else %}
+        Admin activity will appear here once actions are recorded.
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'administrator/css/admin_logs.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+  });
+</script>
+{% endblock %}

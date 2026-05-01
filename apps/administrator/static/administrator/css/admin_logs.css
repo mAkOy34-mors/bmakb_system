@@ -1,0 +1,19 @@
+<!-- ── Action badge styles (scoped) ──────────────────────── -->
+.action-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.action-member_add    { background:#ecfdf5; color:#065f46; }
+.action-member_edit   { background:#eff6ff; color:#1e40af; }
+.action-member_delete { background:#fef2f2; color:#991b1b; }
+.action-member_view   { background:#f5f3ff; color:#5b21b6; }
+.action-login         { background:#ecfdf5; color:#065f46; }
+.action-logout        { background:#f3f4f6; color:#374151; }
+.action-export        { background:#fffbeb; color:#92400e; }
+.action-other         { background:#f3f4f6; color:#6b7280; }
