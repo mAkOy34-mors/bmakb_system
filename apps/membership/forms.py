@@ -30,9 +30,10 @@ class MemberForm(forms.ModelForm):
             }),
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 3,
+                'rows': 2,
                 'placeholder': 'Type barangay to search address...',
                 'autocomplete': 'off',
+                'style': 'resize:none;',
             }),
             'type_of_membership': forms.Select(attrs={'class': 'form-select'}),
             'subscription': forms.NumberInput(attrs={

@@ -97,26 +97,29 @@
             </div>
 
             <!-- Address with barangay autocomplete -->
-            <div class="col-12" style="position:relative;">
+            <div class="col-12">
               <label class="form-label">Address <span style="color:#ef4444">*</span></label>
-              {{ form.address }}
-              <div id="barangay-suggestions" style="
-                display:none;
-                position:absolute;
-                z-index:999;
-                background:#fff;
-                border:1px solid var(--border, #e5e7eb);
-                border-radius:10px;
-                box-shadow:0 8px 24px rgba(0,0,0,0.10);
-                width:100%;
-                max-height:220px;
-                overflow-y:auto;
-                margin-top:2px;
-              "></div>
+              <div style="position:relative;">
+                {{ form.address }}
+                <div id="barangay-suggestions" style="
+                  display:none;
+                  position:absolute;
+                  z-index:999;
+                  background:#fff;
+                  border:1px solid var(--border, #e5e7eb);
+                  border-radius:10px;
+                  box-shadow:0 8px 24px rgba(0,0,0,0.10);
+                  width:100%;
+                  max-height:220px;
+                  overflow-y:auto;
+                  margin-top:2px;
+                "></div>
+              </div>
+              <div style="font-size:11.5px;color:var(--muted,#9ca3af);margin-top:6px;padding-left:2px;">
+                <i class="bi bi-info-circle"></i> Type a barangay name to get address suggestions.
+              </div>
             </div>
-            <div style="font-size:11.5px;color:var(--muted,#9ca3af);margin-top:-6px;padding-left:4px;">
-              <i class="bi bi-info-circle"></i> Type a barangay name to get address suggestions.
-            </div>
+
           </div>
         </div>
       </div>
@@ -158,7 +161,7 @@
               </div>
             </div>
 
-            <!-- CBU Balance — read-only, computed by JS preview & saved by model.save() -->
+            <!-- CBU Balance -->
             <div class="col-md-6">
               <label class="form-label">
                 CBU Balance
@@ -175,7 +178,7 @@
               </div>
               <div id="cbu-balance-hint" style="font-size:11.5px;margin-top:4px;"></div>
               <div style="font-size:11px;color:var(--muted,#9ca3af);margin-top:2px;">
-                Auto-computed on save: CBU − Subscription. Cannot be edited.
+                Auto-computed on save: Subscription − CBU. Cannot be edited.
               </div>
             </div>
 
