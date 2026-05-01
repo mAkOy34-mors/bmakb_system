@@ -1,0 +1,39 @@
+<!-- templates/membership/member_confirm_delete.html -->
+{% extends 'base.html' %}
+
+{% block title %}Delete Member — BMAKB{% endblock %}
+{% block topbar_icon %}trash{% endblock %}
+{% block topbar_title %}Delete Member{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="form-card text-center">
+      <div class="form-card-body" style="padding:40px 32px;">
+        <div style="width:64px;height:64px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;color:#ef4444;">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div style="font-size:20px;font-weight:600;color:var(--text);margin-bottom:8px;">Delete Member?</div>
+        <div style="font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.6;">
+          Are you sure you want to delete
+          <strong style="color:var(--text);">{{ member.name }}</strong>
+          (<span class="acct-badge">{{ member.account_number }}</span>)?
+          <br/>This action <strong>cannot be undone.</strong>
+        </div>
+
+        <form method="POST" class="d-flex flex-column gap-2">
+          {% csrf_token %}
+          <button type="submit" class="btn-teal justify-content-center" style="background:#ef4444;padding:11px;">
+            <i class="bi bi-trash"></i> Yes, Delete Member
+          </button>
+          <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline justify-content-center" style="padding:10px;">
+            Cancel
+          </a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

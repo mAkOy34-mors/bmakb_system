@@ -1,0 +1,116 @@
+<!-- templates/membership/member_list.html -->
+{% extends 'base.html' %}
+
+{% block title %}Members — BMAKB{% endblock %}
+{% block topbar_icon %}people{% endblock %}
+{% block topbar_title %}All Members{% endblock %}
+
+{% block content %}
+
+<!-- ── Toolbar ──────────────────────────────────────────────── -->
+<div class="d-flex align-items-center justify-content-between mb-4 gap-3 flex-wrap">
+  <form method="GET" class="d-flex gap-2 flex-wrap">
+    <div class="search-wrap">
+      <i class="bi bi-search"></i>
+      <input type="text" name="q" class="search-input" placeholder="Search name, account no., TIN…" value="{{ query }}"/>
+    </div>
+    <select name="type" class="form-select" style="width:160px;border-radius:10px;font-size:13px;border:1px solid var(--border)">
+      <option value="">All types</option>
+      <option value="regular" {% if membership_type == 'regular' %}selected{% endif %}>Regular</option>
+      <option value="associate" {% if membership_type == 'associate' %}selected{% endif %}>Associate</option>
+    </select>
+    <button type="submit" class="btn-teal">
+      <i class="bi bi-funnel"></i> Filter
+    </button>
+    {% if query or membership_type %}
+    <a href="{% url 'membership:member_list' %}" class="btn-outline">
+      <i class="bi bi-x"></i> Clear
+    </a>
+    {% endif %}
+  </form>
+
+  <a href="{% url 'membership:member_add' %}" class="btn-teal">
+    <i class="bi bi-person-plus"></i> Add Member
+  </a>
+</div>
+
+<!-- ── Count ────────────────────────────────────────────────── -->
+<div style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+  Showing <strong style="color:var(--text)">{{ total }}</strong> member{{ total|pluralize }}
+  {% if query %} for "<strong>{{ query }}</strong>"{% endif %}
+</div>
+
+<!-- ── Table ────────────────────────────────────────────────── -->
+<div class="data-card">
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Account No.</th>
+          <th>Name</th>
+          <th>TIN</th>
+          <th>Type</th>
+          <th>Age</th>
+          <th>Gender</th>
+          <th>Date Joined</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in members %}
+        <tr>
+          <td><span class="acct-badge">{{ member.account_number }}</span></td>
+          <td>
+            <strong>{{ member.name }}</strong>
+            <div style="font-size:11px;color:var(--muted)">{{ member.occupation }}</div>
+          </td>
+          <td style="font-family:monospace;font-size:12px;">{{ member.tin }}</td>
+          <td>
+            {% if member.type_of_membership == 'regular' %}
+              <span class="badge-regular">Regular</span>
+            {% else %}
+              <span class="badge-associate">Associate</span>
+            {% endif %}
+          </td>
+          <td>{{ member.age }}</td>
+          <td>{{ member.get_gender_display }}</td>
+          <td>{{ member.date_joined|date:"M d, Y" }}</td>
+          <td>
+            {% if member.is_active %}
+              <span class="badge-active">Active</span>
+            {% else %}
+              <span class="badge-inactive">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;" title="View">
+                <i class="bi bi-eye"></i>
+              </a>
+              <a href="{% url 'membership:member_edit' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;" title="Edit">
+                <i class="bi bi-pencil"></i>
+              </a>
+              <a href="{% url 'membership:member_delete' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;color:#ef4444;" title="Delete">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-center py-5">
+            <i class="bi bi-people" style="font-size:36px;color:var(--border);display:block;margin-bottom:8px;"></i>
+            <div style="font-size:14px;color:var(--muted);">No members found.</div>
+            <a href="{% url 'membership:member_add' %}" class="btn-teal mt-3 d-inline-flex">
+              <i class="bi bi-person-plus"></i> Add First Member
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

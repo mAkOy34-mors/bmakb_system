@@ -1,0 +1,37 @@
+# ── Core ──────────────────────────────────────────────────────────────────────
+Django>=6.0.4
+
+# ── Database ──────────────────────────────────────────────────────────────────
+mysqlclient>=2.2              # MySQL adapter
+
+# ── Environment & Config ──────────────────────────────────────────────────────
+python-decouple>=3.8          # Load secrets from .env
+dj-database-url>=2.1          # Parse DATABASE_URL env variable
+
+# ── Static Files ──────────────────────────────────────────────────────────────
+whitenoise>=6.6               # Serve static files in production
+
+# ── Forms & Validation ────────────────────────────────────────────────────────
+django-crispy-forms>=2.1      # Better form rendering
+crispy-bootstrap5>=2024.2     # Bootstrap 5 template pack for crispy-forms
+
+# ── Authentication ────────────────────────────────────────────────────────────
+django-allauth>=0.61          # Social auth + email verification (optional)
+
+# ── Media & Image Handling ────────────────────────────────────────────────────
+Pillow>=10.2                  # Required if using ImageField in models
+
+# ── Security ──────────────────────────────────────────────────────────────────
+django-cors-headers>=4.3      # CORS headers (needed if frontend is separate)
+
+# ── Development Tools (consider moving to requirements/dev.txt) ────────────────
+django-debug-toolbar>=4.3     # SQL query inspector in browser
+django-extensions>=3.2        # Extra management commands (shell_plus, etc.)
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=8.1
+pytest-django>=4.8
+factory-boy>=3.3              # Model factories for tests
+
+# ── Production Server ─────────────────────────────────────────────────────────
+gunicorn>=22.0                # WSGI server for production

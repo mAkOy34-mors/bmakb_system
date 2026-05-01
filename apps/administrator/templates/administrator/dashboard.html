@@ -1,0 +1,178 @@
+<!-- templates/administrator/dashboard.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard — BMAKB{% endblock %}
+{% block topbar_icon %}grid-1x2{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ── Stat Cards ─────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-3">
+    <div class="stat-card blue">
+      <div class="stat-icon-wrap blue">
+        <i data-lucide="log-in" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TOTAL MEMBERS</div>
+      <div class="stat-value">{{ total_members }}</div>
+      <div class="stat-sub">All registered members</div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card amber">
+      <div class="stat-icon-wrap amber">
+        <i data-lucide="log-out" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">ACTIVE MEMBERS</div>
+      <div class="stat-value">{{ active_members }}</div>
+      <div class="stat-sub">Currently active</div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card red">
+      <div class="stat-icon-wrap red">
+        <i data-lucide="clock" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">REGULAR MEMBERS</div>
+      <div class="stat-value">{{ regular_members }}</div>
+      <div class="stat-sub">Regular membership</div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card purple">
+      <div class="stat-icon-wrap purple">
+        <i data-lucide="credit-card" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">ASSOCIATE MEMBERS</div>
+      <div class="stat-value">{{ associate_members }}</div>
+      <div class="stat-sub">Associate membership</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row ─────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="trending-up" style="width:16px;height:16px;color:var(--amber)"></i>
+            Monthly Membership Trend
+          </div>
+          <div class="chart-sub">{{ chart_months_count|default:"1" }} months of data</div>
+        </div>
+        <div class="chart-toggle-group" id="memberToggle">
+          <button class="chart-toggle" data-period="daily">Daily</button>
+          <button class="chart-toggle" data-period="weekly">Weekly</button>
+          <button class="chart-toggle active" data-period="monthly">Monthly</button>
+        </div>
+      </div>
+      <div class="chart-body">
+        <canvas id="memberChart" height="180"
+          data-labels='{{ monthly_labels|safe|default:"[]" }}'
+          data-values='{{ monthly_data|safe|default:"[]" }}'>
+        </canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="dollar-sign" style="width:16px;height:16px;color:var(--green)"></i>
+            Revenue Trend
+          </div>
+          <div class="chart-sub">
+            Total revenue ₱{{ total_revenue|default:"0.00" }} · {{ revenue_periods|default:"1" }} periods
+          </div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <canvas id="typeChart" height="180"
+          data-labels='{{ revenue_labels|safe|default:"[]" }}'
+          data-values='{{ revenue_data|safe|default:"[]" }}'>
+        </canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Recent Members ──────────────────────────────────────── -->
+<div class="data-card">
+  <div class="data-card-header">
+    <div class="data-card-title">
+      <i data-lucide="clock" style="width:16px;height:16px;color:var(--teal)"></i>
+      Recently Added Members
+    </div>
+    <a href="{% url 'membership:member_list' %}" class="btn-outline">
+      View all <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+    </a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Account No.</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Date Joined</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in recent_members %}
+        <tr>
+          <td><span class="acct-badge">{{ member.account_number }}</span></td>
+          <td><strong>{{ member.name }}</strong></td>
+          <td>
+            {% if member.type_of_membership == 'regular' %}
+              <span class="badge-regular">Regular</span>
+            {% else %}
+              <span class="badge-associate">Associate</span>
+            {% endif %}
+          </td>
+          <td>{{ member.date_joined|date:"M d, Y" }}</td>
+          <td>
+            {% if member.is_active %}
+              <span class="badge-active">Active</span>
+            {% else %}
+              <span class="badge-inactive">Inactive</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;">
+              View
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-4" style="color:var(--muted);font-size:13px;">
+            No members yet. <a href="{% url 'membership:member_add' %}" style="color:var(--teal)">Add the first one →</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="{% static 'administrator/js/dashboard.js' %}"></script>
+{% endblock %}
