@@ -1,5 +1,6 @@
 <!-- templates/membership/member_form.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ title }} — BMAKB{% endblock %}
 {% block topbar_icon %}person-plus{% endblock %}
@@ -13,7 +14,7 @@
   </a>
 </div>
 
-<form method="POST">
+<form method="POST" id="memberForm">
   {% csrf_token %}
 
   <div class="row g-4">
@@ -33,7 +34,9 @@
             <div class="col-md-6">
               <label class="form-label">TIN <span style="color:#ef4444">*</span></label>
               {{ form.tin }}
-              {% if form.tin.errors %}<div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.tin.errors.0 }}</div>{% endif %}
+              {% if form.tin.errors %}
+                <div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.tin.errors.0 }}</div>
+              {% endif %}
             </div>
             <div class="col-md-6">
               <label class="form-label">Type of Membership <span style="color:#ef4444">*</span></label>
@@ -55,29 +58,70 @@
             <div class="col-12">
               <label class="form-label">Full Name <span style="color:#ef4444">*</span></label>
               {{ form.name }}
-              {% if form.name.errors %}<div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.name.errors.0 }}</div>{% endif %}
+              {% if form.name.errors %}
+                <div style="font-size:12px;color:#ef4444;margin-top:4px;">{{ form.name.errors.0 }}</div>
+              {% endif %}
             </div>
+
+            <!-- Date of Birth -->
             <div class="col-md-4">
               <label class="form-label">Date of Birth <span style="color:#ef4444">*</span></label>
               {{ form.date_of_birth }}
             </div>
+
+            <!-- Age — read-only, auto-computed from DOB via JS -->
+            <div class="col-md-4">
+              <label class="form-label">
+                Age
+                <span style="background:rgba(20,184,166,0.12);color:var(--teal,#14b8a6);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:4px;">AUTO</span>
+              </label>
+              <input type="text"
+                     id="age-display"
+                     class="form-control"
+                     readonly
+                     value="{% if member %}{{ member.age }}{% endif %}"
+                     placeholder="—"
+                     style="background:#f9fafb;color:var(--text);cursor:default;">
+              <div style="font-size:11px;color:var(--muted,#9ca3af);margin-top:2px;">
+                Auto-computed from date of birth.
+              </div>
+            </div>
+
             <div class="col-md-4">
               <label class="form-label">Gender <span style="color:#ef4444">*</span></label>
               {{ form.gender }}
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <label class="form-label">Occupation <span style="color:#ef4444">*</span></label>
               {{ form.occupation }}
             </div>
-            <div class="col-12">
+
+            <!-- Address with barangay autocomplete -->
+            <div class="col-12" style="position:relative;">
               <label class="form-label">Address <span style="color:#ef4444">*</span></label>
               {{ form.address }}
+              <div id="barangay-suggestions" style="
+                display:none;
+                position:absolute;
+                z-index:999;
+                background:#fff;
+                border:1px solid var(--border, #e5e7eb);
+                border-radius:10px;
+                box-shadow:0 8px 24px rgba(0,0,0,0.10);
+                width:100%;
+                max-height:220px;
+                overflow-y:auto;
+                margin-top:2px;
+              "></div>
+            </div>
+            <div style="font-size:11.5px;color:var(--muted,#9ca3af);margin-top:-6px;padding-left:4px;">
+              <i class="bi bi-info-circle"></i> Type a barangay name to get address suggestions.
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Financial -->
+      <!-- Financial Details -->
       <div class="form-card">
         <div class="form-card-header">
           <div style="font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;">
@@ -86,34 +130,55 @@
         </div>
         <div class="form-card-body">
           <div class="row g-3">
+
+            <!-- Subscription -->
             <div class="col-md-6">
-              <label class="form-label">Subscription</label>
+              <label class="form-label">Subscription (per year)</label>
               <div class="input-group">
                 <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">₱</span>
                 {{ form.subscription }}
               </div>
             </div>
+
+            <!-- Term (Years) -->
             <div class="col-md-6">
-              <label class="form-label">CBU</label>
+              <label class="form-label">Term (Years)</label>
+              <div class="input-group">
+                {{ form.term_years }}
+                <span class="input-group-text" style="border-radius:0 10px 10px 0;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">yr(s)</span>
+              </div>
+            </div>
+
+            <!-- CBU -->
+            <div class="col-md-6">
+              <label class="form-label">CBU <span style="font-size:11px;color:var(--muted,#9ca3af);font-weight:400;">(original contribution)</span></label>
               <div class="input-group">
                 <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">₱</span>
                 {{ form.con }}
               </div>
             </div>
+
+            <!-- CBU Balance — read-only, computed by JS preview & saved by model.save() -->
             <div class="col-md-6">
-              <label class="form-label">Initial Subscription</label>
+              <label class="form-label">
+                CBU Balance
+                <span style="background:rgba(20,184,166,0.12);color:var(--teal,#14b8a6);font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;margin-left:4px;">SAVED TO DB</span>
+              </label>
               <div class="input-group">
                 <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">₱</span>
-                {{ form.initial_subscription }}
+                <input type="text"
+                       id="cbu-balance-display"
+                       class="form-control"
+                       readonly
+                       value="{% if member %}{{ member.cbu_balance }}{% else %}0.00{% endif %}"
+                       style="background:#f9fafb;color:var(--text);cursor:default;">
+              </div>
+              <div id="cbu-balance-hint" style="font-size:11.5px;margin-top:4px;"></div>
+              <div style="font-size:11px;color:var(--muted,#9ca3af);margin-top:2px;">
+                Auto-computed on save: CBU − Subscription. Cannot be edited.
               </div>
             </div>
-            <div class="col-md-6">
-              <label class="form-label">Initial Paid Up</label>
-              <div class="input-group">
-                <span class="input-group-text" style="border-radius:10px 0 0 10px;background:#f9fafb;border:1px solid var(--border);font-size:13px;color:var(--muted);">₱</span>
-                {{ form.initial_paid_up }}
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
@@ -169,4 +234,8 @@
   </div>
 </form>
 
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'membership/js/member_form.js' %}"></script>
 {% endblock %}

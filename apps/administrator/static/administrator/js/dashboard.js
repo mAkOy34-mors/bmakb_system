@@ -1,119 +1,277 @@
-// ── Chart Data (injected from Django via data attributes) ──
-const canvas = document.getElementById('memberChart');
-const monthlyLabels = JSON.parse(canvas.dataset.labels);
-const monthlyData   = JSON.parse(canvas.dataset.values);
+// apps/administrator/static/administrator/js/dashboard.js
 
-const canvas2 = document.getElementById('typeChart');
-const revenueLabels = JSON.parse(canvas2.dataset.labels);
-const revenueData   = JSON.parse(canvas2.dataset.values);
+document.addEventListener('DOMContentLoaded', function () {
 
-// ── Shared Chart Defaults ──────────────────────────────────
-const chartDefaults = {
-  responsive: true,
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      backgroundColor: '#1a1a2e',
-      titleColor: '#fff',
-      bodyColor: '#d1d5db',
-      padding: 10,
-      cornerRadius: 8,
-    }
-  },
-  scales: {
-    x: {
-      grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
-      ticks: { font: { size: 11 }, color: '#9ca3af' }
-    },
-    y: {
-      grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false },
-      ticks: { font: { size: 11 }, color: '#9ca3af' },
-      beginAtZero: true
-    }
-  }
-};
+  // ── Lucide Icons ─────────────────────────────────────────
+  lucide.createIcons();
 
-// ── Member Trend Chart ─────────────────────────────────────
-const memberCtx = document.getElementById('memberChart').getContext('2d');
-const memberChart = new Chart(memberCtx, {
-  type: 'line',
-  data: {
-    labels: monthlyLabels,
-    datasets: [{
-      label: 'bookings',
+  // ── Read Data from Canvas Data Attributes ────────────────
+  const memberCanvas  = document.getElementById('memberChart');
+  const revenueCanvas = document.getElementById('revenueChart');
+  const typeCanvas    = document.getElementById('typeChart');
+
+  const monthlyLabels = JSON.parse(memberCanvas.dataset.labels   || '[]');
+  const monthlyData   = JSON.parse(memberCanvas.dataset.values   || '[]');
+  const revenueLabels = JSON.parse(revenueCanvas.dataset.labels  || '[]');
+  const revenueData   = JSON.parse(revenueCanvas.dataset.values  || '[]');
+  const typeLabels    = JSON.parse(typeCanvas.dataset.labels     || '["Regular","Associate"]');
+  const typeValues    = JSON.parse(typeCanvas.dataset.values     || '[0,0]');
+
+  // ── Shared Theme ─────────────────────────────────────────
+  const fontFamily = "'DM Sans', sans-serif";
+  const mutedColor = '#9ca3af';
+  const gridColor  = 'rgba(0,0,0,0.04)';
+
+  const tooltipStyle = {
+    theme: 'dark',
+    style: { fontSize: '12px', fontFamily },
+  };
+
+  // ── 1. Line Chart — Monthly Membership Trend ─────────────
+  const memberOptions = {
+    series: [{
+      name: 'New Members',
       data: monthlyData,
-      borderColor: '#f59e0b',
-      backgroundColor: 'rgba(245,158,11,0.08)',
-      pointBackgroundColor: '#f59e0b',
-      pointBorderColor: '#fff',
-      pointBorderWidth: 2,
-      pointRadius: 5,
-      pointHoverRadius: 7,
-      tension: 0.4,
-      fill: true,
-    }]
-  },
-  options: {
-    ...chartDefaults,
-    plugins: {
-      ...chartDefaults.plugins,
-      legend: {
-        display: true,
-        position: 'bottom',
-        labels: {
-          color: '#f59e0b',
-          font: { size: 12 },
-          usePointStyle: true,
-          pointStyleWidth: 16,
-        }
-      }
-    }
-  }
-});
+    }],
+    chart: {
+      type: 'line',
+      height: 220,
+      fontFamily,
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 600,
+      },
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 3,
+    },
+    colors: ['#f59e0b'],
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shade: 'light',
+        type: 'vertical',
+        shadeIntensity: 0.3,
+        gradientToColors: ['#fef3c7'],
+        opacityFrom: 0.5,
+        opacityTo: 0.05,
+      },
+    },
+    markers: {
+      size: 5,
+      colors: ['#f59e0b'],
+      strokeColors: '#fff',
+      strokeWidth: 2,
+      hover: { size: 7 },
+    },
+    xaxis: {
+      categories: monthlyLabels,
+      labels: {
+        style: { colors: mutedColor, fontSize: '11px', fontFamily },
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: mutedColor, fontSize: '11px', fontFamily },
+        formatter: val => Math.round(val),
+      },
+    },
+    grid: {
+      borderColor: gridColor,
+      strokeDashArray: 4,
+      xaxis: { lines: { show: false } },
+    },
+    tooltip: {
+      ...tooltipStyle,
+      y: { formatter: val => val + ' members' },
+    },
+    legend: {
+      show: true,
+      position: 'bottom',
+      labels: { colors: '#f59e0b' },
+      markers: { fillColors: ['#f59e0b'] },
+    },
+    dataLabels: { enabled: false },
+  };
 
-// ── Revenue Trend Chart ────────────────────────────────────
-const typeCtx = document.getElementById('typeChart').getContext('2d');
-const typeChart = new Chart(typeCtx, {
-  type: 'line',
-  data: {
-    labels: revenueLabels,
-    datasets: [{
-      label: 'revenue',
+  const memberChart = new ApexCharts(
+    document.getElementById('memberChart'),
+    memberOptions
+  );
+  memberChart.render();
+
+  // ── 2. Bar Chart — Revenue Trend ─────────────────────────
+  const revenueOptions = {
+    series: [{
+      name: 'Revenue',
       data: revenueData,
-      borderColor: '#10b981',
-      backgroundColor: 'rgba(16,185,129,0.08)',
-      pointBackgroundColor: 'transparent',
-      pointBorderColor: '#10b981',
-      pointBorderWidth: 2,
-      pointRadius: 5,
-      pointHoverRadius: 7,
-      tension: 0.4,
-      fill: true,
-    }]
-  },
-  options: {
-    ...chartDefaults,
-    scales: {
-      ...chartDefaults.scales,
-      y: {
-        ...chartDefaults.scales.y,
-        ticks: {
-          font: { size: 11 }, color: '#9ca3af',
-          callback: val => '₱' + (val >= 1000 ? (val/1000).toFixed(0)+'k' : val)
-        }
+    }],
+    chart: {
+      type: 'bar',
+      height: 220,
+      fontFamily,
+      toolbar: { show: false },
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 600,
+      },
+    },
+    colors: ['#1d6a5b'],
+    plotOptions: {
+      bar: {
+        borderRadius: 6,
+        columnWidth: '50%',
+        dataLabels: { position: 'top' },
+      },
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shade: 'light',
+        type: 'vertical',
+        shadeIntensity: 0.2,
+        gradientToColors: ['#10b981'],
+        opacityFrom: 0.9,
+        opacityTo: 0.7,
+      },
+    },
+    xaxis: {
+      categories: revenueLabels,
+      labels: {
+        style: { colors: mutedColor, fontSize: '11px', fontFamily },
+      },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      labels: {
+        style: { colors: mutedColor, fontSize: '11px', fontFamily },
+        formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
+      },
+    },
+    grid: {
+      borderColor: gridColor,
+      strokeDashArray: 4,
+      xaxis: { lines: { show: false } },
+    },
+    tooltip: {
+      ...tooltipStyle,
+      y: { formatter: val => '₱' + val.toLocaleString() },
+    },
+    dataLabels: { enabled: false },
+  };
+
+  const revenueChart = new ApexCharts(
+    document.getElementById('revenueChart'),
+    revenueOptions
+  );
+  revenueChart.render();
+
+  // ── 3. Pie/Donut Chart — Membership Types ────────────────
+  const typeOptions = {
+    series: typeValues,
+    chart: {
+      type: 'donut',
+      height: 260,
+      fontFamily,
+      animations: {
+        enabled: true,
+        easing: 'easeinout',
+        speed: 600,
+      },
+    },
+    labels: typeLabels,
+    colors: ['#1d6a5b', '#3b82f6', '#f59e0b', '#8b5cf6'],
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '65%',
+          labels: {
+            show: true,
+            name: {
+              show: true,
+              fontSize: '13px',
+              fontFamily,
+              color: '#1a1a2e',
+            },
+            value: {
+              show: true,
+              fontSize: '24px',
+              fontFamily: "'DM Serif Display', serif",
+              color: '#1a1a2e',
+              formatter: val => val,
+            },
+            total: {
+              show: true,
+              label: 'Total',
+              fontSize: '12px',
+              fontFamily,
+              color: mutedColor,
+              formatter: w =>
+                w.globals.seriesTotals.reduce((a, b) => a + b, 0),
+            },
+          },
+        },
+      },
+    },
+    legend: {
+      position: 'bottom',
+      fontSize: '12px',
+      fontFamily,
+      labels: { colors: '#6b7280' },
+      markers: { width: 10, height: 10, radius: 3 },
+      itemMargin: { horizontal: 10, vertical: 4 },
+    },
+    dataLabels: {
+      enabled: true,
+      formatter: (val) => val.toFixed(1) + '%',
+      style: { fontSize: '11px', fontFamily, fontWeight: '600' },
+      dropShadow: { enabled: false },
+    },
+    stroke: { width: 0 },
+    tooltip: {
+      ...tooltipStyle,
+      y: { formatter: val => val + ' members' },
+    },
+  };
+
+  const typeChart = new ApexCharts(
+    document.getElementById('typeChart'),
+    typeOptions
+  );
+  typeChart.render();
+
+  // ── Period Toggle (re-renders member chart) ───────────────
+  document.querySelectorAll('#memberToggle .chart-toggle').forEach(btn => {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#memberToggle .chart-toggle')
+        .forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      const period = this.dataset.period;
+      const dailyLabels  = JSON.parse(memberCanvas.dataset.dailyLabels  || '[]');
+      const dailyValues  = JSON.parse(memberCanvas.dataset.dailyValues  || '[]');
+      const weeklyLabels = JSON.parse(memberCanvas.dataset.weeklyLabels || '[]');
+      const weeklyValues = JSON.parse(memberCanvas.dataset.weeklyValues || '[]');
+
+      if (period === 'daily') {
+        memberChart.updateOptions({ xaxis: { categories: dailyLabels } });
+        memberChart.updateSeries([{ data: dailyValues }]);
+      } else if (period === 'weekly') {
+        memberChart.updateOptions({ xaxis: { categories: weeklyLabels } });
+        memberChart.updateSeries([{ data: weeklyValues }]);
+      } else {
+        memberChart.updateOptions({ xaxis: { categories: monthlyLabels } });
+        memberChart.updateSeries([{ data: monthlyData }]);
       }
-    }
-  }
-});
-
-// ── Period Toggle ──────────────────────────────────────────
-document.querySelectorAll('#memberToggle .chart-toggle').forEach(btn => {
-  btn.addEventListener('click', function () {
-    document.querySelectorAll('#memberToggle .chart-toggle')
-      .forEach(b => b.classList.remove('active'));
-    this.classList.add('active');
+    });
   });
-});
 
-// ── Lucide Icons ───────────────────────────────────────────
-lucide.createIcons();
+});

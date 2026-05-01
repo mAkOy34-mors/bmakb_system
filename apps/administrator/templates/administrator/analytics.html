@@ -1,0 +1,147 @@
+<!-- templates/administrator/analytics.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics — BMAKB{% endblock %}
+{% block topbar_icon %}bar-chart-2{% endblock %}
+{% block topbar_title %}Analytics{% endblock %}
+
+{% block content %}
+
+<!-- ── Stat Cards ─────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-3">
+    <div class="stat-card blue">
+      <div class="stat-icon-wrap blue">
+        <i data-lucide="users" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TOTAL MEMBERS</div>
+      <div class="stat-value">{{ total_members }}</div>
+      <div class="stat-sub">All registered members</div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card green">
+      <div class="stat-icon-wrap green">
+        <i data-lucide="user-check" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">ACTIVE MEMBERS</div>
+      <div class="stat-value">{{ active_members }}</div>
+      <div class="stat-sub">Currently active</div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card amber">
+      <div class="stat-icon-wrap amber">
+        <i data-lucide="user-round" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">REGULAR MEMBERS</div>
+      <div class="stat-value">{{ regular_members }}</div>
+      <div class="stat-sub">Regular membership</div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card purple">
+      <div class="stat-icon-wrap purple">
+        <i data-lucide="star" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">ASSOCIATE MEMBERS</div>
+      <div class="stat-value">{{ associate_members }}</div>
+      <div class="stat-sub">Associate membership</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 1 — Line + Donut ────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <!-- Line Chart: Monthly Membership Trend -->
+  <div class="col-md-7">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="trending-up" style="width:16px;height:16px;color:var(--amber)"></i>
+            Monthly Membership Trend
+          </div>
+          <div class="chart-sub">{{ chart_months_count|default:"1" }} months of data</div>
+        </div>
+        <div class="chart-toggle-group" id="memberToggle">
+          <button class="chart-toggle" data-period="daily">Daily</button>
+          <button class="chart-toggle" data-period="weekly">Weekly</button>
+          <button class="chart-toggle active" data-period="monthly">Monthly</button>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="memberChart"
+          data-labels='{{ monthly_labels|safe|default:"[]" }}'
+          data-values='{{ monthly_data|safe|default:"[]" }}'
+          data-daily-labels='{{ daily_labels|safe|default:"[]" }}'
+          data-daily-values='{{ daily_data|safe|default:"[]" }}'
+          data-weekly-labels='{{ weekly_labels|safe|default:"[]" }}'
+          data-weekly-values='{{ weekly_data|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Donut Chart: Membership Types -->
+  <div class="col-md-5">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="pie-chart" style="width:16px;height:16px;color:var(--teal)"></i>
+            Membership Breakdown
+          </div>
+          <div class="chart-sub">Regular vs Associate</div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="typeChart"
+          data-labels='{{ type_labels|safe|default:"[\"Regular\",\"Associate\"]" }}'
+          data-values='{{ type_values|safe|default:"[0,0]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 2 — Bar ─────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="bar-chart-2" style="width:16px;height:16px;color:var(--teal)"></i>
+            Revenue Trend
+          </div>
+          <div class="chart-sub">
+            Total revenue ₱{{ total_revenue|default:"0.00" }} · {{ revenue_periods|default:"1" }} periods
+          </div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="revenueChart"
+          data-labels='{{ revenue_labels|safe|default:"[]" }}'
+          data-values='{{ revenue_data|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="{% static 'administrator/js/dashboard.js' %}"></script>
+{% endblock %}

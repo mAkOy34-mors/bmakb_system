@@ -35,6 +35,12 @@
       <i class="bi bi-grid-1x2"></i> Dashboard
     </a>
 
+    <div class="nav-section-label">Analytics</div>
+  <a href="{% url 'administrator:analytics' %}"
+     class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+    <i class="bi bi-bar-chart-line"></i> Analytics
+  </a>
+
     <div class="nav-section-label">Members</div>
     <!-- All Members — only active on list and detail pages -->
 <a href="{% url 'membership:member_list' %}"

@@ -51,25 +51,29 @@ class Member(models.Model):
         decimal_places=2,
         default=0.00,
         validators=[MinValueValidator(0)],
+        help_text='Annual subscription amount.',
+    )
+    term_years = models.PositiveSmallIntegerField(
+        default=1,
+        validators=[MinValueValidator(1)],
+        verbose_name='Term (Years)',
+        help_text='Number of years for the subscription term.',
     )
     con = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=0.00,
-        verbose_name='CON',
+        verbose_name='CBU',
         validators=[MinValueValidator(0)],
+        help_text='Capital Build-Up — original contribution amount.',
     )
-    initial_subscription = models.DecimalField(
+    cbu_balance = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=0.00,
-        validators=[MinValueValidator(0)],
-    )
-    initial_paid_up = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
-        default=0.00,
-        validators=[MinValueValidator(0)],
+        editable=False,  # auto-computed, never shown as an editable form field
+        verbose_name='CBU Balance',
+        help_text='Auto-computed: CBU minus annual subscription. Saved to DB.',
     )
 
     # ── Timestamps ────────────────────────────────────────────────────────────
@@ -94,9 +98,15 @@ class Member(models.Model):
                 today.year - self.date_of_birth.year
                 - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
             )
+
+        # Auto-compute CBU balance: Subscription minus CBU
+        # Represents the remaining unpaid balance. Zero means fully paid.
+        self.cbu_balance = (self.subscription or 0) - (self.con or 0)
+
         # Auto-generate account number
         if not self.account_number:
             last = Member.objects.order_by('id').last()
             next_id = (last.id + 1) if last else 1
             self.account_number = f"BMAKB-{next_id:05d}"
+
         super().save(*args, **kwargs)

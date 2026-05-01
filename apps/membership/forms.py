@@ -12,7 +12,8 @@ class MemberForm(forms.ModelForm):
 
     class Meta:
         model = Member
-        exclude = ['account_number', 'age', 'created_at', 'updated_at']
+        exclude = ['account_number', 'age', 'cbu_balance', 'created_at', 'updated_at',
+                   'initial_subscription', 'initial_paid_up']
         widgets = {
             'tin': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -30,24 +31,25 @@ class MemberForm(forms.ModelForm):
             'address': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Full address',
+                'placeholder': 'Type barangay to search address...',
+                'autocomplete': 'off',
             }),
             'type_of_membership': forms.Select(attrs={'class': 'form-select'}),
             'subscription': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01',
+                'placeholder': '0.00',
+            }),
+            'term_years': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'max': '50',
+                'placeholder': '1',
             }),
             'con': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'step': '0.01',
-            }),
-            'initial_subscription': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
-            }),
-            'initial_paid_up': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'step': '0.01',
+                'placeholder': '0.00',
             }),
             'date_joined': forms.DateInput(attrs={
                 'type': 'date',
