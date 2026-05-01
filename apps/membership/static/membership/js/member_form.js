@@ -6,29 +6,16 @@
   /* ─────────────────────────────────────────────
      HELPERS
   ───────────────────────────────────────────── */
-  const $   = (id) => document.getElementById(id);
-  const fmt = (v) =>
-    "₱" +
-    (isNaN(v)
-      ? "0.00"
-      : parseFloat(v).toLocaleString("en-PH", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        }));
+  const $ = (id) => document.getElementById(id);
 
   /* ─────────────────────────────────────────────
      FIELD REFERENCES
   ───────────────────────────────────────────── */
   const dobInput   = $("id_date_of_birth");
   const ageDisplay = $("age-display");
-  const subInput   = $("id_subscription");
-  const conInput   = $("id_con");
-  const cbuDisplay = $("cbu-balance-display");
-  const cbuHint    = $("cbu-balance-hint");
 
   /* ─────────────────────────────────────────────
      1. LIVE AGE COMPUTATION
-        Mirrors the logic in model.save()
   ───────────────────────────────────────────── */
   function computeAge(dobValue) {
     if (!dobValue) return null;
@@ -38,7 +25,8 @@
     let age = today.getFullYear() - dob.getFullYear();
     const notYetHadBirthday =
       today.getMonth() < dob.getMonth() ||
-      (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate());
+      (today.getMonth() === dob.getMonth() &&
+       today.getDate() < dob.getDate());
     if (notYetHadBirthday) age--;
     return age >= 0 ? age : null;
   }
@@ -46,7 +34,7 @@
   function updateAge() {
     const age = computeAge(dobInput?.value);
     if (ageDisplay) {
-      ageDisplay.value = age !== null ? age : "";
+      ageDisplay.value       = age !== null ? age : "";
       ageDisplay.placeholder = age !== null ? "" : "—";
     }
   }
@@ -56,85 +44,33 @@
   updateAge();
 
   /* ─────────────────────────────────────────────
-     2. CBU BALANCE PREVIEW
-        Formula: CBU Balance = Subscription − CBU
-        • Positive → outstanding balance (still owes)
-        • Zero     → fully paid
-        • Negative → CBU exceeds subscription (overpaid)
-        Mirrors the logic in model.save()
-  ───────────────────────────────────────────── */
-  function recalcFinancials() {
-    const sub = parseFloat(subInput?.value) || 0;
-    const cbu = parseFloat(conInput?.value) || 0;
-
-    const balance = sub - cbu;
-
-    if (sub > 0 || cbu > 0) {
-      cbuDisplay.value = balance.toFixed(2);
-
-      if (balance > 0) {
-        // Still has an outstanding balance
-        cbuDisplay.style.color = "#ef4444";
-        cbuHint.innerHTML =
-          '<i class="bi bi-exclamation-triangle" style="color:#ef4444"></i> ' +
-          '<span style="color:#ef4444;font-weight:500;">Outstanding balance of ' +
-          fmt(balance) + ' remaining.</span>';
-      } else if (balance === 0) {
-        // Fully paid
-        cbuDisplay.style.color = "var(--teal, #14b8a6)";
-        cbuHint.innerHTML =
-          '<i class="bi bi-check-circle" style="color:var(--teal,#14b8a6)"></i> ' +
-          '<span style="color:var(--teal,#14b8a6);font-weight:500;">Fully paid — CBU covers the subscription.</span>';
-      } else {
-        // CBU exceeds subscription (overpaid)
-        cbuDisplay.style.color = "var(--teal, #14b8a6)";
-        cbuHint.innerHTML =
-          '<i class="bi bi-check-circle" style="color:var(--teal,#14b8a6)"></i> ' +
-          '<span style="color:var(--teal,#14b8a6);font-weight:500;">Overpaid — CBU exceeds subscription by ' +
-          fmt(Math.abs(balance)) + '.</span>';
-      }
-    } else {
-      cbuDisplay.value = "0.00";
-      cbuDisplay.style.color = "var(--text)";
-      cbuHint.innerHTML = "";
-    }
-  }
-
-  [subInput, conInput].forEach((el) =>
-    el?.addEventListener("input", recalcFinancials)
-  );
-
-  recalcFinancials();
-
-  /* ─────────────────────────────────────────────
-     3. BARANGAY ADDRESS AUTOCOMPLETE
-        Primary city: Bayawan City, Negros Oriental
+     2. BARANGAY ADDRESS AUTOCOMPLETE
   ───────────────────────────────────────────── */
   const BARANGAYS = [
-  "Ali-is, Bayawan City, Negros Oriental",
-  "Banaybanay, Bayawan City, Negros Oriental",
-  "Banga, Bayawan City, Negros Oriental",
-  "Villasol (Bato), Bayawan City, Negros Oriental",
-  "Boyco (Poblacion), Bayawan City, Negros Oriental",
-  "Bugay, Bayawan City, Negros Oriental",
-  "Cansumalig, Bayawan City, Negros Oriental",
-  "Dawis, Bayawan City, Negros Oriental",
-  "Kalamtukan, Bayawan City, Negros Oriental",
-  "Kalumboyan, Bayawan City, Negros Oriental",
-  "Malabugas, Bayawan City, Negros Oriental",
-  "Mandu-ao, Bayawan City, Negros Oriental",
-  "Villareal, Bayawan City, Negros Oriental",
-  "Maninihon, Bayawan City, Negros Oriental",
-  "Minaba, Bayawan City, Negros Oriental",
-  "Nangka, Bayawan City, Negros Oriental",
-  "Narra, Bayawan City, Negros Oriental",
-  "Pagatban, Bayawan City, Negros Oriental",
-  "Poblacion, Bayawan City, Negros Oriental",
-  "San Isidro, Bayawan City, Negros Oriental",
-  "Suba (Poblacion), Bayawan City, Negros Oriental",
-  "Tinago (Poblacion), Bayawan City, Negros Oriental",
-  "Ubos (Poblacion), Bayawan City, Negros Oriental"
-];
+    "Ali-is, Bayawan City, Negros Oriental",
+    "Banaybanay, Bayawan City, Negros Oriental",
+    "Banga, Bayawan City, Negros Oriental",
+    "Villasol (Bato), Bayawan City, Negros Oriental",
+    "Boyco (Poblacion), Bayawan City, Negros Oriental",
+    "Bugay, Bayawan City, Negros Oriental",
+    "Cansumalig, Bayawan City, Negros Oriental",
+    "Dawis, Bayawan City, Negros Oriental",
+    "Kalamtukan, Bayawan City, Negros Oriental",
+    "Kalumboyan, Bayawan City, Negros Oriental",
+    "Malabugas, Bayawan City, Negros Oriental",
+    "Mandu-ao, Bayawan City, Negros Oriental",
+    "Villareal, Bayawan City, Negros Oriental",
+    "Maninihon, Bayawan City, Negros Oriental",
+    "Minaba, Bayawan City, Negros Oriental",
+    "Nangka, Bayawan City, Negros Oriental",
+    "Narra, Bayawan City, Negros Oriental",
+    "Pagatban, Bayawan City, Negros Oriental",
+    "Poblacion, Bayawan City, Negros Oriental",
+    "San Isidro, Bayawan City, Negros Oriental",
+    "Suba (Poblacion), Bayawan City, Negros Oriental",
+    "Tinago (Poblacion), Bayawan City, Negros Oriental",
+    "Ubos (Poblacion), Bayawan City, Negros Oriental"
+  ];
 
   const addressField  = $("id_address");
   const suggestionBox = $("barangay-suggestions");
