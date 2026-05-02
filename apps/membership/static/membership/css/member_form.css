@@ -87,3 +87,35 @@
 .required-star {
   color: #ef4444;
 }
+/* ── Initial Paid-Up badge ────────────────────────────────────────────────── */
+.paid-up-badge {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* ── Live CBU preview hint (shown while typing initial paid-up) ──────────── */
+.cbu-preview-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #10b981;
+  font-weight: 500;
+  animation: fadeIn 0.15s ease;
+}
+
+.cbu-preview-hint i {
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-3px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

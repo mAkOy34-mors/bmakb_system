@@ -13,7 +13,7 @@ class MemberForm(forms.ModelForm):
     class Meta:
         model = Member
         exclude = ['account_number', 'age', 'created_at', 'updated_at',
-                   'initial_subscription', 'initial_paid_up']
+                   'initial_subscription']
         widgets = {
             'tin': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -51,6 +51,14 @@ class MemberForm(forms.ModelForm):
                 'class': 'form-control',
                 'step': '0.01',
                 'placeholder': '0.00',
+                'id': 'id_con',
+            }),
+            'initial_paid_up': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': '0.00',
+                'id': 'id_initial_paid_up',
+                'min': '0',
             }),
             'date_joined': forms.DateInput(attrs={
                 'type': 'date',

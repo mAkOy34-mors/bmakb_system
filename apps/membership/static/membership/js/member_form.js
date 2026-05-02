@@ -44,7 +44,44 @@
   updateAge();
 
   /* ─────────────────────────────────────────────
-     2. BARANGAY ADDRESS AUTOCOMPLETE
+     2. LIVE CBU PREVIEW FROM INITIAL PAID-UP
+     Logic mirrors the model's save():
+       • New record  → CBU = initial_paid_up
+       • Edit record → CBU = existing CBU + (new paid-up − old paid-up)
+                       (only when delta > 0)
+  ───────────────────────────────────────────── */
+  const paidUpInput   = $("id_initial_paid_up");
+  const conInput      = $("id_con");
+  const cbuPreview    = $("cbu-preview");
+  const cbuPreviewVal = $("cbu-preview-value");
+
+  // Lock in the CBU value as it was when the page loaded — never overwrite it.
+  const savedCBU = parseFloat(conInput?.value) || 0;
+
+  function formatPHP(amount) {
+    return "₱" + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  function updateCBUPreview() {
+    if (!paidUpInput || !conInput) return;
+
+    const paidUp    = parseFloat(paidUpInput.value) || 0;
+    // Always: projected CBU = current saved CBU + whatever is typed in paid-up
+    const projected = savedCBU + paidUp;
+
+    if (paidUp > 0) {
+      cbuPreviewVal.textContent = formatPHP(projected);
+      cbuPreview.style.display  = "flex";
+    } else {
+      cbuPreview.style.display  = "none";
+    }
+  }
+
+  paidUpInput?.addEventListener("input",  updateCBUPreview);
+  paidUpInput?.addEventListener("change", updateCBUPreview);
+
+  /* ─────────────────────────────────────────────
+     3. BARANGAY ADDRESS AUTOCOMPLETE
   ───────────────────────────────────────────── */
   const BARANGAYS = [
     "Ali-is, Bayawan City, Negros Oriental",

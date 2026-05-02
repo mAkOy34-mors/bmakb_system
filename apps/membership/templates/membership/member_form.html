@@ -143,12 +143,36 @@
               </div>
             </div>
 
-            <!-- CBU -->
+            <!-- Initial Paid-Up -->
             <div class="col-md-6">
-              <label class="form-label">CBU <span class="cbu-hint">(original contribution)</span></label>
+              <label class="form-label">
+                Initial Paid-Up
+                <span class="paid-up-badge">+ CBU</span>
+              </label>
+              <div class="input-group">
+                <span class="input-group-text currency-prefix">₱</span>
+                {{ form.initial_paid_up }}
+              </div>
+              <div class="helper-text">
+                <i class="bi bi-info-circle"></i>
+                Each amount entered here is <strong>added</strong> to the CBU total.
+              </div>
+            </div>
+
+            <!-- CBU — accumulates every initial_paid_up entry -->
+            <div class="col-md-6">
+              <label class="form-label">
+                CBU
+                <span class="cbu-hint">(accumulated total)</span>
+              </label>
               <div class="input-group">
                 <span class="input-group-text currency-prefix">₱</span>
                 {{ form.con }}
+              </div>
+              <!-- Live preview shown while admin is typing in Initial Paid-Up -->
+              <div id="cbu-preview" class="cbu-preview-hint" style="display:none;">
+                <i class="bi bi-arrow-right-circle-fill"></i>
+                Will become: <strong id="cbu-preview-value">₱0.00</strong>
               </div>
             </div>
 

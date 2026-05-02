@@ -65,8 +65,17 @@ class Member(models.Model):
         default=0.00,
         verbose_name='CBU',
         validators=[MinValueValidator(0)],
-        help_text='Capital Build-Up — original contribution amount.',
+        help_text='Capital Build-Up — accumulated total of all paid-up contributions.',
     )
+    initial_paid_up = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0.00,
+        validators=[MinValueValidator(0)],
+        verbose_name='Initial Paid-Up',
+        help_text='Amount to add on top of the current CBU each time this is updated.',
+    )
+
     # ── Timestamps ────────────────────────────────────────────────────────────
     date_joined = models.DateField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -89,6 +98,20 @@ class Member(models.Model):
                 today.year - self.date_of_birth.year
                 - ((today.month, today.day) < (self.date_of_birth.month, self.date_of_birth.day))
             )
+
+        # Accumulate initial_paid_up into con (CBU).
+        # Always: new CBU = old saved CBU + initial_paid_up entered this save.
+        if self.pk:
+            try:
+                old = Member.objects.get(pk=self.pk)
+                # Use the DB's con as the base — not whatever came from the form —
+                # so the form's read-only CBU display never causes double-counting.
+                self.con = (old.con or 0) + (self.initial_paid_up or 0)
+            except Member.DoesNotExist:
+                self.con = self.initial_paid_up or 0
+        else:
+            # New record: initial_paid_up seeds con directly
+            self.con = self.initial_paid_up or 0
 
         # Auto-generate account number
         if not self.account_number:
