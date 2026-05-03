@@ -6,113 +6,10 @@
 {% block topbar_title %}Analytics{% endblock %}
 
 {% block extra_css %}
- <link rel="stylesheet" href="{% static 'administrator/css/analytics.css'%}"
+ <link rel="stylesheet" href="{% static 'administrator/css/analytics.css'%}">
 {% endblock %}
 
 {% block content %}
-
-<!-- ── Membership Stat Cards ──────────────────────────────── -->
-<div class="row g-3 mb-4">
-
-  <div class="col-md-3">
-    <div class="stat-card c-blue">
-      <div class="stat-icon-wrap c-blue">
-        <i data-lucide="users" class="lucide-icon"></i>
-      </div>
-      <div class="stat-label">TOTAL MEMBERS</div>
-      <div class="stat-value">{{ total_members }}</div>
-      <div class="stat-sub">All registered members</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card c-emerald">
-      <div class="stat-icon-wrap c-emerald">
-        <i data-lucide="user-check" class="lucide-icon"></i>
-      </div>
-      <div class="stat-label">ACTIVE MEMBERS</div>
-      <div class="stat-value">{{ active_members }}</div>
-      <div class="stat-sub">Currently active</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card c-amber">
-      <div class="stat-icon-wrap c-amber">
-        <i data-lucide="user-round" class="lucide-icon"></i>
-      </div>
-      <div class="stat-label">REGULAR MEMBERS</div>
-      <div class="stat-value">{{ regular_members }}</div>
-      <div class="stat-sub">Regular membership</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card c-violet">
-      <div class="stat-icon-wrap c-violet">
-        <i data-lucide="star" class="lucide-icon"></i>
-      </div>
-      <div class="stat-label">ASSOCIATE MEMBERS</div>
-      <div class="stat-value">{{ associate_members }}</div>
-      <div class="stat-sub">Associate membership</div>
-    </div>
-  </div>
-
-</div>
-
-<!-- ── Gender Stat Cards ──────────────────────────────────── -->
-<div class="row g-3 mb-4">
-
-  <div class="col-md-4">
-    <div class="stat-card c-sky">
-      <div class="stat-icon-wrap c-sky">
-        <!-- Male symbol ♂ -->
-        <svg viewBox="0 0 24 24">
-          <circle cx="10" cy="14" r="5"/>
-          <line x1="14.5" y1="9.5" x2="20" y2="4"/>
-          <polyline points="15 4 20 4 20 9"/>
-        </svg>
-      </div>
-      <div class="stat-label">MALE MEMBERS</div>
-      <div class="stat-value">{{ male_members }}</div>
-      <div class="stat-sub">
-        {% if total_members %}{{ male_percent|floatformat:1 }}% of total{% else %}No data yet{% endif %}
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="stat-card c-rose">
-      <div class="stat-icon-wrap c-rose">
-        <!-- Female symbol ♀ -->
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="9" r="5"/>
-          <line x1="12" y1="14" x2="12" y2="21"/>
-          <line x1="9"  y1="18" x2="15" y2="18"/>
-        </svg>
-      </div>
-      <div class="stat-label">FEMALE MEMBERS</div>
-      <div class="stat-value">{{ female_members }}</div>
-      <div class="stat-sub">
-        {% if total_members %}{{ female_percent|floatformat:1 }}% of total{% else %}No data yet{% endif %}
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="stat-card c-slate">
-      <div class="stat-icon-wrap c-slate">
-        <i data-lucide="user" class="lucide-icon"></i>
-      </div>
-      <div class="stat-label">OTHER / UNSPECIFIED</div>
-      <div class="stat-value">{{ other_members }}</div>
-      <div class="stat-sub">
-        {% if total_members %}{{ other_percent|floatformat:1 }}% of total{% else %}No data yet{% endif %}
-      </div>
-    </div>
-  </div>
-
-</div>
 
 <!-- ── Charts Row 1 — Line + Donut ────────────────────────── -->
 <div class="row g-3 mb-4">
@@ -240,10 +137,135 @@
   </div>
 </div>
 
+<!-- ── Charts Row 4 — CBU Trend ───────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="piggy-bank" style="width:16px;height:16px;color:#6366f1"></i>
+            CBU Accumulation Trend
+          </div>
+          <div class="chart-sub">
+            Total CBU ₱{{ total_cbu|floatformat:2 }} · Capital Build-Up by month
+          </div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="cbuChart"
+          data-labels='{{ cbu_labels|safe|default:"[]" }}'
+          data-values='{{ cbu_data|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Charts Row 5 — Subscription + Initial Paid-Up ─────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="calendar-check" style="width:16px;height:16px;color:#f43f5e"></i>
+            Subscription Trend
+          </div>
+          <div class="chart-sub">
+            Total ₱{{ total_subscription|floatformat:2 }} · Monthly subscription payments
+          </div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="subscriptionChart"
+          data-labels='{{ subscription_labels|safe|default:"[]" }}'
+          data-values='{{ subscription_data|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="clipboard-list" style="width:16px;height:16px;color:#0ea5e9"></i>
+            Initial Paid-Up Trend
+          </div>
+          <div class="chart-sub">
+            Total ₱{{ total_initial_paid_up|floatformat:2 }} · Monthly initial paid-up
+          </div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="initialPaidUpChart"
+          data-labels='{{ initial_paid_up_labels|safe|default:"[]" }}'
+          data-values='{{ initial_paid_up_data|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Charts Row 6 — Savings Trend ──────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="wallet" style="width:16px;height:16px;color:#14b8a6"></i>
+            Savings Trend
+          </div>
+          <div class="chart-sub">
+            Total ₱{{ total_savings|floatformat:2 }} · Cumulative member savings by month
+          </div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="savingsChart"
+          data-labels='{{ savings_labels|safe|default:"[]" }}'
+          data-values='{{ savings_data|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Active vs Inactive Trend ───────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-12">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-header-left">
+          <div class="chart-title">
+            <i data-lucide="activity" style="width:16px;height:16px;color:#10b981"></i>
+            Active vs Inactive Members
+          </div>
+          <div class="chart-sub">
+            {{ total_active }} active · {{ total_inactive }} inactive
+          </div>
+        </div>
+      </div>
+      <div class="chart-body">
+        <div id="statusChart"
+          data-labels='{{ status_labels|safe|default:"[]" }}'
+          data-active='{{ status_active_data|safe|default:"[]" }}'
+          data-inactive='{{ status_inactive_data|safe|default:"[]" }}'>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'administrator/js/lucide.min.js' %}"></script>
 <script src="{% static 'administrator/js/apexcharts.min.js' %}"></script>
-<script src="{% static 'administrator/js/dashboard.js' %}"></script>
+<script src="{% static 'administrator/js/analytics.js' %}"></script>
 {% endblock %}

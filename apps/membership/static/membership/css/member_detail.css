@@ -14,12 +14,6 @@
   display: flex;
   gap: 8px;
 }
-
-.btn-delete {
-  color: #ef4444;
-  border-color: #fecaca;
-}
-
 /* Profile card */
 .profile-card-body {
   padding: 32px 24px;
@@ -148,4 +142,37 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
+}
+/* Transaction type badges */
+.txn-type-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.txn-cbu            { background: #e0f2fe; color: #0369a1; }
+.txn-savings        { background: #dcfce7; color: #15803d; }
+.txn-initial_paid_up{ background: #fef9c3; color: #854d0e; }
+.txn-subscription   { background: #ede9fe; color: #6d28d9; }
+.txn-withdrawal     { background: #fee2e2; color: #b91c1c; }
+
+/* Amount colors */
+.txn-positive { color: #15803d; font-weight: 600; }
+.txn-negative { color: #b91c1c; font-weight: 600; }
+
+/* Empty state */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+}
+.empty-state-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+.empty-state-text { font-size: 0.95rem; }
+
+.sticky-card {
+  position: sticky;
+  top: 80px;
 }

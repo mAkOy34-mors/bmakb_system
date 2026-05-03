@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.db.models import Q
 
 from .models import Member
-from .forms import MemberForm
+from .forms import MemberForm, MemberTransactionForm, MemberEditForm
 from apps.administrator.log_utils import log_action
 
 
@@ -43,7 +43,17 @@ def member_add(request):
     if request.method == 'POST':
         form = MemberForm(request.POST)
         if form.is_valid():
-            member = form.save()
+            member = form.save(commit=False)
+
+            # Bug 1: Always set active on creation
+            member.is_active = True
+
+            # Bug 2 & 3: Add initial_paid_up on top of CBU at creation time
+            initial_paid_up = form.cleaned_data.get('initial_paid_up') or 0
+            con             = form.cleaned_data.get('con') or 0
+            member.con      = con + initial_paid_up
+
+            member.save()
 
             log_action(
                 request, 'member_add',
@@ -74,20 +84,25 @@ def member_add(request):
     })
 
 
+
 # ── Member Detail ─────────────────────────────────────────────────────────────
 @login_required
 def member_detail(request, pk):
-    member = get_object_or_404(Member, pk=pk)
+    member       = get_object_or_404(Member, pk=pk)
+    transactions = member.transactions.select_related('created_by').order_by('-created_at')
 
     log_action(
-        request, 'member_view',
+        request,
+        'member_view',
         target_name=member.name,
         target_id=member.account_number,
         description=f"Viewed profile of {member.name} ({member.account_number}).",
     )
 
-    return render(request, 'membership/member_detail.html', {'member': member})
-
+    return render(request, 'membership/member_detail.html', {
+        'member':       member,
+        'transactions': transactions,
+    })
 
 # ── Edit Member ───────────────────────────────────────────────────────────────
 @login_required
@@ -95,9 +110,8 @@ def member_edit(request, pk):
     member = get_object_or_404(Member, pk=pk)
 
     if request.method == 'POST':
-        form = MemberForm(request.POST, instance=member)
+        form = MemberEditForm(request.POST, instance=member)
         if form.is_valid():
-            # Capture which fields changed before saving
             changed = form.changed_data
             form.save()
 
@@ -116,7 +130,7 @@ def member_edit(request, pk):
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
-        form = MemberForm(instance=member)
+        form = MemberEditForm(instance=member)
 
     return render(request, 'membership/member_form.html', {
         'form':      form,
@@ -124,8 +138,6 @@ def member_edit(request, pk):
         'title':     f'Edit Member — {member.name}',
         'btn_label': 'Update Member',
     })
-
-
 # ── Delete Member ─────────────────────────────────────────────────────────────
 @login_required
 def member_delete(request, pk):
@@ -137,6 +149,7 @@ def member_delete(request, pk):
         account_number = member.account_number
         membership     = member.get_type_of_membership_display()
 
+        member.transactions.all().delete()
         member.delete()
 
         log_action(
@@ -153,3 +166,44 @@ def member_delete(request, pk):
         return redirect('membership:member_list')
 
     return render(request, 'membership/member_confirm_delete.html', {'member': member})
+
+@login_required
+def add_transaction(request, pk):
+    member = get_object_or_404(Member, pk=pk)
+
+    if request.method == 'POST':
+        form = MemberTransactionForm(request.POST)
+        if form.is_valid():
+            txn = form.save(commit=False)
+            txn.member     = member
+            txn.created_by = request.user
+            txn.save()
+
+            # ── Update member balance based on transaction type ────────────
+            if txn.type == 'cbu':
+                member.con      += txn.amount
+            elif txn.type == 'savings':
+                member.savings  += txn.amount
+            elif txn.type == 'initial_paid_up':
+                member.initial_paid_up += txn.amount
+                member.con             += txn.amount
+            elif txn.type == 'withdrawal':
+                member.savings  = max(0, member.savings - txn.amount)
+            member.save()
+            # ─────────────────────────────────────────────────────────────
+
+            log_action(
+                request, 'transaction_add',
+                target_name=member.name,
+                target_id=member.account_number,
+                description=f"Added {txn.get_type_display()} of ₱{txn.amount} for {member.name}.",
+            )
+            messages.success(request, 'Transaction recorded successfully.')
+            return redirect('membership:member_detail', pk=member.pk)
+    else:
+        form = MemberTransactionForm()
+
+    return render(request, 'membership/add_transaction.html', {
+        'form':   form,
+        'member': member,
+    })

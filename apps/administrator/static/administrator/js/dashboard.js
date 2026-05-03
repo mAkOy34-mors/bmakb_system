@@ -1,426 +1,172 @@
-// apps/administrator/static/administrator/js/dashboard.js
+/* ──────────────────────────────────────────────────────────────
+   dashboard.js  —  Member Modal Logic
+   NOTE: Django URL template tags do NOT work in .js files.
+   URLs are passed in via window.DASHBOARD_URLS (set in dashboard.html).
+   ────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
 
-document.addEventListener('DOMContentLoaded', function () {
-
-  // ── Lucide Icons ─────────────────────────────────────────
-  lucide.createIcons();
-
-  // ── Read Data from Canvas Data Attributes ────────────────
-  const memberCanvas  = document.getElementById('memberChart');
-  const revenueCanvas = document.getElementById('revenueChart');
-  const typeCanvas    = document.getElementById('typeChart');
-
-  const monthlyLabels = JSON.parse(memberCanvas.dataset.labels   || '[]');
-  const monthlyData   = JSON.parse(memberCanvas.dataset.values   || '[]');
-  const revenueLabels = JSON.parse(revenueCanvas.dataset.labels  || '[]');
-  const revenueData   = JSON.parse(revenueCanvas.dataset.values  || '[]');
-  const typeLabels    = JSON.parse(typeCanvas.dataset.labels     || '["Regular","Associate"]');
-  const typeValues    = JSON.parse(typeCanvas.dataset.values     || '[0,0]');
-
-  // ── Shared Theme ─────────────────────────────────────────
-  const fontFamily = "'DM Sans', sans-serif";
-  const mutedColor = '#9ca3af';
-  const gridColor  = 'rgba(0,0,0,0.04)';
-
-  const tooltipStyle = {
-    theme: 'dark',
-    style: { fontSize: '12px', fontFamily },
-  };
-
-  // ── 1. Line Chart — Monthly Membership Trend ─────────────
-  const memberOptions = {
-    series: [{
-      name: 'New Members',
-      data: monthlyData,
-    }],
-    chart: {
-      type: 'line',
-      height: 220,
-      fontFamily,
-      toolbar: { show: false },
-      zoom: { enabled: false },
-      animations: { enabled: true, easing: 'easeinout', speed: 600 },
-    },
-    stroke: { curve: 'smooth', width: 3 },
-    colors: ['#f59e0b'],
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shade: 'light',
-        type: 'vertical',
-        shadeIntensity: 0.3,
-        gradientToColors: ['#fef3c7'],
-        opacityFrom: 0.5,
-        opacityTo: 0.05,
-      },
-    },
-    markers: {
-      size: 5,
-      colors: ['#f59e0b'],
-      strokeColors: '#fff',
-      strokeWidth: 2,
-      hover: { size: 7 },
-    },
-    xaxis: {
-      categories: monthlyLabels,
-      labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-      axisBorder: { show: false },
-      axisTicks:  { show: false },
-    },
-    yaxis: {
-      labels: {
-        style: { colors: mutedColor, fontSize: '11px', fontFamily },
-        formatter: val => Math.round(val),
-      },
-    },
-    grid: {
-      borderColor: gridColor,
-      strokeDashArray: 4,
-      xaxis: { lines: { show: false } },
-    },
-    tooltip: {
-      ...tooltipStyle,
-      y: { formatter: val => val + ' members' },
-    },
-    legend: {
-      show: true,
-      position: 'bottom',
-      labels: { colors: '#f59e0b' },
-      markers: { fillColors: ['#f59e0b'] },
-    },
-    dataLabels: { enabled: false },
-  };
-
-  const memberChart = new ApexCharts(
-    document.getElementById('memberChart'),
-    memberOptions
+  /* ── 1. Parse member data ─────────────────────────────────── */
+  const membersRaw = JSON.parse(
+    document.getElementById('members-data').textContent || '[]'
   );
-  memberChart.render();
 
-  // ── 2. Bar Chart — Revenue Trend ─────────────────────────
-  const revenueOptions = {
-    series: [{ name: 'Revenue', data: revenueData }],
-    chart: {
-      type: 'bar',
-      height: 220,
-      fontFamily,
-      toolbar: { show: false },
-      animations: { enabled: true, easing: 'easeinout', speed: 600 },
-    },
-    colors: ['#1d6a5b'],
-    plotOptions: {
-      bar: {
-        borderRadius: 6,
-        columnWidth: '50%',
-        dataLabels: { position: 'top' },
-      },
-    },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shade: 'light',
-        type: 'vertical',
-        shadeIntensity: 0.2,
-        gradientToColors: ['#10b981'],
-        opacityFrom: 0.9,
-        opacityTo: 0.7,
-      },
-    },
-    xaxis: {
-      categories: revenueLabels,
-      labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-      axisBorder: { show: false },
-      axisTicks:  { show: false },
-    },
-    yaxis: {
-      labels: {
-        style: { colors: mutedColor, fontSize: '11px', fontFamily },
-        formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
-      },
-    },
-    grid: {
-      borderColor: gridColor,
-      strokeDashArray: 4,
-      xaxis: { lines: { show: false } },
-    },
-    tooltip: {
-      ...tooltipStyle,
-      y: { formatter: val => '₱' + val.toLocaleString() },
-    },
-    dataLabels: { enabled: false },
-  };
+  /* ── 2. Month name helper ─────────────────────────────────── */
+  const MONTHS = [
+    'January','February','March','April','May','June',
+    'July','August','September','October','November','December'
+  ];
 
-  const revenueChart = new ApexCharts(
-    document.getElementById('revenueChart'),
-    revenueOptions
-  );
-  revenueChart.render();
-
-  // ── 3. Donut Chart — Membership Types ────────────────────
-  const typeOptions = {
-    series: typeValues,
-    chart: {
-      type: 'donut',
-      height: 260,
-      fontFamily,
-      animations: { enabled: true, easing: 'easeinout', speed: 600 },
-    },
-    labels: typeLabels,
-    colors: ['#1d6a5b', '#3b82f6', '#f59e0b', '#8b5cf6'],
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '65%',
-          labels: {
-            show: true,
-            name: {
-              show: true,
-              fontSize: '13px',
-              fontFamily,
-              color: '#1a1a2e',
-            },
-            value: {
-              show: true,
-              fontSize: '24px',
-              fontFamily: "'DM Serif Display', serif",
-              color: '#1a1a2e',
-              formatter: val => val,
-            },
-            total: {
-              show: true,
-              label: 'Total',
-              fontSize: '12px',
-              fontFamily,
-              color: mutedColor,
-              formatter: w =>
-                w.globals.seriesTotals.reduce((a, b) => a + b, 0),
-            },
-          },
-        },
-      },
-    },
-    legend: {
-      position: 'bottom',
-      fontSize: '12px',
-      fontFamily,
-      labels: { colors: '#6b7280' },
-      markers: { width: 10, height: 10, radius: 3 },
-      itemMargin: { horizontal: 10, vertical: 4 },
-    },
-    dataLabels: {
-      enabled: true,
-      formatter: val => val.toFixed(1) + '%',
-      style: { fontSize: '11px', fontFamily, fontWeight: '600' },
-      dropShadow: { enabled: false },
-    },
-    stroke: { width: 0 },
-    tooltip: {
-      ...tooltipStyle,
-      y: { formatter: val => val + ' members' },
-    },
-  };
-
-  const typeChart = new ApexCharts(
-    document.getElementById('typeChart'),
-    typeOptions
-  );
-  typeChart.render();
-
-  // ── 4. Donut Chart — Gender Breakdown ────────────────────
-  const genderEl = document.getElementById('genderChart');
-  if (genderEl) {
-    const genderLabels = JSON.parse(genderEl.dataset.labels || '["Male","Female","Other"]');
-    const genderValues = JSON.parse(genderEl.dataset.values || '[0,0,0]');
-
-    const genderOptions = {
-      series: genderValues,
-      chart: {
-        type: 'donut',
-        height: 260,
-        fontFamily,
-        animations: { enabled: true, easing: 'easeinout', speed: 600 },
-      },
-      labels: genderLabels,
-      // blue = male, pink = female, gray = other
-      colors: ['#378ADD', '#D4537E', '#888780'],
-      plotOptions: {
-        pie: {
-          donut: {
-            size: '65%',
-            labels: {
-              show: true,
-              name: {
-                show: true,
-                fontSize: '13px',
-                fontFamily,
-                color: mutedColor,
-              },
-              value: {
-                show: true,
-                fontSize: '22px',
-                fontFamily: "'DM Serif Display', serif",
-                color: '#1a1a2e',
-                formatter: val => val,
-              },
-              total: {
-                show: true,
-                label: 'Total',
-                fontSize: '12px',
-                fontFamily,
-                color: mutedColor,
-                formatter: w =>
-                  w.globals.seriesTotals.reduce((a, b) => a + b, 0),
-              },
-            },
-          },
-        },
-      },
-      legend: {
-        position: 'bottom',
-        fontSize: '12px',
-        fontFamily,
-        labels: { colors: '#6b7280' },
-        markers: { width: 10, height: 10, radius: 3 },
-        itemMargin: { horizontal: 10, vertical: 4 },
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: val => val.toFixed(1) + '%',
-        style: { fontSize: '11px', fontFamily, fontWeight: '600' },
-        dropShadow: { enabled: false },
-      },
-      stroke: { width: 0 },
-      tooltip: {
-        ...tooltipStyle,
-        y: { formatter: val => val + ' members' },
-      },
-    };
-
-    new ApexCharts(genderEl, genderOptions).render();
+  function currentMonthLabel() {
+    const d = new Date();
+    return MONTHS[d.getMonth()] + ' ' + d.getFullYear();
   }
 
-  // ── 5. Horizontal Stacked Bar — Members by Barangay ──────
-  // Horizontal bars are the best fit here: barangay names are long text
-  // labels that would be unreadable on a vertical axis, and stacking
-  // Male / Female / Other shows both the total and the gender split in
-  // a single glance without needing a second chart.
-  const barangayEl = document.getElementById('barangayChart');
-  if (barangayEl) {
-    const bLabels  = JSON.parse(barangayEl.dataset.labels  || '[]');
-    const bTotal   = JSON.parse(barangayEl.dataset.values  || '[]');
-    const bMale    = JSON.parse(barangayEl.dataset.male    || '[]');
-    const bFemale  = JSON.parse(barangayEl.dataset.female  || '[]');
+  /* ── 3. Filter helpers ────────────────────────────────────── */
+  const FILTERS = {
+    total:     () => true,
+    active:    m => m.is_active,
+    inactive:  m => !m.is_active,
+    regular:   m => m.type_of_membership === 'regular',
+    associate: m => m.type_of_membership === 'associate',
+  };
 
-    if (!bLabels.length) {
-      barangayEl.innerHTML =
-        '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No barangay data yet.</p>';
+  /* ── 4. DOM refs ──────────────────────────────────────────── */
+  const backdrop     = document.getElementById('members-modal');
+  const modalIcon    = document.getElementById('modal-icon');
+  const modalTitle   = document.getElementById('modal-title');
+  const modalSub     = document.getElementById('modal-subtitle');
+  const modalSummary = document.getElementById('modal-summary');
+  const summaryText  = document.getElementById('modal-summary-text');
+  const searchInput  = document.getElementById('modal-search-input');
+  const tableBody    = document.getElementById('modal-table-body');
+  const emptyState   = document.getElementById('modal-empty');
+  const countText    = document.getElementById('modal-count-text');
+  const viewAllLink  = document.getElementById('modal-view-all-link');
+
+  let currentRows = [];
+
+  /* ── 5. HTML escape helper ────────────────────────────────── */
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str ?? '';
+    return d.innerHTML;
+  }
+
+  /* ── 6. Build a table row ─────────────────────────────────── */
+  function buildRow(member) {
+    const typeLabel = member.type_of_membership === 'regular' ? 'Regular' : 'Associate';
+    const typeClass = member.type_of_membership === 'regular'
+      ? 'modal-badge-regular' : 'modal-badge-associate';
+    const statLabel = member.is_active ? 'Active' : 'Inactive';
+    const statClass = member.is_active ? 'modal-badge-active' : 'modal-badge-inactive';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="acct-badge">${escHtml(member.account_number)}</span></td>
+      <td><strong>${escHtml(member.name)}</strong></td>
+      <td><span class="modal-badge ${typeClass}">${typeLabel}</span></td>
+      <td>${escHtml(member.date_joined)}</td>
+      <td><span class="modal-badge ${statClass}">${statLabel}</span></td>
+      <td>
+        <a href="${escHtml(member.detail_url)}" class="modal-view-btn">
+          View <i data-lucide="arrow-right" style="width:12px;height:12px;"></i>
+        </a>
+      </td>`;
+    return tr;
+  }
+
+  /* ── 7. Render rows ───────────────────────────────────────── */
+  function renderRows(rows) {
+    tableBody.innerHTML = '';
+
+    if (!rows.length) {
+      emptyState.style.display = 'block';
+      countText.textContent = 'No results';
     } else {
-      // "Other" = total minus male minus female
-      const bOther = bTotal.map((t, i) => Math.max(0, t - (bMale[i] || 0) - (bFemale[i] || 0)));
-
-      // 38 px per row keeps bars comfortably sized without empty space
-      const chartHeight = Math.max(300, bLabels.length * 38 + 80);
-
-      const barangayOptions = {
-        series: [
-          { name: 'Male',   data: bMale   },
-          { name: 'Female', data: bFemale },
-          { name: 'Other',  data: bOther  },
-        ],
-        chart: {
-          type: 'bar',
-          height: chartHeight,
-          fontFamily,
-          stacked: true,
-          toolbar: { show: false },
-          animations: { enabled: true, easing: 'easeinout', speed: 700 },
-        },
-        plotOptions: {
-          bar: {
-            horizontal: true,
-            barHeight: '68%',
-            borderRadius: 4,
-            borderRadiusApplication: 'end',
-            borderRadiusWhenStacked: 'last',
-          },
-        },
-        // blue=male, pink=female, gray=other — same palette as gender donut
-        colors: ['#378ADD', '#D4537E', '#888780'],
-        xaxis: {
-          categories: bLabels,
-          labels: {
-            style: { colors: mutedColor, fontSize: '11px', fontFamily },
-            formatter: val => Math.round(val),
-          },
-          title: {
-            text: 'Number of Members',
-            style: { color: mutedColor, fontSize: '11px', fontFamily },
-          },
-        },
-        yaxis: {
-          labels: {
-            style: { colors: '#374151', fontSize: '12px', fontFamily },
-            // Prevent very long names from overflowing the chart
-            maxWidth: 180,
-          },
-        },
-        legend: {
-          position: 'top',
-          horizontalAlign: 'left',
-          fontSize: '12px',
-          fontFamily,
-          labels: { colors: '#6b7280' },
-          markers: { width: 10, height: 10, radius: 3 },
-        },
-        dataLabels: {
-          enabled: true,
-          // Only show the label when the segment is wide enough to read
-          formatter: (val) => (val > 0 ? val : ''),
-          style: { fontSize: '11px', fontFamily, fontWeight: '600', colors: ['#fff'] },
-          dropShadow: { enabled: false },
-        },
-        tooltip: {
-          shared: true,
-          intersect: false,
-          ...tooltipStyle,
-          y: { formatter: val => val + ' members' },
-        },
-        grid: {
-          borderColor: gridColor,
-          strokeDashArray: 4,
-          xaxis: { lines: { show: true  } },
-          yaxis: { lines: { show: false } },
-        },
-      };
-
-      new ApexCharts(barangayEl, barangayOptions).render();
+      emptyState.style.display = 'none';
+      rows.forEach(m => tableBody.appendChild(buildRow(m)));
+      countText.textContent = `Showing ${rows.length} member${rows.length !== 1 ? 's' : ''}`;
     }
+
+    // Re-process lucide icons injected into new rows
+    if (window.lucide) lucide.createIcons();
   }
 
-  // ── Period Toggle (re-renders member chart) ───────────────
-  document.querySelectorAll('#memberToggle .chart-toggle').forEach(btn => {
-    btn.addEventListener('click', function () {
-      document.querySelectorAll('#memberToggle .chart-toggle')
-        .forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
+  /* ── 8. Live search ───────────────────────────────────────── */
+  function applySearch() {
+    const q = searchInput.value.trim().toLowerCase();
+    if (!q) { renderRows(currentRows); return; }
+    renderRows(currentRows.filter(m =>
+      m.name.toLowerCase().includes(q) ||
+      m.account_number.toLowerCase().includes(q)
+    ));
+  }
 
-      const period = this.dataset.period;
-      const dailyLabels  = JSON.parse(memberCanvas.dataset.dailyLabels  || '[]');
-      const dailyValues  = JSON.parse(memberCanvas.dataset.dailyValues  || '[]');
-      const weeklyLabels = JSON.parse(memberCanvas.dataset.weeklyLabels || '[]');
-      const weeklyValues = JSON.parse(memberCanvas.dataset.weeklyValues || '[]');
+  searchInput.addEventListener('input', applySearch);
 
-      if (period === 'daily') {
-        memberChart.updateOptions({ xaxis: { categories: dailyLabels } });
-        memberChart.updateSeries([{ data: dailyValues }]);
-      } else if (period === 'weekly') {
-        memberChart.updateOptions({ xaxis: { categories: weeklyLabels } });
-        memberChart.updateSeries([{ data: weeklyValues }]);
-      } else {
-        memberChart.updateOptions({ xaxis: { categories: monthlyLabels } });
-        memberChart.updateSeries([{ data: monthlyData }]);
-      }
+  /* ── 9. Open modal ────────────────────────────────────────── */
+  function openModal(filter, color, icon, label) {
+    currentRows = membersRaw.filter(FILTERS[filter]);
+
+    // Header icon + title
+    modalIcon.className = `members-modal-icon ${color}`;
+    modalIcon.innerHTML = `<i data-lucide="${icon}" style="width:20px;height:20px;"></i>`;
+    modalTitle.textContent = label;
+    modalSub.textContent   = `${currentRows.length} member${currentRows.length !== 1 ? 's' : ''} found`;
+
+    // Summary banner
+    modalSummary.className = `members-modal-summary ${color}`;
+    summaryText.textContent =
+      `As of ${currentMonthLabel()}, you have ${currentRows.length} ${label.toLowerCase()}.`;
+
+    // Use window.DASHBOARD_URLS set in dashboard.html — template tags don't work in .js files
+    const base = (window.DASHBOARD_URLS && window.DASHBOARD_URLS.memberList) || '/members/';
+    const filterParam = filter !== 'total' ? `?filter=${filter}` : '';
+    viewAllLink.href = base + filterParam;
+
+    // Reset search & populate table
+    searchInput.value = '';
+    renderRows(currentRows);
+
+    // Show modal
+    backdrop.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // Re-init lucide for modal header icons
+    if (window.lucide) lucide.createIcons();
+  }
+
+  /* ── 10. Close modal ──────────────────────────────────────── */
+  function closeModal() {
+    backdrop.classList.remove('active');
+    document.body.style.overflow = '';
+    searchInput.value = '';
+  }
+
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-close-btn-2').addEventListener('click', closeModal);
+
+  // Close on backdrop click
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) closeModal();
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && backdrop.classList.contains('active')) closeModal();
+  });
+
+  /* ── 11. Wire clickable stat cards ───────────────────────── */
+  document.querySelectorAll('.stat-card.clickable').forEach(function (card) {
+    card.addEventListener('click', function () {
+      openModal(
+        card.dataset.filter,
+        card.dataset.color,
+        card.dataset.icon,
+        card.dataset.label
+      );
     });
   });
 
-});
+})();

@@ -1,0 +1,119 @@
+<!-- templates/membership/add_transaction.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'membership/css/member_form.css' %}">
+{% endblock %}
+
+{% block title %}Add Transaction — {{ member.name }}{% endblock %}
+{% block topbar_icon %}cash-stack{% endblock %}
+{% block topbar_title %}Add Transaction{% endblock %}
+
+{% block content %}
+
+<div class="back-button">
+  <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline">
+    <i class="bi bi-arrow-left"></i> Back to Profile
+  </a>
+</div>
+
+<div class="row g-4">
+
+  <!-- Member Summary -->
+  <div class="col-lg-4">
+    <div class="form-card sticky-sidebar">
+      <div class="form-card-header">
+        <div class="section-header">
+          <i class="bi bi-person section-icon"></i> Member
+        </div>
+      </div>
+      <div class="form-card-body text-center">
+        <div class="profile-avatar">
+          {{ member.name|first|upper }}
+        </div>
+        <div class="profile-name">{{ member.name }}</div>
+        <div class="profile-occupation">{{ member.occupation }}</div>
+        <div class="profile-account">
+          <span class="acct-badge">{{ member.account_number }}</span>
+        </div>
+
+        <hr class="form-divider"/>
+
+        <div class="info-panel-bg mt-3">
+          <div class="info-row">
+            <span class="info-label">CBU Balance</span>
+            <span class="info-value">₱{{ member.con|floatformat:2 }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Savings</span>
+            <span class="info-value">₱{{ member.savings|floatformat:2 }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Initial Paid-Up</span>
+            <span class="info-value">₱{{ member.initial_paid_up|floatformat:2 }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Form -->
+  <div class="col-lg-8">
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="section-header">
+          <i class="bi bi-cash-stack section-icon"></i> Transaction Details
+        </div>
+      </div>
+      <div class="form-card-body">
+        <form method="POST" id="transactionForm">
+          {% csrf_token %}
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label">Transaction Type <span class="required-star">*</span></label>
+              {{ form.type }}
+              {% if form.type.errors %}
+                <div class="error-text">{{ form.type.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Amount <span class="required-star">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text currency-prefix">₱</span>
+                {{ form.amount }}
+              </div>
+              {% if form.amount.errors %}
+                <div class="error-text">{{ form.amount.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Note</label>
+              {{ form.note }}
+            </div>
+
+          </div>
+
+          <hr class="form-divider mt-4"/>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn-teal justify-content-center submit-btn">
+              <i class="bi bi-check-circle"></i> Save Transaction
+            </button>
+            <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline justify-content-center">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

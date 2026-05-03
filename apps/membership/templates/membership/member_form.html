@@ -30,7 +30,7 @@
       <div class="form-card mb-4">
         <div class="form-card-header">
           <div class="section-header">
-            <i class="bi bi-fingerprint section-icon"></i> Identification
+            <i data-lucide="fingerprint" class="section-icon-lucide"></i> Identification
           </div>
         </div>
         <div class="form-card-body">
@@ -54,7 +54,7 @@
       <div class="form-card mb-4">
         <div class="form-card-header">
           <div class="section-header">
-            <i class="bi bi-person section-icon"></i> Personal Information
+            <i data-lucide="user" class="section-icon-lucide"></i> Personal Information
           </div>
         </div>
         <div class="form-card-body">
@@ -67,39 +67,30 @@
               {% endif %}
             </div>
 
-            <!-- Date of Birth -->
             <div class="col-md-4">
               <label class="form-label">Date of Birth <span class="required-star">*</span></label>
               {{ form.date_of_birth }}
             </div>
 
-            <!-- Age — read-only, auto-computed from DOB via JS -->
             <div class="col-md-4">
               <label class="form-label">
-                Age
-                <span class="age-auto-badge">AUTO</span>
+                Age <span class="age-auto-badge">AUTO</span>
               </label>
-              <input type="text"
-                     id="age-display"
-                     class="form-control age-display"
-                     readonly
-                     value="{% if member %}{{ member.age }}{% endif %}"
-                     placeholder="—">
-              <div class="age-hint">
-                Auto-computed from date of birth.
-              </div>
+              <input type="text" id="age-display" class="form-control age-display"
+                     readonly value="{% if member %}{{ member.age }}{% endif %}" placeholder="—">
+              <div class="age-hint">Auto-computed from date of birth.</div>
             </div>
 
             <div class="col-md-4">
               <label class="form-label">Gender <span class="required-star">*</span></label>
               {{ form.gender }}
             </div>
+
             <div class="col-md-6">
               <label class="form-label">Occupation <span class="required-star">*</span></label>
               {{ form.occupation }}
             </div>
 
-            <!-- Address with barangay autocomplete -->
             <div class="col-12">
               <label class="form-label">Address <span class="required-star">*</span></label>
               <div class="address-wrapper">
@@ -107,25 +98,24 @@
                 <div id="barangay-suggestions" class="barangay-suggestions"></div>
               </div>
               <div class="address-hint">
-                <i class="bi bi-info-circle"></i> Type a barangay name to get address suggestions.
+                <i data-lucide="info" style="width:12px;height:12px;"></i>
+                Type a barangay name to get address suggestions.
               </div>
             </div>
-
           </div>
         </div>
       </div>
 
       <!-- Financial Details -->
+      {% if not member %}
       <div class="form-card">
         <div class="form-card-header">
           <div class="section-header">
-            <i class="bi bi-cash-stack section-icon"></i> Financial Details
+            <i data-lucide="banknote" class="section-icon-lucide"></i> Initial Financial Details
           </div>
         </div>
         <div class="form-card-body">
           <div class="row g-3">
-
-            <!-- Subscription -->
             <div class="col-md-6">
               <label class="form-label">Subscription (per year)</label>
               <div class="input-group">
@@ -133,8 +123,6 @@
                 {{ form.subscription }}
               </div>
             </div>
-
-            <!-- Term (Years) -->
             <div class="col-md-6">
               <label class="form-label">Term (Years)</label>
               <div class="input-group">
@@ -142,43 +130,98 @@
                 <span class="input-group-text currency-suffix">yr(s)</span>
               </div>
             </div>
-
-            <!-- Initial Paid-Up -->
             <div class="col-md-6">
               <label class="form-label">
-                Initial Paid-Up
-                <span class="paid-up-badge">+ CBU</span>
+                Initial Paid-Up <span class="paid-up-badge">+ CBU</span>
               </label>
               <div class="input-group">
                 <span class="input-group-text currency-prefix">₱</span>
                 {{ form.initial_paid_up }}
               </div>
               <div class="helper-text">
-                <i class="bi bi-info-circle"></i>
-                Each amount entered here is <strong>added</strong> to the CBU total.
+                <i data-lucide="info" style="width:12px;height:12px;"></i>
+                This amount will be <strong>added</strong> to the CBU total.
               </div>
             </div>
-
-            <!-- CBU — accumulates every initial_paid_up entry -->
+            <div class="col-md-6">
+              <label class="form-label">Savings</label>
+              <div class="input-group">
+                <span class="input-group-text currency-prefix">₱</span>
+                {{ form.savings }}
+              </div>
+            </div>
             <div class="col-md-6">
               <label class="form-label">
-                CBU
-                <span class="cbu-hint">(accumulated total)</span>
+                CBU <span class="cbu-hint">(accumulated total)</span>
               </label>
               <div class="input-group">
                 <span class="input-group-text currency-prefix">₱</span>
                 {{ form.con }}
               </div>
-              <!-- Live preview shown while admin is typing in Initial Paid-Up -->
               <div id="cbu-preview" class="cbu-preview-hint" style="display:none;">
-                <i class="bi bi-arrow-right-circle-fill"></i>
+                <i data-lucide="arrow-right-circle" style="width:13px;height:13px;"></i>
                 Will become: <strong id="cbu-preview-value">₱0.00</strong>
               </div>
             </div>
-
           </div>
         </div>
       </div>
+
+      {% else %}
+      <!-- EDIT mode — locked -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="section-header">
+            <i data-lucide="banknote" class="section-icon-lucide"></i> Financial Details
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="financial-locked-notice mb-3">
+            <i data-lucide="lock" style="width:15px;height:15px;flex-shrink:0;"></i>
+            Financial figures are managed through transactions and cannot be edited directly.
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="financial-box">
+                <div class="financial-label">Subscription</div>
+                <div class="financial-value">₱{{ member.subscription|floatformat:2 }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="financial-box">
+                <div class="financial-label">CBU</div>
+                <div class="financial-value">₱{{ member.con|floatformat:2 }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="financial-box">
+                <div class="financial-label">Savings</div>
+                <div class="financial-value">₱{{ member.savings|floatformat:2 }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="financial-box">
+                <div class="financial-label">Initial Paid-Up</div>
+                <div class="financial-value">₱{{ member.initial_paid_up|floatformat:2 }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="financial-box">
+                <div class="financial-label">Term</div>
+                <div class="financial-value">
+                  {{ member.term_years }} <span class="term-years">yr{{ member.term_years|pluralize }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="button" class="btn-teal" id="openTxnModal">
+              <i data-lucide="plus-circle" style="width:15px;height:15px;"></i> Add Transaction
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endif %}
 
     </div>
 
@@ -187,7 +230,7 @@
       <div class="form-card sticky-sidebar">
         <div class="form-card-header">
           <div class="section-header">
-            <i class="bi bi-gear section-icon"></i> Settings
+            <i data-lucide="settings" class="section-icon-lucide"></i> Settings
           </div>
         </div>
         <div class="form-card-body">
@@ -196,31 +239,50 @@
             {{ form.date_joined }}
           </div>
 
-          <div class="mb-4">
-            <div class="checkbox-wrapper">
-              {{ form.is_active }}
-              <label class="form-label mb-0">Active Member</label>
-            </div>
-            <div class="helper-text">
-              Uncheck to deactivate this member
-            </div>
-          </div>
+          <!-- Status Display (replaces checkbox) -->
+          {% if member %}
+<div class="mb-4">
+  <label class="form-label">Member Status</label>
+  <div class="status-display">
+    {% if not member.is_active %}
+      <div class="status-badge status-inactive-large">
+        <i data-lucide="user-x" style="width:16px;height:16px;"></i>
+        Deactivated
+      </div>
+      {% if member.deactivation_resolution %}
+      <div class="resolution-display">
+        <div class="resolution-label">Resolution:</div>
+        <div class="resolution-text">{{ member.deactivation_resolution }}</div>
+      </div>
+      {% endif %}
+      <button type="button" class="btn-outline btn-reactivate w-100 mt-3" id="reactivateBtn">
+        <i data-lucide="user-check" style="width:15px;height:15px;"></i> Reactivate Member
+      </button>
+    {% else %}
+      <div class="status-badge status-active-large">
+        <i data-lucide="user-check" style="width:16px;height:16px;"></i>
+        Active
+      </div>
+      <button type="button" class="btn-outline btn-deactivate w-100 mt-3" id="deactivateBtn">
+        <i data-lucide="user-x" style="width:15px;height:15px;"></i> Deactivate Member
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
 
           <hr class="form-divider"/>
-
           <button type="submit" class="btn-teal w-100 justify-content-center submit-btn">
-            <i class="bi bi-check-circle"></i> {{ btn_label }}
+            <i data-lucide="check-circle" style="width:15px;height:15px;"></i> {{ btn_label }}
           </button>
-
           <a href="{% url 'membership:member_list' %}" class="btn-outline w-100 justify-content-center cancel-btn">
             Cancel
           </a>
-
           {% if member %}
           <hr class="form-divider"/>
           <a href="{% url 'membership:member_delete' member.pk %}"
              class="btn-outline w-100 justify-content-center delete-btn">
-            <i class="bi bi-trash"></i> Delete Member
+            <i data-lucide="trash-2" style="width:15px;height:15px;"></i> Delete Member
           </a>
           {% endif %}
         </div>
@@ -228,10 +290,229 @@
     </div>
 
   </div>
+
+  <!-- Hidden fields for deactivation/reactivation -->
+  {% if member %}
+  <input type="hidden" name="is_active" id="is_active_field" value="{{ member.is_active|yesno:'true,false' }}">
+  <input type="hidden" name="deactivation_reason" id="deactivation_reason_field">
+  <input type="hidden" name="deactivation_resolution" id="deactivation_resolution_field">
+  {% endif %}
+
 </form>
+
+<!-- ── Deactivation Modal ─────────────────────────────────── -->
+{% if member %}
+<div class="deactivation-modal-overlay" id="deactivationModal">
+  <div class="deactivation-modal">
+    <div class="deactivation-modal-header">
+      <div class="deactivation-modal-icon">
+        <i data-lucide="alert-triangle" style="width:24px;height:24px;"></i>
+      </div>
+      <div>
+        <h3 class="deactivation-modal-title">Deactivate Member</h3>
+        <p class="deactivation-modal-subtitle">{{ member.name }} · {{ member.account_number }}</p>
+      </div>
+      <button class="deactivation-modal-close" id="closeDeactivationModal">
+        <i data-lucide="x" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+
+    <div class="deactivation-modal-body">
+      <div class="deactivation-warning">
+        <i data-lucide="info" style="width:16px;height:16px;"></i>
+        <span>This member will lose access to cooperative benefits and services.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="deactivation-label">Reason for Deactivation <span class="required-star">*</span></label>
+        <select id="deactivationReasonSelect" class="deactivation-select">
+          <option value="">Select a reason...</option>
+          <option value="non_payment">Non-payment of dues/subscription</option>
+          <option value="voluntary_withdrawal">Voluntary withdrawal</option>
+          <option value="expired_term">Membership term expired</option>
+          <option value="violation">Violation of cooperative policies</option>
+          <option value="death">Death of member</option>
+          <option value="inactivity">Prolonged inactivity</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="otherReasonGroup" style="display:none;">
+        <label class="deactivation-label">Please specify</label>
+        <input type="text" id="otherReasonInput" class="deactivation-input" placeholder="Enter specific reason...">
+      </div>
+
+      <div class="form-group">
+        <label class="deactivation-label">Resolution / Action Plan</label>
+        <textarea id="resolutionText" class="deactivation-textarea" rows="4"
+                  placeholder="Describe what needs to happen to reactivate this member (e.g., 'Pay outstanding balance of ₱5,000', 'Submit written request', 'Complete orientation', etc.)"></textarea>
+        <div class="resolution-hint">
+          <i data-lucide="lightbulb" style="width:12px;height:12px;"></i>
+          This resolution will be displayed to help guide future reactivation.
+        </div>
+      </div>
+    </div>
+
+    <div class="deactivation-modal-footer">
+      <button class="deactivation-cancel-btn" id="cancelDeactivation">Cancel</button>
+      <button class="deactivation-confirm-btn" id="confirmDeactivation">
+        <i data-lucide="user-x" style="width:15px;height:15px;"></i>
+        Confirm Deactivation
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Reactivation Modal ─────────────────────────────────── -->
+<div class="deactivation-modal-overlay" id="reactivationModal">
+  <div class="deactivation-modal">
+    <div class="deactivation-modal-header">
+      <div class="deactivation-modal-icon success-icon">
+        <i data-lucide="user-check" style="width:24px;height:24px;"></i>
+      </div>
+      <div>
+        <h3 class="deactivation-modal-title">Reactivate Member</h3>
+        <p class="deactivation-modal-subtitle">{{ member.name }} · {{ member.account_number }}</p>
+      </div>
+      <button class="deactivation-modal-close" id="closeReactivationModal">
+        <i data-lucide="x" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+
+    <div class="deactivation-modal-body">
+      {% if member.deactivation_resolution %}
+      <div class="reactivation-info">
+        <div class="info-header">
+          <i data-lucide="clipboard-list" style="width:16px;height:16px;"></i>
+          Previous Deactivation Resolution:
+        </div>
+        <div class="info-content">{{ member.deactivation_resolution }}</div>
+      </div>
+      {% endif %}
+
+      <div class="form-group">
+        <label class="deactivation-label">Reactivation Notes</label>
+        <textarea id="reactivationNotes" class="deactivation-textarea" rows="3"
+                  placeholder="Optional: Add notes about this reactivation..."></textarea>
+      </div>
+
+      <div class="reactivation-warning success">
+        <i data-lucide="check-circle" style="width:16px;height:16px;"></i>
+        <span>Member will regain full access to cooperative benefits after reactivation.</span>
+      </div>
+    </div>
+
+    <div class="deactivation-modal-footer">
+      <button class="deactivation-cancel-btn" id="cancelReactivation">Cancel</button>
+      <button class="reactivation-confirm-btn" id="confirmReactivation">
+        <i data-lucide="user-check" style="width:15px;height:15px;"></i>
+        Confirm Reactivation
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ── Transaction Modal (edit mode only) ─────────────────────────────────── -->
+{% if member %}
+<div class="txn-modal-overlay" id="txnModalOverlay">
+  <div class="txn-modal">
+    <!-- ... existing transaction modal content ... -->
+    <div class="txn-modal-header">
+      <div class="txn-modal-header-left">
+        <div class="txn-modal-icon">
+          <i data-lucide="arrow-left-right" style="width:18px;height:18px;"></i>
+        </div>
+        <div>
+          <p class="txn-modal-title">Add Transaction</p>
+          <p class="txn-modal-subtitle">{{ member.name }} · {{ member.account_number }}</p>
+        </div>
+      </div>
+      <button type="button" class="txn-modal-close" id="closeTxnModal">
+        <i data-lucide="x" style="width:16px;height:16px;"></i>
+      </button>
+    </div>
+
+    <div class="txn-balance-strip">
+      <div class="txn-balance-item">
+        <span class="txn-balance-label">Subscription</span>
+        <span class="txn-balance-value">₱{{ member.subscription|floatformat:2 }}</span>
+      </div>
+      <div class="txn-balance-item">
+        <span class="txn-balance-label">CBU</span>
+        <span class="txn-balance-value">₱{{ member.con|floatformat:2 }}</span>
+      </div>
+      <div class="txn-balance-item">
+        <span class="txn-balance-label">Initial Paid-Up</span>
+        <span class="txn-balance-value">₱{{ member.initial_paid_up|floatformat:2 }}</span>
+      </div>
+      <div class="txn-balance-item">
+        <span class="txn-balance-label">Savings</span>
+        <span class="txn-balance-value">₱{{ member.savings|floatformat:2 }}</span>
+      </div>
+    </div>
+
+    <form method="POST" action="{% url 'membership:add_transaction' member.pk %}" id="txnForm">
+      {% csrf_token %}
+      <div class="txn-modal-body">
+        <label class="txn-label">Transaction Type</label>
+        <div class="txn-type-grid" id="txnTypeGrid">
+          <div class="txn-type-card" data-value="cbu">
+            <span class="txn-type-card-icon">
+              <i data-lucide="landmark" style="width:20px;height:20px;"></i>
+            </span>
+            <span class="txn-type-card-label">CBU Deposit</span>
+          </div>
+          <div class="txn-type-card" data-value="savings">
+            <span class="txn-type-card-icon">
+              <i data-lucide="piggy-bank" style="width:20px;height:20px;"></i>
+            </span>
+            <span class="txn-type-card-label">Savings</span>
+          </div>
+          <div class="txn-type-card" data-value="initial_paid_up">
+            <span class="txn-type-card-icon">
+              <i data-lucide="clipboard-list" style="width:20px;height:20px;"></i>
+            </span>
+            <span class="txn-type-card-label">Initial Paid-Up</span>
+          </div>
+          <div class="txn-type-card" data-value="subscription">
+            <span class="txn-type-card-icon">
+              <i data-lucide="calendar-check" style="width:20px;height:20px;"></i>
+            </span>
+            <span class="txn-type-card-label">Subscription</span>
+          </div>
+        </div>
+        <select name="type" id="txn-type-select" required>
+          <option value="cbu">CBU Deposit</option>
+          <option value="savings">Savings Deposit</option>
+          <option value="initial_paid_up">Initial Paid-Up</option>
+          <option value="subscription">Subscription Payment</option>
+        </select>
+        <label class="txn-label">Amount</label>
+        <div class="txn-amount-wrapper">
+          <span class="txn-amount-prefix">₱</span>
+          <input type="number" name="amount" class="txn-amount-input" step="0.01" min="0.01" placeholder="0.00" required>
+        </div>
+        <label class="txn-label">Note <span style="font-weight:400;text-transform:none;font-size:0.75rem;">(optional)</span></label>
+        <textarea name="note" class="txn-note-input" rows="2" placeholder="e.g. Monthly CBU deposit for May 2026"></textarea>
+      </div>
+      <div class="txn-modal-footer">
+        <button type="submit" class="txn-submit-btn" id="txnSubmitBtn">
+          <div class="txn-spinner" id="txnSpinner"></div>
+          <i data-lucide="check-circle" id="txnSubmitIcon" style="width:15px;height:15px;"></i>
+          <span id="txnSubmitLabel">Save Transaction</span>
+        </button>
+        <button type="button" class="txn-cancel-btn" id="txnCancelBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
 
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'administrator/js/lucide.min.js' %}"></script>
+<script>lucide.createIcons();</script>
 <script src="{% static 'membership/js/member_form.js' %}"></script>
 {% endblock %}

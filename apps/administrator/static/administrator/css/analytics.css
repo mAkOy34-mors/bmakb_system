@@ -33,3 +33,11 @@
 
   .stat-card.c-slate  { border-top: 3px solid #64748b; }
   .stat-icon-wrap.c-slate  { background: #f1f5f9; color: #64748b; }
+
+/* Dashboard (no c- prefix) */
+.stat-card.indigo   { border-top: 3px solid #6366f1; }
+.stat-icon-wrap.indigo   { background: #eef2ff; color: #6366f1; }
+
+/* Analytics (c- prefix) */
+.stat-card.c-indigo { border-top: 3px solid #6366f1; }
+.stat-icon-wrap.c-indigo { background: #eef2ff; color: #6366f1; }

@@ -6,123 +6,375 @@
 {% block topbar_icon %}grid-1x2{% endblock %}
 {% block topbar_title %}Dashboard{% endblock %}
 
+{% block extra_css %}
+ <link rel="stylesheet" href="{% static 'administrator/css/dashboard.css'%}">
+{% endblock %}
+
 {% block content %}
 
-<!-- ── Stat Cards ─────────────────────────────────────────── -->
-<div class="row g-3 mb-4">
+<!-- ── Row 1: Member Count Cards ──────────────────────────── -->
+<div class="row g-3 mb-3">
 
   <div class="col-md-3">
-    <div class="stat-card blue">
+    <div class="stat-card blue clickable"
+         data-modal="members-modal"
+         data-filter="total"
+         data-color="blue"
+         data-icon="users"
+         data-label="Total Members">
       <div class="stat-icon-wrap blue">
         <i data-lucide="users" class="lucide-icon"></i>
       </div>
       <div class="stat-label">TOTAL MEMBERS</div>
       <div class="stat-value">{{ total_members }}</div>
       <div class="stat-sub">All registered members</div>
+      <div class="stat-card-tap-hint">
+        <i data-lucide="mouse-pointer-click" style="width:11px;height:11px;"></i> Click to view list
+      </div>
     </div>
   </div>
 
   <div class="col-md-3">
-    <div class="stat-card green">
+    <div class="stat-card green clickable"
+         data-modal="members-modal"
+         data-filter="active"
+         data-color="green"
+         data-icon="user-check"
+         data-label="Active Members">
       <div class="stat-icon-wrap green">
         <i data-lucide="user-check" class="lucide-icon"></i>
       </div>
       <div class="stat-label">ACTIVE MEMBERS</div>
       <div class="stat-value">{{ active_members }}</div>
       <div class="stat-sub">Currently active</div>
+      <div class="stat-card-tap-hint">
+        <i data-lucide="mouse-pointer-click" style="width:11px;height:11px;"></i> Click to view list
+      </div>
     </div>
   </div>
 
   <div class="col-md-3">
-    <div class="stat-card amber">
+    <div class="stat-card amber clickable"
+         data-modal="members-modal"
+         data-filter="regular"
+         data-color="amber"
+         data-icon="user-round"
+         data-label="Regular Members">
       <div class="stat-icon-wrap amber">
         <i data-lucide="user-round" class="lucide-icon"></i>
       </div>
       <div class="stat-label">REGULAR MEMBERS</div>
       <div class="stat-value">{{ regular_members }}</div>
       <div class="stat-sub">Regular membership</div>
+      <div class="stat-card-tap-hint">
+        <i data-lucide="mouse-pointer-click" style="width:11px;height:11px;"></i> Click to view list
+      </div>
     </div>
   </div>
 
   <div class="col-md-3">
-    <div class="stat-card purple">
+    <div class="stat-card purple clickable"
+         data-modal="members-modal"
+         data-filter="associate"
+         data-color="purple"
+         data-icon="star"
+         data-label="Associate Members">
       <div class="stat-icon-wrap purple">
         <i data-lucide="star" class="lucide-icon"></i>
       </div>
       <div class="stat-label">ASSOCIATE MEMBERS</div>
       <div class="stat-value">{{ associate_members }}</div>
       <div class="stat-sub">Associate membership</div>
+      <div class="stat-card-tap-hint">
+        <i data-lucide="mouse-pointer-click" style="width:11px;height:11px;"></i> Click to view list
+      </div>
+    </div>
+  </div>
+
+  <!-- Inactive Members Card -->
+  <div class="col-md-3">
+    <div class="stat-card red clickable"
+         data-modal="members-modal"
+         data-filter="inactive"
+         data-color="red"
+         data-icon="user-x"
+         data-label="Inactive Members">
+      <div class="stat-icon-wrap red">
+        <i data-lucide="user-x" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">INACTIVE MEMBERS</div>
+      <div class="stat-value">{{ inactive_members }}</div>
+      <div class="stat-sub">Currently inactive</div>
+      <div class="stat-card-tap-hint">
+        <i data-lucide="mouse-pointer-click" style="width:11px;height:11px;"></i> Click to view list
+      </div>
     </div>
   </div>
 
 </div>
 
-<!-- ── Recent Members ──────────────────────────────────────── -->
-<div class="data-card">
-  <div class="data-card-header">
-    <div class="data-card-title">
-      <i data-lucide="clock" style="width:16px;height:16px;color:var(--teal)"></i>
-      Recently Added Members
+<!-- ── Row 2: Financial Cards ─────────────────────────────── -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-3">
+    <div class="stat-card indigo">
+      <div class="stat-icon-wrap indigo">
+        <i data-lucide="piggy-bank" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TOTAL CBU</div>
+      <div class="stat-value">₱{{ total_cbu|floatformat:2 }}</div>
+      <div class="stat-sub">Capital Build-Up accumulated</div>
     </div>
-    <a href="{% url 'membership:member_list' %}" class="btn-outline">
-      View all <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
-    </a>
   </div>
-  <div class="table-responsive">
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Account No.</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Date Joined</th>
-          <th>Status</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for member in recent_members %}
-        <tr>
-          <td><span class="acct-badge">{{ member.account_number }}</span></td>
-          <td><strong>{{ member.name }}</strong></td>
-          <td>
-            {% if member.type_of_membership == 'regular' %}
-              <span class="badge-regular">Regular</span>
-            {% else %}
-              <span class="badge-associate">Associate</span>
-            {% endif %}
-          </td>
-          <td>{{ member.date_joined|date:"M d, Y" }}</td>
-          <td>
-            {% if member.is_active %}
-              <span class="badge-active">Active</span>
-            {% else %}
-              <span class="badge-inactive">Inactive</span>
-            {% endif %}
-          </td>
-          <td>
-            <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;">
-              View
-            </a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="6" class="text-center py-4" style="color:var(--muted);font-size:13px;">
-            No members yet. <a href="{% url 'membership:member_add' %}" style="color:var(--teal)">Add the first one →</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+  <div class="col-md-3">
+    <div class="stat-card teal">
+      <div class="stat-icon-wrap teal">
+        <i data-lucide="wallet" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TOTAL SAVINGS</div>
+      <div class="stat-value">₱{{ total_savings|floatformat:2 }}</div>
+      <div class="stat-sub">Member savings total</div>
+    </div>
   </div>
+
+  <div class="col-md-3">
+    <div class="stat-card rose">
+      <div class="stat-icon-wrap rose">
+        <i data-lucide="calendar-check" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TOTAL SUBSCRIPTION</div>
+      <div class="stat-value">₱{{ total_subscription|floatformat:2 }}</div>
+      <div class="stat-sub">All subscription fees</div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="stat-card sky">
+      <div class="stat-icon-wrap sky">
+        <i data-lucide="clipboard-list" class="lucide-icon"></i>
+      </div>
+      <div class="stat-label">TOTAL INITIAL PAID-UP</div>
+      <div class="stat-value">₱{{ total_initial_paid_up|floatformat:2 }}</div>
+      <div class="stat-sub">Initial paid-up total</div>
+    </div>
+  </div>
+
 </div>
+
+<!-- ── Row 3: Recent Members + Quick Actions ──────────────── -->
+<div class="row g-3">
+
+  <!-- Recent Members -->
+  <div class="col-lg-8">
+    <div class="data-card">
+      <div class="data-card-header">
+        <div class="data-card-title">
+          <i data-lucide="clock" style="width:16px;height:16px;color:var(--teal)"></i>
+          Recently Added Members
+        </div>
+        <a href="{% url 'membership:member_list' %}" class="btn-outline">
+          View all <i data-lucide="arrow-right" style="width:14px;height:14px;"></i>
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Account No.</th>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Date Joined</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for member in recent_members %}
+            <tr>
+              <td><span class="acct-badge">{{ member.account_number }}</span></td>
+              <td><strong>{{ member.name }}</strong></td>
+              <td>
+                {% if member.type_of_membership == 'regular' %}
+                  <span class="badge-regular">Regular</span>
+                {% else %}
+                  <span class="badge-associate">Associate</span>
+                {% endif %}
+              </td>
+              <td>{{ member.date_joined|date:"M d, Y" }}</td>
+              <td>
+                {% if member.is_active %}
+                  <span class="badge-active">Active</span>
+                {% else %}
+                  <span class="badge-inactive">Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'membership:member_detail' member.pk %}" class="btn-outline" style="padding:5px 10px;font-size:12px;">
+                  View
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-4" style="color:var(--muted);font-size:13px;">
+                No members yet. <a href="{% url 'membership:member_add' %}" style="color:var(--teal)">Add the first one →</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="col-lg-4">
+    <div class="data-card h-100">
+      <div class="data-card-header">
+        <div class="data-card-title">
+          <i data-lucide="zap" style="width:16px;height:16px;color:var(--teal)"></i>
+          Quick Actions
+        </div>
+      </div>
+      <div class="quick-actions-list">
+
+        <a href="{% url 'membership:member_add' %}" class="quick-action-item">
+          <div class="quick-action-icon qa-teal">
+            <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="quick-action-text">
+            <div class="quick-action-title">Add New Member</div>
+            <div class="quick-action-sub">Register a new member</div>
+          </div>
+          <i data-lucide="chevron-right" class="quick-action-arrow"></i>
+        </a>
+
+        <a href="{% url 'membership:member_list' %}" class="quick-action-item">
+          <div class="quick-action-icon qa-blue">
+            <i data-lucide="users" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="quick-action-text">
+            <div class="quick-action-title">View All Members</div>
+            <div class="quick-action-sub">Browse member directory</div>
+          </div>
+          <i data-lucide="chevron-right" class="quick-action-arrow"></i>
+        </a>
+
+        <a href="{% url 'administrator:analytics' %}" class="quick-action-item">
+          <div class="quick-action-icon qa-violet">
+            <i data-lucide="bar-chart-2" style="width:18px;height:18px;"></i>
+          </div>
+          <div class="quick-action-text">
+            <div class="quick-action-title">View Analytics</div>
+            <div class="quick-action-sub">Charts and statistics</div>
+          </div>
+          <i data-lucide="chevron-right" class="quick-action-arrow"></i>
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     MEMBERS MODAL
+     ══════════════════════════════════════════════════════════════ -->
+<div class="members-modal-backdrop" id="members-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="members-modal">
+
+    <!-- Header -->
+    <div class="members-modal-header">
+      <div class="members-modal-header-left">
+        <div class="members-modal-icon" id="modal-icon">
+          <i data-lucide="users" style="width:20px;height:20px;"></i>
+        </div>
+        <div>
+          <div class="members-modal-title" id="modal-title">Members</div>
+          <div class="members-modal-subtitle" id="modal-subtitle">Loading…</div>
+        </div>
+      </div>
+      <button class="members-modal-close" id="modal-close-btn" aria-label="Close">
+        <i data-lucide="x" style="width:18px;height:18px;"></i>
+      </button>
+    </div>
+
+    <div class="members-modal-divider"></div>
+
+    <!-- Summary banner -->
+    <div class="members-modal-summary" id="modal-summary">
+      <i data-lucide="info" style="width:14px;height:14px;flex-shrink:0;"></i>
+      <span id="modal-summary-text"></span>
+    </div>
+
+    <!-- Search -->
+    <div class="members-modal-search-wrap">
+      <div class="members-modal-search">
+        <span class="search-icon">
+          <i data-lucide="search" style="width:14px;height:14px;"></i>
+        </span>
+        <input type="text" id="modal-search-input" placeholder="Search by name or account number…" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Body / Table -->
+    <div class="members-modal-body">
+      <table class="members-modal-table" id="modal-table">
+        <thead>
+          <tr>
+            <th>Account No.</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Date Joined</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="modal-table-body">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+      <div class="modal-empty-state" id="modal-empty" style="display:none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <div>No members match your search.</div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="members-modal-footer">
+      <span class="modal-count-text" id="modal-count-text"></span>
+      <div class="modal-footer-actions">
+        <button class="modal-btn-secondary" id="modal-close-btn-2">Close</button>
+        <a href="{% url 'membership:member_list' %}" class="modal-btn-primary" id="modal-view-all-link">
+          <i data-lucide="external-link" style="width:13px;height:13px;"></i>
+          View All Members
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /.members-modal -->
+</div><!-- /.members-modal-backdrop -->
+
+
+<!-- ── Data passed to JS ───────────────────────────────────── -->
+{{ members_json|json_script:"members-data" }}
+
+<script>
+  window.DASHBOARD_URLS = {
+    memberList: "{% url 'membership:member_list' %}"
+  };
+</script>
 
 {% endblock %}
 
+
 {% block extra_js %}
 <script src="{% static 'administrator/js/lucide.min.js' %}"></script>
-<script>
-  lucide.createIcons();
-</script>
+<script>lucide.createIcons();</script>
+<script src="{% static 'administrator/js/dashboard.js' %}"></script>
 {% endblock %}
