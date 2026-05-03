@@ -68,7 +68,7 @@ function updateCBUPreview() {
 
 paidUpInput?.addEventListener("input",  updateCBUPreview);
 paidUpInput?.addEventListener("change", updateCBUPreview);
-conInput?.addEventListener("input",  updateCBUPreview);   
+conInput?.addEventListener("input",  updateCBUPreview);
 conInput?.addEventListener("change", updateCBUPreview);
 
   /* ─────────────────────────────────────────────

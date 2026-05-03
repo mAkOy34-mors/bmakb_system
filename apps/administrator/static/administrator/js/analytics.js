@@ -17,24 +17,51 @@ document.addEventListener('DOMContentLoaded', function () {
   const typeLabels    = JSON.parse(typeCanvas.dataset.labels     || '["Regular","Associate"]');
   const typeValues    = JSON.parse(typeCanvas.dataset.values     || '[0,0]');
 
-  // ── Shared Theme ─────────────────────────────────────────
-  const fontFamily = "'DM Sans', sans-serif";
-  const mutedColor = '#9ca3af';
-  const gridColor  = 'rgba(0,0,0,0.04)';
+  // ── Academic / Textbook Theme ─────────────────────────────
+  const fontFamily  = "'Georgia', 'Times New Roman', serif";
+  const gridColor   = 'rgba(0,0,0,0.12)';
+  const axisColor   = 'rgba(0,0,0,0.5)';
+  const tickColor   = '#333';
+  const labelStyle  = { colors: tickColor, fontSize: '11px', fontFamily };
 
+  // Shared axis config — dashed grid lines, serif tick labels
+  const sharedXaxis = {
+    labels: { style: labelStyle },
+    axisBorder: { show: true, color: axisColor },
+    axisTicks:  { show: true,  color: axisColor },
+  };
+  const sharedYaxis = {
+    labels: { style: labelStyle },
+  };
+  const sharedGrid = {
+    borderColor: gridColor,
+    strokeDashArray: 5,
+    xaxis: { lines: { show: false } },
+    yaxis: { lines: { show: true  } },
+  };
   const tooltipStyle = {
-    theme: 'dark',
+    theme: 'light',
     style: { fontSize: '12px', fontFamily },
   };
 
-  // ── 1. Line Chart — Monthly Membership Trend ─────────────
+  // Palette — flat, distinct academic colors
+  const COLORS = {
+    amber:   '#e5950a',
+    green:   '#1d6a5b',
+    blue:    '#2563eb',
+    purple:  '#7c3aed',
+    red:     '#dc2626',
+    teal:    '#0d9488',
+    pink:    '#db2777',
+    indigo:  '#4f46e5',
+    sky:     '#0284c7',
+  };
+
+  // ── 1. Area Chart — Monthly Membership Trend ─────────────
   const memberOptions = {
-    series: [{
-      name: 'New Members',
-      data: monthlyData,
-    }],
+    series: [{ name: 'New Members', data: monthlyData }],
     chart: {
-      type: 'line',
+      type: 'area',
       height: 220,
       fontFamily,
       toolbar: { show: false },
@@ -42,51 +69,57 @@ document.addEventListener('DOMContentLoaded', function () {
       animations: { enabled: true, easing: 'easeinout', speed: 600 },
     },
     stroke: { curve: 'smooth', width: 3 },
-    colors: ['#f59e0b'],
+    colors: [COLORS.pink],
     fill: {
       type: 'gradient',
       gradient: {
         shade: 'light',
         type: 'vertical',
-        shadeIntensity: 0.3,
-        gradientToColors: ['#fef3c7'],
-        opacityFrom: 0.5,
-        opacityTo: 0.05,
+        shadeIntensity: 0.2,
+        gradientToColors: [COLORS.pink],
+        opacityFrom: 0.3,
+        opacityTo: 0.02,
       },
     },
     markers: {
       size: 5,
-      colors: ['#f59e0b'],
-      strokeColors: '#fff',
+      colors: ['#fff'],
+      strokeColors: COLORS.pink,
       strokeWidth: 2,
+      shape: 'circle',
       hover: { size: 7 },
     },
     xaxis: {
       categories: monthlyLabels,
-      labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-      axisBorder: { show: false },
-      axisTicks:  { show: false },
+      ...sharedXaxis,
+      title: {
+        text: 'Month',
+        style: { color: tickColor, fontSize: '11px', fontFamily },
+      },
     },
     yaxis: {
+      ...sharedYaxis,
+      title: {
+        text: 'Frequency',
+        style: { color: tickColor, fontSize: '11px', fontFamily },
+      },
       labels: {
-        style: { colors: mutedColor, fontSize: '11px', fontFamily },
+        style: labelStyle,
         formatter: val => Math.round(val),
       },
     },
-    grid: {
-      borderColor: gridColor,
-      strokeDashArray: 4,
-      xaxis: { lines: { show: false } },
-    },
+    grid: sharedGrid,
     tooltip: {
       ...tooltipStyle,
       y: { formatter: val => val + ' members' },
     },
     legend: {
       show: true,
-      position: 'bottom',
-      labels: { colors: '#f59e0b' },
-      markers: { fillColors: ['#f59e0b'] },
+      position: 'top',
+      horizontalAlign: 'left',
+      fontFamily,
+      fontSize: '12px',
+      labels: { colors: tickColor },
     },
     dataLabels: { enabled: false },
   };
@@ -105,44 +138,36 @@ document.addEventListener('DOMContentLoaded', function () {
       height: 220,
       fontFamily,
       toolbar: { show: false },
-      animations: { enabled: true, easing: 'easeinout', speed: 600 },
+      animations: { enabled: false },
     },
-    colors: ['#1d6a5b'],
+    colors: [COLORS.blue],
     plotOptions: {
       bar: {
-        borderRadius: 6,
-        columnWidth: '50%',
-        dataLabels: { position: 'top' },
+        borderRadius: 0,
+        columnWidth: '60%',
       },
     },
-    fill: {
-      type: 'gradient',
-      gradient: {
-        shade: 'light',
-        type: 'vertical',
-        shadeIntensity: 0.2,
-        gradientToColors: ['#10b981'],
-        opacityFrom: 0.9,
-        opacityTo: 0.7,
-      },
-    },
+    fill: { type: 'solid', opacity: 1 },
     xaxis: {
       categories: revenueLabels,
-      labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-      axisBorder: { show: false },
-      axisTicks:  { show: false },
+      ...sharedXaxis,
+      title: {
+        text: 'Month',
+        style: { color: tickColor, fontSize: '11px', fontFamily },
+      },
     },
     yaxis: {
+      ...sharedYaxis,
+      title: {
+        text: 'Revenue (₱)',
+        style: { color: tickColor, fontSize: '11px', fontFamily },
+      },
       labels: {
-        style: { colors: mutedColor, fontSize: '11px', fontFamily },
+        style: labelStyle,
         formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
       },
     },
-    grid: {
-      borderColor: gridColor,
-      strokeDashArray: 4,
-      xaxis: { lines: { show: false } },
-    },
+    grid: sharedGrid,
     tooltip: {
       ...tooltipStyle,
       y: { formatter: val => '₱' + val.toLocaleString() },
@@ -156,64 +181,33 @@ document.addEventListener('DOMContentLoaded', function () {
   );
   revenueChart.render();
 
-  // ── 3. Donut Chart — Membership Types ────────────────────
+  // ── 3. Pie Chart — Membership Types ──────────────────────
+  // Changed from donut to pie to match the reference image
   const typeOptions = {
     series: typeValues,
     chart: {
-      type: 'donut',
+      type: 'pie',
       height: 260,
       fontFamily,
-      animations: { enabled: true, easing: 'easeinout', speed: 600 },
+      animations: { enabled: false },
     },
     labels: typeLabels,
-    colors: ['#1d6a5b', '#3b82f6', '#f59e0b', '#8b5cf6'],
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '65%',
-          labels: {
-            show: true,
-            name: {
-              show: true,
-              fontSize: '13px',
-              fontFamily,
-              color: '#1a1a2e',
-            },
-            value: {
-              show: true,
-              fontSize: '24px',
-              fontFamily: "'DM Serif Display', serif",
-              color: '#1a1a2e',
-              formatter: val => val,
-            },
-            total: {
-              show: true,
-              label: 'Total',
-              fontSize: '12px',
-              fontFamily,
-              color: mutedColor,
-              formatter: w =>
-                w.globals.seriesTotals.reduce((a, b) => a + b, 0),
-            },
-          },
-        },
-      },
-    },
+    colors: [COLORS.green, COLORS.blue, COLORS.amber, COLORS.purple],
     legend: {
       position: 'bottom',
       fontSize: '12px',
       fontFamily,
-      labels: { colors: '#6b7280' },
-      markers: { width: 10, height: 10, radius: 3 },
+      labels: { colors: tickColor },
+      markers: { width: 12, height: 12, radius: 2 },
       itemMargin: { horizontal: 10, vertical: 4 },
     },
     dataLabels: {
       enabled: true,
       formatter: val => val.toFixed(1) + '%',
-      style: { fontSize: '11px', fontFamily, fontWeight: '600' },
+      style: { fontSize: '11px', fontFamily, fontWeight: '600', colors: ['#fff'] },
       dropShadow: { enabled: false },
     },
-    stroke: { width: 0 },
+    stroke: { width: 2, colors: ['#fff'] },
     tooltip: {
       ...tooltipStyle,
       y: { formatter: val => val + ' members' },
@@ -226,76 +220,42 @@ document.addEventListener('DOMContentLoaded', function () {
   );
   typeChart.render();
 
-  // ── 4. Donut Chart — Gender Breakdown ────────────────────
+  // ── 4. Pie Chart — Gender Breakdown ──────────────────────
   const genderEl = document.getElementById('genderChart');
   if (genderEl) {
     const genderLabels = JSON.parse(genderEl.dataset.labels || '["Male","Female","Other"]');
     const genderValues = JSON.parse(genderEl.dataset.values || '[0,0,0]');
 
-    const genderOptions = {
+    new ApexCharts(genderEl, {
       series: genderValues,
       chart: {
-        type: 'donut',
+        type: 'pie',
         height: 260,
         fontFamily,
-        animations: { enabled: true, easing: 'easeinout', speed: 600 },
+        animations: { enabled: false },
       },
       labels: genderLabels,
-      colors: ['#378ADD', '#D4537E', '#888780'],
-      plotOptions: {
-        pie: {
-          donut: {
-            size: '65%',
-            labels: {
-              show: true,
-              name: {
-                show: true,
-                fontSize: '13px',
-                fontFamily,
-                color: mutedColor,
-              },
-              value: {
-                show: true,
-                fontSize: '22px',
-                fontFamily: "'DM Serif Display', serif",
-                color: '#1a1a2e',
-                formatter: val => val,
-              },
-              total: {
-                show: true,
-                label: 'Total',
-                fontSize: '12px',
-                fontFamily,
-                color: mutedColor,
-                formatter: w =>
-                  w.globals.seriesTotals.reduce((a, b) => a + b, 0),
-              },
-            },
-          },
-        },
-      },
+      colors: ['#2563eb', '#db2777', '#888780'],
       legend: {
         position: 'bottom',
         fontSize: '12px',
         fontFamily,
-        labels: { colors: '#6b7280' },
-        markers: { width: 10, height: 10, radius: 3 },
+        labels: { colors: tickColor },
+        markers: { width: 12, height: 12, radius: 2 },
         itemMargin: { horizontal: 10, vertical: 4 },
       },
       dataLabels: {
         enabled: true,
         formatter: val => val.toFixed(1) + '%',
-        style: { fontSize: '11px', fontFamily, fontWeight: '600' },
+        style: { fontSize: '11px', fontFamily, fontWeight: '600', colors: ['#fff'] },
         dropShadow: { enabled: false },
       },
-      stroke: { width: 0 },
+      stroke: { width: 2, colors: ['#fff'] },
       tooltip: {
         ...tooltipStyle,
         y: { formatter: val => val + ' members' },
       },
-    };
-
-    new ApexCharts(genderEl, genderOptions).render();
+    }).render();
   }
 
   // ── 5. Horizontal Stacked Bar — Members by Barangay ──────
@@ -313,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const bOther = bTotal.map((t, i) => Math.max(0, t - (bMale[i] || 0) - (bFemale[i] || 0)));
       const chartHeight = Math.max(300, bLabels.length * 38 + 80);
 
-      const barangayOptions = {
+      new ApexCharts(barangayEl, {
         series: [
           { name: 'Male',   data: bMale   },
           { name: 'Female', data: bFemale },
@@ -325,32 +285,33 @@ document.addEventListener('DOMContentLoaded', function () {
           fontFamily,
           stacked: true,
           toolbar: { show: false },
-          animations: { enabled: true, easing: 'easeinout', speed: 700 },
+          animations: { enabled: false },
         },
         plotOptions: {
           bar: {
             horizontal: true,
             barHeight: '68%',
-            borderRadius: 4,
-            borderRadiusApplication: 'end',
-            borderRadiusWhenStacked: 'last',
+            borderRadius: 0,
           },
         },
-        colors: ['#378ADD', '#D4537E', '#888780'],
+        colors: ['#2563eb', '#db2777', '#888780'],
+        fill: { type: 'solid', opacity: 1 },
         xaxis: {
           categories: bLabels,
           labels: {
-            style: { colors: mutedColor, fontSize: '11px', fontFamily },
+            style: labelStyle,
             formatter: val => Math.round(val),
           },
           title: {
             text: 'Number of Members',
-            style: { color: mutedColor, fontSize: '11px', fontFamily },
+            style: { color: tickColor, fontSize: '11px', fontFamily },
           },
+          axisBorder: { show: true, color: axisColor },
+          axisTicks:  { show: true, color: axisColor },
         },
         yaxis: {
           labels: {
-            style: { colors: '#374151', fontSize: '12px', fontFamily },
+            style: { colors: tickColor, fontSize: '12px', fontFamily },
             maxWidth: 180,
           },
         },
@@ -359,12 +320,12 @@ document.addEventListener('DOMContentLoaded', function () {
           horizontalAlign: 'left',
           fontSize: '12px',
           fontFamily,
-          labels: { colors: '#6b7280' },
-          markers: { width: 10, height: 10, radius: 3 },
+          labels: { colors: tickColor },
+          markers: { width: 12, height: 12, radius: 2 },
         },
         dataLabels: {
           enabled: true,
-          formatter: (val) => (val > 0 ? val : ''),
+          formatter: val => (val > 0 ? val : ''),
           style: { fontSize: '11px', fontFamily, fontWeight: '600', colors: ['#fff'] },
           dropShadow: { enabled: false },
         },
@@ -375,14 +336,11 @@ document.addEventListener('DOMContentLoaded', function () {
           y: { formatter: val => val + ' members' },
         },
         grid: {
-          borderColor: gridColor,
-          strokeDashArray: 4,
-          xaxis: { lines: { show: true  } },
+          ...sharedGrid,
+          xaxis: { lines: { show: true } },
           yaxis: { lines: { show: false } },
         },
-      };
-
-      new ApexCharts(barangayEl, barangayOptions).render();
+      }).render();
     }
   }
 
@@ -391,21 +349,18 @@ document.addEventListener('DOMContentLoaded', function () {
   if (cbuEl) {
     const cbuLabels = JSON.parse(cbuEl.dataset.labels || '[]');
     const cbuValues = JSON.parse(cbuEl.dataset.values || '[]');
-
-    // Show empty state if no labels OR every value is 0
     const hasData = cbuLabels.length > 0 && cbuValues.some(v => v > 0);
 
     if (!hasData) {
       cbuEl.innerHTML =
         '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No CBU data yet.</p>';
     } else {
-      // Running cumulative total — shows fund growth over time
       const cbuCumulative = cbuValues.reduce((acc, val, i) => {
         acc.push(+((acc[i - 1] || 0) + val).toFixed(2));
         return acc;
       }, []);
 
-      const cbuOptions = {
+      new ApexCharts(cbuEl, {
         series: [
           { name: 'Monthly CBU',    data: cbuValues     },
           { name: 'Cumulative CBU', data: cbuCumulative },
@@ -418,42 +373,39 @@ document.addEventListener('DOMContentLoaded', function () {
           zoom: { enabled: false },
           animations: { enabled: true, easing: 'easeinout', speed: 600 },
         },
-        stroke: { curve: 'smooth', width: [2, 3] },
-        colors: ['#a78bfa', '#6366f1'],
+        stroke: { curve: 'smooth', width: [2, 3], dashArray: [0, 6] },
+        colors: [COLORS.purple, COLORS.indigo],
         fill: {
           type: 'gradient',
           gradient: {
             shade: 'light',
             type: 'vertical',
-            shadeIntensity: 0.3,
-            gradientToColors: ['#ede9fe', '#c7d2fe'],
-            opacityFrom: 0.45,
-            opacityTo: 0.03,
+            shadeIntensity: 0.2,
+            opacityFrom: 0.25,
+            opacityTo: 0.02,
           },
         },
         markers: {
           size: 4,
-          strokeColors: '#fff',
+          colors: ['#fff'],
+          strokeColors: [COLORS.purple, COLORS.indigo],
           strokeWidth: 2,
           hover: { size: 6 },
         },
         xaxis: {
           categories: cbuLabels,
-          labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-          axisBorder: { show: false },
-          axisTicks:  { show: false },
+          ...sharedXaxis,
+          title: { text: 'Month', style: { color: tickColor, fontSize: '11px', fontFamily } },
         },
         yaxis: {
+          ...sharedYaxis,
+          title: { text: 'CBU (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
           labels: {
-            style: { colors: mutedColor, fontSize: '11px', fontFamily },
+            style: labelStyle,
             formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
           },
         },
-        grid: {
-          borderColor: gridColor,
-          strokeDashArray: 4,
-          xaxis: { lines: { show: false } },
-        },
+        grid: sharedGrid,
         tooltip: {
           shared: true,
           intersect: false,
@@ -461,19 +413,18 @@ document.addEventListener('DOMContentLoaded', function () {
           y: { formatter: val => '₱' + val.toLocaleString() },
         },
         legend: {
-          position: 'bottom',
+          position: 'top',
+          horizontalAlign: 'left',
           fontSize: '12px',
           fontFamily,
-          labels: { colors: '#6b7280' },
-          markers: { width: 10, height: 10, radius: 3 },
-          itemMargin: { horizontal: 10, vertical: 4 },
+          labels: { colors: tickColor },
+          markers: { width: 12, height: 12, radius: 2 },
         },
         dataLabels: { enabled: false },
-      };
-
-      new ApexCharts(cbuEl, cbuOptions).render();
+      }).render();
     }
   }
+
   // ── 7. Bar Chart — Subscription Trend ────────────────────
   const subscriptionEl = document.getElementById('subscriptionChart');
   if (subscriptionEl) {
@@ -487,33 +438,29 @@ document.addEventListener('DOMContentLoaded', function () {
       new ApexCharts(subscriptionEl, {
         series: [{ name: 'Subscription', data: subValues }],
         chart: {
-          type: 'bar', height: 220, fontFamily,
+          type: 'bar',
+          height: 220,
+          fontFamily,
           toolbar: { show: false },
-          animations: { enabled: true, easing: 'easeinout', speed: 600 },
+          animations: { enabled: false },
         },
-        colors: ['#f43f5e'],
-        plotOptions: {
-          bar: { borderRadius: 6, columnWidth: '50%' },
-        },
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shade: 'light', type: 'vertical', shadeIntensity: 0.2,
-            gradientToColors: ['#fda4af'], opacityFrom: 0.9, opacityTo: 0.7,
-          },
-        },
+        colors: [COLORS.red],
+        plotOptions: { bar: { borderRadius: 0, columnWidth: '60%' } },
+        fill: { type: 'solid', opacity: 1 },
         xaxis: {
           categories: subLabels,
-          labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-          axisBorder: { show: false }, axisTicks: { show: false },
+          ...sharedXaxis,
+          title: { text: 'Month', style: { color: tickColor, fontSize: '11px', fontFamily } },
         },
         yaxis: {
+          ...sharedYaxis,
+          title: { text: 'Amount (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
           labels: {
-            style: { colors: mutedColor, fontSize: '11px', fontFamily },
+            style: labelStyle,
             formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
           },
         },
-        grid: { borderColor: gridColor, strokeDashArray: 4, xaxis: { lines: { show: false } } },
+        grid: sharedGrid,
         tooltip: { ...tooltipStyle, y: { formatter: val => '₱' + val.toLocaleString() } },
         dataLabels: { enabled: false },
       }).render();
@@ -533,45 +480,40 @@ document.addEventListener('DOMContentLoaded', function () {
       new ApexCharts(initialPaidUpEl, {
         series: [{ name: 'Initial Paid-Up', data: ipValues }],
         chart: {
-          type: 'bar', height: 220, fontFamily,
+          type: 'bar',
+          height: 220,
+          fontFamily,
           toolbar: { show: false },
-          animations: { enabled: true, easing: 'easeinout', speed: 600 },
+          animations: { enabled: false },
         },
-        colors: ['#0ea5e9'],
-        plotOptions: {
-          bar: { borderRadius: 6, columnWidth: '50%' },
-        },
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shade: 'light', type: 'vertical', shadeIntensity: 0.2,
-            gradientToColors: ['#7dd3fc'], opacityFrom: 0.9, opacityTo: 0.7,
-          },
-        },
+        colors: [COLORS.sky],
+        plotOptions: { bar: { borderRadius: 0, columnWidth: '60%' } },
+        fill: { type: 'solid', opacity: 1 },
         xaxis: {
           categories: ipLabels,
-          labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-          axisBorder: { show: false }, axisTicks: { show: false },
+          ...sharedXaxis,
+          title: { text: 'Month', style: { color: tickColor, fontSize: '11px', fontFamily } },
         },
         yaxis: {
+          ...sharedYaxis,
+          title: { text: 'Amount (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
           labels: {
-            style: { colors: mutedColor, fontSize: '11px', fontFamily },
+            style: labelStyle,
             formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
           },
         },
-        grid: { borderColor: gridColor, strokeDashArray: 4, xaxis: { lines: { show: false } } },
+        grid: sharedGrid,
         tooltip: { ...tooltipStyle, y: { formatter: val => '₱' + val.toLocaleString() } },
         dataLabels: { enabled: false },
       }).render();
     }
   }
 
-  // ── 9. Area Chart — Savings Trend ────────────────────────
+  // ── 9. Line Chart — Savings Trend ────────────────────────
   const savingsEl = document.getElementById('savingsChart');
   if (savingsEl) {
     const savLabels = JSON.parse(savingsEl.dataset.labels || '[]');
     const savValues = JSON.parse(savingsEl.dataset.values || '[]');
-
     const savHasData = savLabels.length > 0 && savValues.some(v => v > 0);
 
     if (!savHasData) {
@@ -589,141 +531,146 @@ document.addEventListener('DOMContentLoaded', function () {
           { name: 'Cumulative Savings', data: savCumulative },
         ],
         chart: {
-          type: 'area', height: 240, fontFamily,
-          toolbar: { show: false }, zoom: { enabled: false },
+          type: 'area',
+          height: 240,
+          fontFamily,
+          toolbar: { show: false },
+          zoom: { enabled: false },
           animations: { enabled: true, easing: 'easeinout', speed: 600 },
         },
-        stroke: { curve: 'smooth', width: [2, 3] },
-        colors: ['#5eead4', '#14b8a6'],
+        stroke: { curve: 'smooth', width: [2, 3], dashArray: [0, 6] },
+        colors: [COLORS.teal, COLORS.green],
         fill: {
           type: 'gradient',
           gradient: {
-            shade: 'light', type: 'vertical', shadeIntensity: 0.3,
-            gradientToColors: ['#ccfbf1', '#99f6e4'],
-            opacityFrom: 0.45, opacityTo: 0.03,
+            shade: 'light',
+            type: 'vertical',
+            shadeIntensity: 0.2,
+            opacityFrom: 0.25,
+            opacityTo: 0.02,
           },
         },
-        markers: { size: 4, strokeColors: '#fff', strokeWidth: 2, hover: { size: 6 } },
+        markers: { size: 4, colors: ['#fff'], strokeColors: [COLORS.teal, COLORS.green], strokeWidth: 2, hover: { size: 6 } },
         xaxis: {
           categories: savLabels,
-          labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-          axisBorder: { show: false }, axisTicks: { show: false },
+          ...sharedXaxis,
+          title: { text: 'Month', style: { color: tickColor, fontSize: '11px', fontFamily } },
         },
         yaxis: {
+          ...sharedYaxis,
+          title: { text: 'Savings (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
           labels: {
-            style: { colors: mutedColor, fontSize: '11px', fontFamily },
+            style: labelStyle,
             formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
           },
         },
-        grid: { borderColor: gridColor, strokeDashArray: 4, xaxis: { lines: { show: false } } },
+        grid: sharedGrid,
         tooltip: {
-          shared: true, intersect: false, ...tooltipStyle,
+          shared: true,
+          intersect: false,
+          ...tooltipStyle,
           y: { formatter: val => '₱' + val.toLocaleString() },
         },
         legend: {
-          position: 'bottom', fontSize: '12px', fontFamily,
-          labels: { colors: '#6b7280' },
-          markers: { width: 10, height: 10, radius: 3 },
-          itemMargin: { horizontal: 10, vertical: 4 },
+          position: 'top',
+          horizontalAlign: 'left',
+          fontSize: '12px',
+          fontFamily,
+          labels: { colors: tickColor },
+          markers: { width: 12, height: 12, radius: 2 },
         },
         dataLabels: { enabled: false },
       }).render();
     }
   }
 
-  // ── Active vs Inactive Line Chart ─────────────────────────
-const statusEl = document.getElementById('statusChart');
-if (statusEl) {
-  const statusLabels   = JSON.parse(statusEl.dataset.labels   || '[]');
-  const statusActive   = JSON.parse(statusEl.dataset.active   || '[]');
-  const statusInactive = JSON.parse(statusEl.dataset.inactive || '[]');
+  // ── 10. Line Chart — Active vs Inactive Members ───────────
+  const statusEl = document.getElementById('statusChart');
+  if (statusEl) {
+    const statusLabels   = JSON.parse(statusEl.dataset.labels   || '[]');
+    const statusActive   = JSON.parse(statusEl.dataset.active   || '[]');
+    const statusInactive = JSON.parse(statusEl.dataset.inactive || '[]');
 
-  const hasStatusData = statusLabels.length > 0;
-
-  if (!hasStatusData) {
-    statusEl.innerHTML =
-      '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No status data yet.</p>';
-  } else {
-    new ApexCharts(statusEl, {
-      series: [
-        { name: 'Active',   data: statusActive   },
-        { name: 'Inactive', data: statusInactive },
-      ],
-      chart: {
-        type: 'line',
-        height: 260,
-        fontFamily,
-        toolbar: { show: false },
-        zoom: { enabled: false },
-        animations: { enabled: true, easing: 'easeinout', speed: 600 },
-      },
-      stroke: { curve: 'smooth', width: [3, 3] },
-      colors: ['#10b981', '#ef4444'],
-      fill: {
-        type: 'gradient',
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          shadeIntensity: 0.3,
-          gradientToColors: ['#d1fae5', '#fee2e2'],
-          opacityFrom: 0.35,
-          opacityTo: 0.02,
+    if (!statusLabels.length) {
+      statusEl.innerHTML =
+        '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No status data yet.</p>';
+    } else {
+      new ApexCharts(statusEl, {
+        series: [
+          { name: 'Active',   data: statusActive   },
+          { name: 'Inactive', data: statusInactive },
+        ],
+        chart: {
+          type: 'area',
+          height: 260,
+          fontFamily,
+          toolbar: { show: false },
+          zoom: { enabled: false },
+          animations: { enabled: true, easing: 'easeinout', speed: 600 },
         },
-      },
-      markers: {
-        size: 5,
-        strokeColors: '#fff',
-        strokeWidth: 2,
-        hover: { size: 7 },
-      },
-      xaxis: {
-        categories: statusLabels,
-        labels: { style: { colors: mutedColor, fontSize: '11px', fontFamily } },
-        axisBorder: { show: false },
-        axisTicks:  { show: false },
-      },
-      yaxis: {
-        labels: {
-          style: { colors: mutedColor, fontSize: '11px', fontFamily },
-          formatter: val => Math.round(val),
+        stroke: { curve: 'smooth', width: [3, 3], dashArray: [0, 6] },
+        colors: [COLORS.green, COLORS.red],
+        fill: {
+          type: 'gradient',
+          gradient: {
+            shade: 'light',
+            type: 'vertical',
+            shadeIntensity: 0.2,
+            opacityFrom: 0.25,
+            opacityTo: 0.02,
+          },
         },
-        min: 0,
-      },
-      grid: {
-        borderColor: gridColor,
-        strokeDashArray: 4,
-        xaxis: { lines: { show: false } },
-      },
-      tooltip: {
-        shared: true,
-        intersect: false,
-        ...tooltipStyle,
-        y: { formatter: val => val + ' members' },
-      },
-      legend: {
-        position: 'bottom',
-        fontSize: '12px',
-        fontFamily,
-        labels: { colors: '#6b7280' },
-        markers: { width: 10, height: 10, radius: 3 },
-        itemMargin: { horizontal: 10, vertical: 4 },
-      },
-      dataLabels: {
-        enabled: true,
-        formatter: val => val > 0 ? val : '',
-        style: { fontSize: '11px', fontFamily, fontWeight: '600' },
-        background: {
+        markers: {
+          size: 5,
+          colors: ['#fff'],
+          strokeColors: [COLORS.green, COLORS.red],
+          strokeWidth: 2,
+          hover: { size: 7 },
+        },
+        xaxis: {
+          categories: statusLabels,
+          ...sharedXaxis,
+          title: { text: 'Month', style: { color: tickColor, fontSize: '11px', fontFamily } },
+        },
+        yaxis: {
+          ...sharedYaxis,
+          min: 0,
+          title: { text: 'Members', style: { color: tickColor, fontSize: '11px', fontFamily } },
+          labels: {
+            style: labelStyle,
+            formatter: val => Math.round(val),
+          },
+        },
+        grid: sharedGrid,
+        tooltip: {
+          shared: true,
+          intersect: false,
+          ...tooltipStyle,
+          y: { formatter: val => val + ' members' },
+        },
+        legend: {
+          position: 'top',
+          horizontalAlign: 'left',
+          fontSize: '12px',
+          fontFamily,
+          labels: { colors: tickColor },
+          markers: { width: 12, height: 12, radius: 2 },
+        },
+        dataLabels: {
           enabled: true,
-          borderRadius: 4,
-          borderWidth: 0,
-          opacity: 0.85,
+          formatter: val => val > 0 ? val : '',
+          style: { fontSize: '11px', fontFamily, fontWeight: '600' },
+          background: {
+            enabled: true,
+            borderRadius: 2,
+            borderWidth: 0,
+            opacity: 0.85,
+          },
+          dropShadow: { enabled: false },
         },
-        dropShadow: { enabled: false },
-      },
-    }).render();
+      }).render();
+    }
   }
-}
-
 
   // ── Period Toggle (re-renders member chart) ───────────────
   document.querySelectorAll('#memberToggle .chart-toggle').forEach(btn => {
