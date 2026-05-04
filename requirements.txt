@@ -1,5 +1,5 @@
 # ── Core ──────────────────────────────────────────────────────────────────────
-Django>=6.0.4
+Django==4.1.13
 
 # ── Database ──────────────────────────────────────────────────────────────────
 mysqlclient>=2.2              # MySQL adapter
@@ -9,6 +9,9 @@ python-decouple>=3.8          # Load secrets from .env
 dj-database-url>=2.1          # Parse DATABASE_URL env variable
 
 # ── Static Files ──────────────────────────────────────────────────────────────
+
+
+
 whitenoise>=6.6               # Serve static files in production
 
 # ── Forms & Validation ────────────────────────────────────────────────────────
