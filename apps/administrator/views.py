@@ -18,6 +18,13 @@ from .models import AdminLog
 from .log_utils import log_action, get_client_ip
 from apps.membership.models import Member, MemberTransaction
 
+from django.core.mail import send_mail, EmailMultiAlternatives
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.utils.crypto import get_random_string
+import random
+
+User = get_user_model()
 
 # ── Register ──────────────────────────────────────────────────────────────────
 def admin_register(request):
@@ -459,3 +466,393 @@ def admin_logs(request):
         'danger_logs':       danger_logs,
     }
     return render(request, 'administrator/admin_logs.html', context)
+
+
+def _generate_otp():
+    """Return a random 6-digit OTP string."""
+    return str(random.randint(100000, 999999))
+
+
+# ── Step 1 – Enter email ──────────────────────────────────────────────────────
+def forgot_password(request):
+    """Ask the user for their registered email address."""
+    if request.user.is_authenticated:
+        return redirect('administrator:dashboard')
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+
+        # Always show a generic success message (prevents email enumeration)
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            otp = _generate_otp()
+            # Store OTP + email in session (expires with session)
+            request.session['otp_code'] = otp
+            request.session['otp_email'] = email
+            request.session['otp_verified'] = False
+
+            subject = 'BMAKB - Password Reset OTP'
+            text_body = (
+                f'Hello {user.get_full_name()},\n\n'
+                f'Your OTP is: {otp}\n\n'
+                f'This code is valid for the duration of your browser session.\n'
+                f'If you did not request this, please ignore this email.\n\n'
+                f'— BMAKB Membership System'
+            )
+            html_body = f'''
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="UTF-8"/>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+            </head>
+            <body style="margin:0;padding:0;background:#f0f2f5;font-family:'Segoe UI',DM Sans,sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 0;">
+                <tr>
+                  <td align="center">
+                    <table width="480" cellpadding="0" cellspacing="0"
+                           style="background:#ffffff;border-radius:16px;overflow:hidden;
+                                  box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+                      <!-- Header -->
+                      <tr>
+                        <td align="center"
+                            style="background:linear-gradient(135deg,#1a4731,#1d6a5b);
+                                   padding:32px 40px;">
+                          <h1 style="margin:0;font-size:28px;color:#86efac;letter-spacing:-0.5px;">
+                            BMAKB
+                          </h1>
+                          <p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,0.5);
+                                    letter-spacing:1px;text-transform:uppercase;">
+                            Membership Management System
+                          </p>
+                        </td>
+                      </tr>
+
+                      <!-- Body -->
+                      <tr>
+                        <td style="padding:36px 40px 24px;">
+
+                          <!-- Icon -->
+                          <div align="center" style="margin-bottom:24px;">
+                            <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;
+                                        display:inline-flex;align-items:center;justify-content:center;
+                                        font-size:28px;line-height:64px;text-align:center;">
+                              🔐
+                            </div>
+                          </div>
+
+                          <h2 style="margin:0 0 8px;font-size:20px;color:#0d2b1f;text-align:center;">
+                            Password Reset Request
+                          </h2>
+                          <p style="margin:0 0 24px;font-size:14px;color:#5a7a6a;text-align:center;">
+                            Hello, <strong style="color:#0d2b1f;">{user.get_full_name()}</strong>!
+                            Use the OTP below to reset your password.
+                          </p>
+
+                          <!-- OTP Box -->
+                          <div align="center" style="margin:0 0 28px;">
+                            <div style="display:inline-block;background:#f0fdf4;
+                                        border:2px dashed #16a34a;border-radius:14px;
+                                        padding:20px 48px;">
+                              <p style="margin:0 0 4px;font-size:11px;font-weight:600;
+                                         letter-spacing:2px;text-transform:uppercase;color:#5a7a6a;">
+                                Your OTP Code
+                              </p>
+                              <p style="margin:0;font-size:42px;font-weight:800;
+                                         letter-spacing:12px;color:#15803d;line-height:1.2;">
+                                {otp}
+                              </p>
+                            </div>
+                          </div>
+
+                          <!-- Info -->
+                          <table width="100%" cellpadding="0" cellspacing="0"
+                                 style="background:#f0fdf4;border-radius:10px;
+                                        border:1px solid #d1e8dc;margin-bottom:24px;">
+                            <tr>
+                              <td style="padding:14px 16px;font-size:13px;color:#166534;">
+                                <strong>&#x23F1; Valid for:</strong> Duration of your current browser session
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:0 16px 14px;font-size:13px;color:#166534;">
+                                <strong>&#x1F512; Keep it safe:</strong> Never share this code with anyone
+                              </td>
+                            </tr>
+                          </table>
+
+                          <!-- Warning -->
+                          <table width="100%" cellpadding="0" cellspacing="0"
+                                 style="background:#fef2f2;border-radius:10px;
+                                        border:1px solid #fecaca;margin-bottom:8px;">
+                            <tr>
+                              <td style="padding:12px 16px;font-size:12px;color:#991b1b;">
+                                &#x26A0;&#xFE0F; If you did not request a password reset, please ignore this email.
+                                Your account is safe.
+                              </td>
+                            </tr>
+                          </table>
+
+                        </td>
+                      </tr>
+
+                      <!-- Footer -->
+                      <tr>
+                        <td style="background:#f0fdf4;border-top:1px solid #d1e8dc;
+                                   padding:20px 40px;text-align:center;">
+                          <p style="margin:0;font-size:12px;color:#5a7a6a;">
+                            &copy; 2026 <strong style="color:#15803d;">BMAKB Membership System</strong>
+                          </p>
+                          <p style="margin:4px 0 0;font-size:11px;color:#9ca3af;">
+                            Developed by Micho Moreno &amp; Flerie Jill Montes
+                          </p>
+                        </td>
+                      </tr>
+
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </body>
+            </html>
+            '''
+
+            email_msg = EmailMultiAlternatives(
+                subject=subject,
+                body=text_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[email],
+            )
+            email_msg.attach_alternative(html_body, "text/html")
+            email_msg.send(fail_silently=False)
+
+        # Redirect regardless so we don't reveal whether the email exists
+        messages.success(
+            request,
+            "If that email is registered, we've sent a 6-digit OTP to it."
+        )
+        return redirect('administrator:verify_otp')
+
+    return render(request, 'administrator/forgot_password.html')
+
+# ── Step 2 – Verify OTP ───────────────────────────────────────────────────────
+def verify_otp(request):
+    """Verify the 6-digit OTP the user received by email."""
+    if request.user.is_authenticated:
+        return redirect('administrator:dashboard')
+
+    # Guard: must have gone through step 1
+    if not request.session.get('otp_email'):
+        messages.error(request, 'Please start the password reset process again.')
+        return redirect('administrator:forgot_password')
+
+    if request.method == 'POST':
+        entered = request.POST.get('otp', '').strip()
+        expected = request.session.get('otp_code', '')
+
+        if entered == expected:
+            request.session['otp_verified'] = True
+            return redirect('administrator:reset_password')
+        else:
+            messages.error(request, 'Invalid OTP. Please try again.')
+
+    return render(request, 'administrator/verify_otp.html')
+
+
+# ── Step 2b – Resend OTP ──────────────────────────────────────────────────────
+def resend_otp(request):
+    """Generate a fresh OTP and re-send to the stored session email."""
+    if request.user.is_authenticated:
+        return redirect('administrator:dashboard')
+
+    email = request.session.get('otp_email')
+    if not email:
+        messages.error(request, 'Session expired. Please start again.')
+        return redirect('administrator:forgot_password')
+
+    user = User.objects.filter(email__iexact=email).first()
+    if user:
+        otp = _generate_otp()
+        request.session['otp_code'] = otp
+        request.session['otp_verified'] = False
+
+        subject = 'BMAKB - Password Reset OTP'
+        text_body = (
+            f'Hello {user.get_full_name()},\n\n'
+            f'Your new OTP is: {otp}\n\n'
+            f'This code is valid for the duration of your browser session.\n'
+            f'If you did not request this, please ignore this email.\n\n'
+            f'— BMAKB Membership System'
+        )
+        html_body = f'''
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        </head>
+        <body style="margin:0;padding:0;background:#f0f2f5;font-family:'Segoe UI',DM Sans,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:40px 0;">
+            <tr>
+              <td align="center">
+                <table width="480" cellpadding="0" cellspacing="0"
+                       style="background:#ffffff;border-radius:16px;overflow:hidden;
+                              box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+                  <!-- Header -->
+                  <tr>
+                    <td align="center"
+                        style="background:linear-gradient(135deg,#1a4731,#1d6a5b);
+                               padding:32px 40px;">
+                      <h1 style="margin:0;font-size:28px;color:#86efac;letter-spacing:-0.5px;">
+                        BMAKB
+                      </h1>
+                      <p style="margin:6px 0 0;font-size:12px;color:rgba(255,255,255,0.5);
+                                letter-spacing:1px;text-transform:uppercase;">
+                        Membership Management System
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Body -->
+                  <tr>
+                    <td style="padding:36px 40px 24px;">
+
+                      <!-- Icon -->
+                      <div align="center" style="margin-bottom:24px;">
+                        <div style="width:64px;height:64px;background:#dcfce7;border-radius:50%;
+                                    display:inline-flex;align-items:center;justify-content:center;
+                                    font-size:28px;line-height:64px;text-align:center;">
+                          🔄
+                        </div>
+                      </div>
+
+                      <h2 style="margin:0 0 8px;font-size:20px;color:#0d2b1f;text-align:center;">
+                        New OTP Requested
+                      </h2>
+                      <p style="margin:0 0 24px;font-size:14px;color:#5a7a6a;text-align:center;">
+                        Hello, <strong style="color:#0d2b1f;">{user.get_full_name()}</strong>!
+                        Here is your new OTP code.
+                      </p>
+
+                      <!-- OTP Box -->
+                      <div align="center" style="margin:0 0 28px;">
+                        <div style="display:inline-block;background:#f0fdf4;
+                                    border:2px dashed #16a34a;border-radius:14px;
+                                    padding:20px 48px;">
+                          <p style="margin:0 0 4px;font-size:11px;font-weight:600;
+                                     letter-spacing:2px;text-transform:uppercase;color:#5a7a6a;">
+                            Your New OTP Code
+                          </p>
+                          <p style="margin:0;font-size:42px;font-weight:800;
+                                     letter-spacing:12px;color:#15803d;line-height:1.2;">
+                            {otp}
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- Info -->
+                      <table width="100%" cellpadding="0" cellspacing="0"
+                             style="background:#f0fdf4;border-radius:10px;
+                                    border:1px solid #d1e8dc;margin-bottom:24px;">
+                        <tr>
+                          <td style="padding:14px 16px;font-size:13px;color:#166534;">
+                            <strong>&#x23F1; Valid for:</strong> Duration of your current browser session
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0 16px 14px;font-size:13px;color:#166534;">
+                            <strong>&#x1F512; Keep it safe:</strong> Never share this code with anyone
+                          </td>
+                        </tr>
+                      </table>
+
+                      <!-- Warning -->
+                      <table width="100%" cellpadding="0" cellspacing="0"
+                             style="background:#fef2f2;border-radius:10px;
+                                    border:1px solid #fecaca;margin-bottom:8px;">
+                        <tr>
+                          <td style="padding:12px 16px;font-size:12px;color:#991b1b;">
+                            &#x26A0;&#xFE0F; If you did not request a password reset, please ignore this email.
+                            Your account is safe.
+                          </td>
+                        </tr>
+                      </table>
+
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background:#f0fdf4;border-top:1px solid #d1e8dc;
+                               padding:20px 40px;text-align:center;">
+                      <p style="margin:0;font-size:12px;color:#5a7a6a;">
+                        &copy; 2026 <strong style="color:#15803d;">BMAKB Membership System</strong>
+                      </p>
+                      <p style="margin:4px 0 0;font-size:11px;color:#9ca3af;">
+                        Developed by Micho Moreno &amp; Flerie Jill Montes
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+        '''
+
+        email_msg = EmailMultiAlternatives(
+            subject=subject,
+            body=text_body,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[email],
+        )
+        email_msg.attach_alternative(html_body, "text/html")
+        email_msg.send(fail_silently=False)
+
+    messages.success(request, 'A new OTP has been sent to your email.')
+    return redirect('administrator:verify_otp')
+
+# ── Step 3 – Set new password ─────────────────────────────────────────────────
+def reset_password(request):
+    """Allow the user to set a new password after OTP verification."""
+    if request.user.is_authenticated:
+        return redirect('administrator:dashboard')
+
+    # Guard: OTP must have been verified
+    if not request.session.get('otp_verified'):
+        messages.error(request, 'Please verify your OTP first.')
+        return redirect('administrator:forgot_password')
+
+    if request.method == 'POST':
+        pw1 = request.POST.get('password1', '')
+        pw2 = request.POST.get('password2', '')
+
+        if pw1 != pw2:
+            messages.error(request, 'Passwords do not match.')
+        elif len(pw1) < 8:
+            messages.error(request, 'Password must be at least 8 characters.')
+        else:
+            email = request.session.get('otp_email')
+            user = User.objects.filter(email__iexact=email).first()
+            if user:
+                user.set_password(pw1)
+                user.save()
+
+                # Clear session keys
+                for key in ('otp_code', 'otp_email', 'otp_verified'):
+                    request.session.pop(key, None)
+
+                messages.success(
+                    request,
+                    'Password reset successfully. You can now log in.'
+                )
+                return redirect('administrator:login')
+            else:
+                messages.error(request, 'Account not found. Please try again.')
+                return redirect('administrator:forgot_password')
+
+    return render(request, 'administrator/reset_password.html')

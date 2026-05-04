@@ -11,91 +11,124 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
   <link rel="stylesheet" href="{% static 'administrator/css/register.css' %}">
-
 </head>
 <body>
-<div class="auth-wrap">
-  <div class="auth-brand">
-    <h1>BMAKB</h1>
-    <p>Membership Management System</p>
-  </div>
 
-  <div class="auth-card">
-    <div class="auth-title">Create account</div>
-    <div class="auth-sub">Register as a new administrator</div>
+  <!-- Full-screen background -->
+  <div class="page-bg" style="background-image: url('{% static 'images/BMAKB-LOGO.jpg' %}');">
+    <div class="bg-overlay"></div>
 
-    {% for message in messages %}
-    <div class="alert alert-danger mb-3">{{ message }}</div>
-    {% endfor %}
+    <!-- Floating brand watermark -->
 
-    <form method="POST" enctype="multipart/form-data">
-      {% csrf_token %}
+    <!-- Centered modal card -->
+    <div class="modal-wrap">
 
-      <div class="section-label">Personal Information</div>
-      <div class="two-columns">
-        <div>
-          <label class="form-label">First Name <span style="color:#ef4444;">*</span></label>
-          <input type="text" name="first_name" class="form-control" placeholder="First name" value="{{ form.first_name.value|default:'' }}" required/>
-          {{ form.first_name.errors }}
-        </div>
-        <div>
-          <label class="form-label">Last Name <span style="color:#ef4444;">*</span></label>
-          <input type="text" name="last_name" class="form-control" placeholder="Last name" value="{{ form.last_name.value|default:'' }}" required/>
-          {{ form.last_name.errors }}
-        </div>
-        <div class="full-width">
-          <label class="form-label">Email Address <span style="color:#ef4444;">*</span></label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-            <input type="email" name="email" class="form-control" placeholder="Email address" value="{{ form.email.value|default:'' }}" required/>
+      <div class="auth-card">
+
+        <!-- Brand inside card -->
+        <div class="auth-brand">
+          <div class="logo-ring">
+            <img src="{% static 'images/BMAKB-LOGO.jpg' %}" alt="BMAKB Logo" class="auth-logo"/>
           </div>
-          {{ form.email.errors }}
+          <h1>BMAKB</h1>
+          <p>Membership Management System</p>
         </div>
-        <div class="full-width">
-          <label class="form-label">Phone <span style="color:var(--muted);font-weight:400">(optional)</span></label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-            <input type="text" name="phone" class="form-control" placeholder="Phone number" value="{{ form.phone.value|default:'' }}"/>
+
+        <div class="auth-title">Create account</div>
+        <div class="auth-sub">Register as a new administrator</div>
+
+        {% for message in messages %}
+        <div class="alert alert-danger mb-3">{{ message }}</div>
+        {% endfor %}
+
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <div class="section-label">Personal Information</div>
+          <div class="two-columns">
+            <div>
+              <label class="form-label">First Name <span class="req">*</span></label>
+              <input type="text" name="first_name" class="form-control" placeholder="First name" value="{{ form.first_name.value|default:'' }}" required/>
+              {{ form.first_name.errors }}
+            </div>
+            <div>
+              <label class="form-label">Last Name <span class="req">*</span></label>
+              <input type="text" name="last_name" class="form-control" placeholder="Last name" value="{{ form.last_name.value|default:'' }}" required/>
+              {{ form.last_name.errors }}
+            </div>
+            <div class="full-width">
+              <label class="form-label">Email Address <span class="req">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" name="email" class="form-control" placeholder="Email address" value="{{ form.email.value|default:'' }}" required/>
+              </div>
+              {{ form.email.errors }}
+            </div>
+            <div class="full-width">
+              <label class="form-label">Phone <span class="opt">(optional)</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input type="text" name="phone" class="form-control" placeholder="Phone number" value="{{ form.phone.value|default:'' }}"/>
+              </div>
+            </div>
           </div>
+
+          <div class="section-label">Account Credentials</div>
+          <div class="two-columns">
+            <div class="full-width">
+              <label class="form-label">Username <span class="req">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="username" class="form-control" placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required/>
+              </div>
+              {{ form.username.errors }}
+            </div>
+            <div>
+              <label class="form-label">Password <span class="req">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password1" id="pw1" class="form-control" placeholder="Password" required/>
+                <button type="button" class="input-group-text toggle-pw" onclick="togglePassword('pw1', this)" tabindex="-1">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              {{ form.password1.errors }}
+            </div>
+            <div>
+              <label class="form-label">Confirm Password <span class="req">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
+                <input type="password" name="password2" id="pw2" class="form-control" placeholder="Confirm password" required/>
+                <button type="button" class="input-group-text toggle-pw" onclick="togglePassword('pw2', this)" tabindex="-1">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              {{ form.password2.errors }}
+            </div>
+            <div class="full-width">
+              <label class="form-label">Profile Picture <span class="opt">(optional)</span></label>
+              <input type="file" name="profile_picture" class="form-control" accept="image/*"/>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-auth">
+            <i class="bi bi-person-check me-2"></i> Create Account
+          </button>
+        </form>
+
+        <div class="auth-link">
+          Already have an account? <a href="{% url 'administrator:login' %}">Sign in here</a>
         </div>
       </div>
 
-      <div class="section-label">Account Credentials</div>
-      <div class="two-columns">
-        <div class="full-width">
-          <label class="form-label">Username <span style="color:#ef4444;">*</span></label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-person"></i></span>
-            <input type="text" name="username" class="form-control" placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required/>
-          </div>
-          {{ form.username.errors }}
-        </div>
-        <div>
-          <label class="form-label">Password <span style="color:#ef4444;">*</span></label>
-          <input type="password" name="password1" class="form-control" placeholder="Password" required/>
-          {{ form.password1.errors }}
-        </div>
-        <div>
-          <label class="form-label">Confirm Password <span style="color:#ef4444;">*</span></label>
-          <input type="password" name="password2" class="form-control" placeholder="Confirm password" required/>
-          {{ form.password2.errors }}
-        </div>
-        <div class="full-width">
-          <label class="form-label">Profile Picture <span style="color:var(--muted);font-weight:400">(optional)</span></label>
-          <input type="file" name="profile_picture" class="form-control" accept="image/*"/>
-        </div>
+      <div class="auth-footer">
+        &copy; 2026 BMAKB Membership System &nbsp;|&nbsp; Developed by Micho Moreno &amp; Flerie Jill Montes
       </div>
 
-      <button type="submit" class="btn-auth">
-        <i class="bi bi-person-check me-2"></i> Create Account
-      </button>
-    </form>
+    </div><!-- /modal-wrap -->
+  </div><!-- /page-bg -->
 
-    <div class="auth-link">
-      Already have an account? <a href="{% url 'administrator:login' %}">Sign in here</a>
-    </div>
-  </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'administrator/js/register.js' %}"></script>
 </body>
 </html>
