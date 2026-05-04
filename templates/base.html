@@ -17,7 +17,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-   {% block extra_css %}{% endblock %}
+  {% block extra_css %}{% endblock %}
 </head>
 <body>
 
@@ -25,8 +25,15 @@
 <!-- ── Sidebar ───────────────────────────────────────────── -->
 <aside class="sidebar">
   <div class="sidebar-brand">
-    <h1>BMAKB</h1>
-    <p>Management System</p>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="{% static 'images/BMAKB-LOGO.jpg' %}"
+           alt="BMAKB Logo"
+           style="width:42px; height:42px; object-fit:contain; border-radius:8px; flex-shrink:0;">
+      <div>
+        <h1 style="margin:0;">BMAKB</h1>
+        <p style="margin:0;">Memebership System</p>
+      </div>
+    </div>
   </div>
 
   <nav class="sidebar-nav">
@@ -37,29 +44,26 @@
     </a>
 
     <div class="nav-section-label">Analytics</div>
-  <a href="{% url 'administrator:analytics' %}"
-     class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
-    <i class="bi bi-bar-chart-line"></i> Analytics
-  </a>
+    <a href="{% url 'administrator:analytics' %}"
+       class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+      <i class="bi bi-bar-chart-line"></i> Analytics
+    </a>
 
-     <div class="nav-section-label">System</div>
-   <a href="{% url 'administrator:admin_logs' %}"
-     class="nav-link {% if request.resolver_match.url_name == 'admin_logs' %}active{% endif %}">
-     <i class="bi bi-shield-check"></i> Admin Logs
-   </a>
+    <div class="nav-section-label">System</div>
+    <a href="{% url 'administrator:admin_logs' %}"
+       class="nav-link {% if request.resolver_match.url_name == 'admin_logs' %}active{% endif %}">
+      <i class="bi bi-shield-check"></i> Admin Logs
+    </a>
 
     <div class="nav-section-label">Members</div>
-    <!-- All Members — only active on list and detail pages -->
-<a href="{% url 'membership:member_list' %}"
-   class="nav-link {% if request.resolver_match.url_name in 'member_list member_detail member_edit member_delete' %}active{% endif %}">
-  <i class="bi bi-people"></i> All Members
-</a>
-
-<!-- Add Member — only active on add page -->
-<a href="{% url 'membership:member_add' %}"
-   class="nav-link {% if request.resolver_match.url_name == 'member_add' %}active{% endif %}">
-  <i class="bi bi-person-plus"></i> Add Member
-</a>
+    <a href="{% url 'membership:member_list' %}"
+       class="nav-link {% if request.resolver_match.url_name in 'member_list member_detail member_edit member_delete' %}active{% endif %}">
+      <i class="bi bi-people"></i> All Members
+    </a>
+    <a href="{% url 'membership:member_add' %}"
+       class="nav-link {% if request.resolver_match.url_name == 'member_add' %}active{% endif %}">
+      <i class="bi bi-person-plus"></i> Add Member
+    </a>
   </nav>
 
   <div class="sidebar-footer">
@@ -84,12 +88,12 @@
   {% if user.is_authenticated %}
   <div class="topbar">
     <div class="topbar-title">
-      <i class="bi bi-{% block topbar_icon %}grid-1x2{% endblock %}"></i>
+      <i class="bi bi-{% block topbar_icon %}grid-1x2{% endblock %}" style="color:var(--green);"></i>
       {% block topbar_title %}Dashboard{% endblock %}
     </div>
-    <div style="font-size:13px;color:var(--muted);">
+    <div style="font-size:13px; color:var(--muted);">
       {{ user.get_full_name }} &nbsp;·&nbsp;
-      <span style="color:var(--teal)">Administrator</span>
+      <span style="color:var(--teal); font-weight:600;">Administrator</span>
     </div>
   </div>
   {% endif %}

@@ -12,10 +12,10 @@
 
 {% block content %}
 
-<!-- ── Row 1: Member Count Cards ──────────────────────────── -->
-<div class="row g-3 mb-3">
+<!-- ── Row 1: Member Count Cards (5 columns) ──────────────── -->
+<div class="row g-3 mb-3 row-cols-5">
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card blue clickable"
          data-modal="members-modal"
          data-filter="total"
@@ -34,7 +34,7 @@
     </div>
   </div>
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card green clickable"
          data-modal="members-modal"
          data-filter="active"
@@ -53,7 +53,7 @@
     </div>
   </div>
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card amber clickable"
          data-modal="members-modal"
          data-filter="regular"
@@ -72,7 +72,7 @@
     </div>
   </div>
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card purple clickable"
          data-modal="members-modal"
          data-filter="associate"
@@ -91,8 +91,7 @@
     </div>
   </div>
 
-  <!-- Inactive Members Card -->
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card red clickable"
          data-modal="members-modal"
          data-filter="inactive"
@@ -113,52 +112,54 @@
 
 </div>
 
-<!-- ── Row 2: Financial Cards ─────────────────────────────── -->
-<div class="row g-3 mb-4">
+<!-- ── Row 2: Financial Cards (5 columns) ─────────────────── -->
+<div class="row g-3 mb-4 row-cols-5">
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card indigo">
       <div class="stat-icon-wrap indigo">
         <i data-lucide="piggy-bank" class="lucide-icon"></i>
       </div>
       <div class="stat-label">TOTAL CBU</div>
-      <div class="stat-value">₱{{ total_cbu|floatformat:2 }}</div>
+      <div class="stat-value stat-value--financial">₱{{ total_cbu|floatformat:2 }}</div>
       <div class="stat-sub">Capital Build-Up accumulated</div>
     </div>
   </div>
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card teal">
       <div class="stat-icon-wrap teal">
         <i data-lucide="wallet" class="lucide-icon"></i>
       </div>
       <div class="stat-label">TOTAL SAVINGS</div>
-      <div class="stat-value">₱{{ total_savings|floatformat:2 }}</div>
+      <div class="stat-value stat-value--financial">₱{{ total_savings|floatformat:2 }}</div>
       <div class="stat-sub">Member savings total</div>
     </div>
   </div>
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card rose">
       <div class="stat-icon-wrap rose">
         <i data-lucide="calendar-check" class="lucide-icon"></i>
       </div>
       <div class="stat-label">TOTAL SUBSCRIPTION</div>
-      <div class="stat-value">₱{{ total_subscription|floatformat:2 }}</div>
+      <div class="stat-value stat-value--financial">₱{{ total_subscription|floatformat:2 }}</div>
       <div class="stat-sub">All subscription fees</div>
     </div>
   </div>
 
-  <div class="col-md-3">
+  <div class="col">
     <div class="stat-card sky">
       <div class="stat-icon-wrap sky">
         <i data-lucide="clipboard-list" class="lucide-icon"></i>
       </div>
       <div class="stat-label">TOTAL INITIAL PAID-UP</div>
-      <div class="stat-value">₱{{ total_initial_paid_up|floatformat:2 }}</div>
+      <div class="stat-value stat-value--financial">₱{{ total_initial_paid_up|floatformat:2 }}</div>
       <div class="stat-sub">Initial paid-up total</div>
     </div>
   </div>
+
+
 
 </div>
 
