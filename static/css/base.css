@@ -893,3 +893,14 @@ body {
 .sidebar-nav::-webkit-scrollbar-track-piece {
   margin: 4px 0;
 }
+
+/* ── Site Footer ──────────────────────────────────── */
+.site-footer {
+  text-align: center;
+  padding: 14px 28px;
+  font-size: 12px;
+  color: #16a34a;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  letter-spacing: 0.2px;
+}
