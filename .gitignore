@@ -1,1 +1,27 @@
-.env 
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# Django static/media (if applicable)
+media/
+staticfiles/
+
+#Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
