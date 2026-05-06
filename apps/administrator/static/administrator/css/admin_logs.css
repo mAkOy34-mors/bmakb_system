@@ -17,3 +17,9 @@
 .action-logout        { background:#f3f4f6; color:#374151; }
 .action-export        { background:#fffbeb; color:#92400e; }
 .action-other         { background:#f3f4f6; color:#6b7280; }
+
+/* ── Status badges ───────────────────────────────────────── */
+.badge-active     { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:#ecfdf5; color:#065f46; }
+.badge-associate  { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:#eff6ff; color:#1e40af; }
+.badge-inactive   { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:#fef2f2; color:#991b1b; }
+.badge-teal       { display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; background:#f0fdfa; color:#0f766e; }
