@@ -218,7 +218,7 @@ def analytics(request):
         .annotate(
             total=Sum(
                 ExpressionWrapper(
-                    F('con') + F('subscription') + F('initial_paid_up') + F('savings'),
+                    F('con') + F('subscription') + F('savings'),
                     output_field=DecimalField()
                 )
             )
