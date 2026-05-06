@@ -97,6 +97,7 @@ def member_detail(request, pk):
         target_name=member.name,
         target_id=member.account_number,
         description=f"Viewed profile of {member.name} ({member.account_number}).",
+        log_status='viewed',
     )
 
     return render(request, 'membership/member_detail.html', {
@@ -122,7 +123,7 @@ def member_edit(request, pk):
                 description=(
                     f"Updated fields: {', '.join(changed) if changed else 'no changes detected'}."
                 ),
-                severity='warning',
+                log_status='updated',
             )
 
             messages.success(request, f'Member "{member.name}" updated successfully!')
@@ -159,7 +160,7 @@ def member_delete(request, pk):
             description=(
                 f"{membership} member {name} ({account_number}) permanently deleted."
             ),
-            severity='danger',
+            log_status='deleted',
         )
 
         messages.success(request, f'Member "{name}" deleted successfully.')

@@ -12,7 +12,7 @@ def get_client_ip(request):
 
 def log_action(request, action, *,
                target_name='', target_id='',
-               description='', severity='info'):
+               description='', log_status='viewed'):
     """
     Record an admin action tied to the currently logged-in Administrator.
 
@@ -23,7 +23,7 @@ def log_action(request, action, *,
     target_name : str  — human-readable name of the affected object
     target_id   : str  — account number / PK of the affected object
     description : str  — optional free-text note
-    severity    : 'info' | 'warning' | 'danger'
+    log_status    : 'viewed' | 'updated' | 'deleted'
 
     Usage
     -----
@@ -44,7 +44,7 @@ def log_action(request, action, *,
     AdminLog.objects.create(
         admin=admin,
         action=action,
-        severity=severity,
+        status=log_status,
         target_name=target_name,
         target_id=target_id,
         description=description,

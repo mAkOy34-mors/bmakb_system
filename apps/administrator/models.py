@@ -45,10 +45,10 @@ class AdminLog(models.Model):
         ('other',         'Other'),
     ]
 
-    SEVERITY_CHOICES = [
-        ('info',    'Info'),
-        ('warning', 'Warning'),
-        ('danger',  'Danger'),
+    STATUS_CHOICES = [
+        ('viewed', 'Viewed'),
+        ('updated', 'Updated'),
+        ('deleted', 'Deleted'),
     ]
 
     admin = models.ForeignKey(
@@ -58,7 +58,7 @@ class AdminLog(models.Model):
         related_name='activity_logs',
     )
     action      = models.CharField(max_length=30, choices=ACTION_CHOICES)
-    severity    = models.CharField(max_length=10, choices=SEVERITY_CHOICES, default='info')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='viewed')
     target_name = models.CharField(max_length=200, blank=True,
                                    help_text='Human-readable target, e.g. member name')
     target_id   = models.CharField(max_length=50, blank=True,
@@ -74,4 +74,4 @@ class AdminLog(models.Model):
 
     def __str__(self):
         name = self.admin.get_full_name() if self.admin else 'Unknown'
-        return f"[{self.severity.upper()}] {name} — {self.get_action_display()} @ {self.timestamp:%Y-%m-%d %H:%M}"
+        return f"[{self.status.upper()}] {name} — {self.get_action_display()} @ {self.timestamp:%Y-%m-%d %H:%M}"

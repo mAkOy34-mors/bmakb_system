@@ -27,28 +27,50 @@
     <div class="col-lg-8">
 
       <!-- Identification -->
-      <div class="form-card mb-4">
-        <div class="form-card-header">
-          <div class="section-header">
-            <i data-lucide="fingerprint" class="section-icon-lucide"></i> Identification
-          </div>
-        </div>
-        <div class="form-card-body">
-          <div class="row g-3">
-            <div class="col-md-6">
-              <label class="form-label">TIN <span class="required-star">*</span></label>
-              {{ form.tin }}
-              {% if form.tin.errors %}
-                <div class="error-text">{{ form.tin.errors.0 }}</div>
-              {% endif %}
-            </div>
-            <div class="col-md-6">
-              <label class="form-label">Type of Membership <span class="required-star">*</span></label>
-              {{ form.type_of_membership }}
-            </div>
-          </div>
+<div class="form-card mb-4">
+  <div class="form-card-header">
+    <div class="section-header">
+      <i data-lucide="fingerprint" class="section-icon-lucide"></i> Identification
+    </div>
+  </div>
+  <div class="form-card-body">
+    <div class="row g-3">
+
+      <!-- ADD THIS — only show on Add mode (no member instance) -->
+      {% if not member %}
+      <div class="col-12">
+        <label class="form-label">
+          Account Number
+          <span style="font-size:11px;font-weight:400;color:var(--muted);margin-left:6px;">
+            optional
+          </span>
+        </label>
+        {{ form.account_number }}
+        {% if form.account_number.errors %}
+          <div class="error-text">{{ form.account_number.errors.0 }}</div>
+        {% endif %}
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+          <i data-lucide="info" style="width:11px;height:11px;"></i>
+          For existing members already assigned a number. Leave blank to auto-generate.
+          Format: <strong>BMAKB-00001</strong>
         </div>
       </div>
+      {% endif %}
+
+      <div class="col-md-6">
+        <label class="form-label">TIN <span class="required-star">*</span></label>
+        {{ form.tin }}
+        {% if form.tin.errors %}
+          <div class="error-text">{{ form.tin.errors.0 }}</div>
+        {% endif %}
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Type of Membership <span class="required-star">*</span></label>
+        {{ form.type_of_membership }}
+      </div>
+    </div>
+  </div>
+</div>
 
       <!-- Personal Information -->
       <div class="form-card mb-4">
