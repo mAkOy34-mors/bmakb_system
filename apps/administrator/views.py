@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, ExpressionWrapper, DecimalField, F
 from django.db.models.functions import TruncMonth, TruncWeek, TruncDay
 from django.urls import reverse
 from django.utils import timezone
@@ -29,7 +29,7 @@ User = get_user_model()
 # ── Register ──────────────────────────────────────────────────────────────────
 def admin_register(request):
     if request.user.is_authenticated:
-        return redirect('administrator:dashboard')
+        return redirect('administrator:login')
 
     if request.method == 'POST':
         form = AdminRegisterForm(request.POST, request.FILES)
@@ -210,13 +210,25 @@ def analytics(request):
     associate_count = Member.objects.filter(type_of_membership='associate').count()
 
     # ── Revenue ───────────────────────────────────────────────────────────
+    # ── Revenue (CBU + Subscription + Initial Paid-Up + Savings) ─────────────
     revenue_qs = (
         Member.objects
         .annotate(month=TruncMonth('date_joined'))
         .values('month')
-        .annotate(total=Sum('subscription'))
+        .annotate(
+            total=Sum(
+                ExpressionWrapper(
+                    F('con') + F('subscription') + F('initial_paid_up') + F('savings'),
+                    output_field=DecimalField()
+                )
+            )
+        )
         .order_by('month')
     )
+    revenue_labels = [entry['month'].strftime('%b %Y') for entry in revenue_qs]
+    revenue_data = [float(entry['total'] or 0) for entry in revenue_qs]
+    total_revenue = sum(revenue_data)
+
     revenue_labels = [entry['month'].strftime('%b %Y') for entry in revenue_qs]
     revenue_data   = [float(entry['total'] or 0) for entry in revenue_qs]
     total_revenue  = sum(revenue_data)
