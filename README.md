@@ -19,7 +19,6 @@ A web-based admin-controlled system for managing BMAKB members, financial transa
 - [Financial Transactions](#financial-transactions)
 - [Membership Types](#membership-types)
 - [Member Status](#member-status)
-- [Flowchart](#flowchart)
 
 ---
 
@@ -190,21 +189,6 @@ All financial records are **append-only** — administrators cannot directly mod
 |---|---|
 | **Active** | Member is in good standing and has full access to BMAKB services |
 | **Inactive** | Member has been deactivated; access to BMAKB services is suspended pending resolution |
-
----
-
-## Flowchart
-
-The system flowchart is included in this repository as a draw.io-compatible XML file:
-
-**File:** `cooperative_membership_flowchart.xml`
-
-To open:
-1. Go to [draw.io](https://draw.io)
-2. Click **File → Open from → Device**
-3. Select `cooperative_membership_flowchart.xml`
-
-The flowchart covers the complete BMAKB system flow from authentication through logout, including all member action branches and the admin logs pipeline.
 
 ---
 
