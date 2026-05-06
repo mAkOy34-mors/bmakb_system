@@ -1,4 +1,5 @@
 # apps/membership/forms.py
+import re
 
 from django import forms
 from .models import Member, MemberTransaction
@@ -13,8 +14,12 @@ class MemberForm(forms.ModelForm):
 
     class Meta:
         model = Member
-        exclude = ['account_number', 'age', 'created_at', 'updated_at']
+        exclude = ['age', 'created_at', 'updated_at']  # removed 'account_number'
         widgets = {
+            'account_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'BMAKB-00001 (leave blank to auto-generate)',
+            }),
             'tin': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'e.g. 123-456-789-000',
@@ -76,6 +81,18 @@ class MemberForm(forms.ModelForm):
             }),
         }
 
+    def clean_account_number(self):
+        value = self.cleaned_data.get('account_number', '').strip()
+        if value:
+            if not re.match(r'^BMAKB-\d{5}$', value):
+                raise forms.ValidationError(
+                    'Invalid format. Use BMAKB-XXXXX (e.g. BMAKB-00042).'
+                )
+            if Member.objects.filter(account_number=value).exists():
+                raise forms.ValidationError(
+                    f'Account number "{value}" is already in use.'
+                )
+        return value
 
 class MemberEditForm(forms.ModelForm):
     """Used when EDITING a member — excludes all financial fields."""

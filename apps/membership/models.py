@@ -32,7 +32,6 @@ class Member(models.Model):
     account_number = models.CharField(
         max_length=20,
         unique=True,
-        editable=False,
         blank=True,
     )
     tin = models.CharField(
@@ -181,8 +180,8 @@ class Member(models.Model):
         return self.get_deactivation_reason_display()
 
     def save(self, *args, **kwargs):
-        # Auto-generate account number on first save
-        if not self.pk:
+        # Auto-generate account number only if not already provided
+        if not self.pk and not self.account_number:
             last = Member.objects.order_by('id').last()
             next_num = (last.id + 1) if last else 1
             self.account_number = f"BMAKB-{next_num:05d}"

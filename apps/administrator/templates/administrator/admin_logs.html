@@ -36,22 +36,22 @@
   <div class="col-6 col-md-3">
     <div class="stat-card amber">
       <div class="stat-icon-wrap amber">
-        <i data-lucide="alert-triangle" class="lucide-icon"></i>
+        <i data-lucide="pencil" class="lucide-icon"></i>
       </div>
-      <div class="stat-label">WARNINGS</div>
-      <div class="stat-value">{{ warning_logs }}</div>
-      <div class="stat-sub">Warning-level events</div>
+      <div class="stat-label">UPDATED</div>
+      <div class="stat-value">{{ updated_logs }}</div>
+      <div class="stat-sub">Members edited</div>
     </div>
   </div>
 
   <div class="col-6 col-md-3">
     <div class="stat-card red">
       <div class="stat-icon-wrap red">
-        <i data-lucide="shield-alert" class="lucide-icon"></i>
+        <i data-lucide="trash-2" class="lucide-icon"></i>
       </div>
-      <div class="stat-label">CRITICAL</div>
-      <div class="stat-value">{{ danger_logs }}</div>
-      <div class="stat-sub">Danger-level events</div>
+      <div class="stat-label">DELETED</div>
+      <div class="stat-value">{{ deleted_logs }}</div>
+      <div class="stat-sub">Members deleted</div>
     </div>
   </div>
 
@@ -95,13 +95,13 @@
           </select>
         </div>
 
-        <!-- Severity -->
+        <!-- Status -->
         <div class="col-6 col-md-2">
-          <label class="form-label">Severity</label>
-          <select name="severity" class="form-select" onchange="this.form.submit()">
-            <option value="">All levels</option>
-            {% for val, label in severity_choices %}
-              <option value="{{ val }}"{% if severity_filter == val %} selected{% endif %}>{{ label }}</option>
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+            {% for val, label in status_choices %}
+              <option value="{{ val }}"{% if status_filter == val %} selected{% endif %}>{{ label }}</option>
             {% endfor %}
           </select>
         </div>
@@ -154,7 +154,7 @@
           <th>Action</th>
           <th>Target</th>
           <th>Description</th>
-          <th style="width:90px;">Severity</th>
+          <th style="width:90px;">Status</th>
         </tr>
       </thead>
       <tbody>
@@ -167,7 +167,7 @@
               {{ log.timestamp|date:"M d, Y" }}
             </span><br>
             <span style="font-size:11px;color:var(--muted);">
-              {{ log.timestamp|date:"H:i:s" }}
+              {{ log.timestamp|date:"h:i:s A" }}
             </span>
           </td>
 
@@ -259,14 +259,14 @@
             {% endif %}
           </td>
 
-          <!-- Severity -->
+          <!-- Status -->
           <td>
-            {% if log.severity == "info" %}
-              <span class="badge-active">Info</span>
-            {% elif log.severity == "warning" %}
-              <span class="badge-associate">Warning</span>
-            {% else %}
-              <span class="badge-inactive">Danger</span>
+            {% if log.status == "viewed" %}
+              <span class="badge-active">Viewed</span>
+            {% elif log.status == "updated" %}
+              <span class="badge-associate">Updated</span>
+            {% elif log.status == "deleted" %}
+              <span class="badge-inactive">Deleted</span>
             {% endif %}
           </td>
 
@@ -286,13 +286,13 @@
     </span>
     <div style="display:flex;gap:4px;">
       {% if page_obj.has_previous %}
-        <a href="?{% if q %}q={{ q }}&{% endif %}{% if action_filter %}action={{ action_filter }}&{% endif %}{% if severity_filter %}severity={{ severity_filter }}&{% endif %}{% if date_range %}date_range={{ date_range }}&{% endif %}page={{ page_obj.previous_page_number }}"
+        <a href="?{% if q %}q={{ q }}&{% endif %}{% if action_filter %}action={{ action_filter }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if date_range %}date_range={{ date_range }}&{% endif %}page={{ page_obj.previous_page_number }}"
            class="btn-outline" style="padding:6px 12px;font-size:12px;">
           <i data-lucide="chevron-left" class="lucide-icon"></i> Prev
         </a>
       {% endif %}
       {% if page_obj.has_next %}
-        <a href="?{% if q %}q={{ q }}&{% endif %}{% if action_filter %}action={{ action_filter }}&{% endif %}{% if severity_filter %}severity={{ severity_filter }}&{% endif %}{% if date_range %}date_range={{ date_range }}&{% endif %}page={{ page_obj.next_page_number }}"
+        <a href="?{% if q %}q={{ q }}&{% endif %}{% if action_filter %}action={{ action_filter }}&{% endif %}{% if status_filter %}status={{ status_filter }}&{% endif %}{% if date_range %}date_range={{ date_range }}&{% endif %}page={{ page_obj.next_page_number }}"
            class="btn-teal" style="padding:6px 12px;font-size:12px;">
           Next <i data-lucide="chevron-right" class="lucide-icon"></i>
         </a>
@@ -310,7 +310,7 @@
     </div>
     <div style="font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;">No logs found</div>
     <div style="font-size:13px;color:var(--muted);">
-      {% if q or action_filter or severity_filter or date_range %}
+      {% if q or action_filter or status_filter or date_range %}
         No results match your current filters.
         <a href="{% url 'administrator:admin_logs' %}" style="color:var(--teal);">Clear filters</a>
       {% else %}

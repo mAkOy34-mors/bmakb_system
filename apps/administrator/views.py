@@ -443,9 +443,9 @@ def admin_logs(request):
     if action_filter:
         qs = qs.filter(action=action_filter)
 
-    severity_filter = request.GET.get('severity', '').strip()
-    if severity_filter:
-        qs = qs.filter(severity=severity_filter)
+    status_filter = request.GET.get('status', '').strip()
+    if status_filter:
+        qs = qs.filter(status=status_filter)
 
     date_range = request.GET.get('date_range', '').strip()
     now = timezone.now()
@@ -461,21 +461,21 @@ def admin_logs(request):
 
     total_logs   = AdminLog.objects.count()
     today_logs   = AdminLog.objects.filter(timestamp__date=now.date()).count()
-    warning_logs = AdminLog.objects.filter(severity='warning').count()
-    danger_logs  = AdminLog.objects.filter(severity='danger').count()
+    updated_logs = AdminLog.objects.filter(status='updated').count()
+    deleted_logs = AdminLog.objects.filter(status='deleted').count()
 
     context = {
         'page_obj':          page_obj,
         'action_choices':    AdminLog.ACTION_CHOICES,
-        'severity_choices':  AdminLog.SEVERITY_CHOICES,
+        'status_choices':  AdminLog.STATUS_CHOICES,
         'q':                 q,
         'action_filter':     action_filter,
-        'severity_filter':   severity_filter,
+        'status_filter':   status_filter,
         'date_range':        date_range,
         'total_logs':        total_logs,
         'today_logs':        today_logs,
-        'warning_logs':      warning_logs,
-        'danger_logs':       danger_logs,
+        'updated_logs':      updated_logs,
+        'deleted_logs':       deleted_logs,
     }
     return render(request, 'administrator/admin_logs.html', context)
 
