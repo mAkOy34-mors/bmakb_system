@@ -1,0 +1,193 @@
+/* ── Export Button & Dropdown ─────────────────────────── */
+  .export-btn-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.25rem;
+    position: relative;
+  }
+
+  .export-main-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1e293b;
+    color: #f8fafc;
+    border: none;
+    border-radius: 8px 0 0 8px;
+    padding: 9px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  .export-main-btn:hover { background: #334155; }
+
+  .export-caret-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #334155;
+    color: #f8fafc;
+    border: none;
+    border-left: 1px solid #475569;
+    border-radius: 0 8px 8px 0;
+    padding: 9px 12px;
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  .export-caret-btn:hover { background: #475569; }
+
+  .export-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.13);
+    z-index: 999;
+    min-width: 210px;
+    overflow: hidden;
+    animation: ddFadeIn 0.15s ease;
+  }
+  .export-dropdown.open { display: block; }
+
+  @keyframes ddFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .export-dropdown-header {
+    padding: 10px 16px 7px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    text-transform: uppercase;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .export-option {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 16px;
+    font-size: 13.5px;
+    font-family: 'Georgia', serif;
+    color: #1e293b;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: background 0.13s;
+  }
+  .export-option:hover { background: #f8fafc; }
+  .export-option .exp-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .exp-icon.print-ic  { background: #eff6ff; color: #2563eb; }
+  .exp-icon.pdf-ic    { background: #fef2f2; color: #dc2626; }
+  .exp-icon.excel-ic  { background: #f0fdf4; color: #16a34a; }
+
+  .exp-label { line-height: 1.2; }
+  .exp-label small { display: block; font-size: 11px; color: #94a3b8; font-family: sans-serif; }
+
+  /* ── Print Styles ────────────────────────────────────────── */
+  @media print {
+  /* Hide sidebar, topbar, nav, export controls */
+  .sidebar,
+  .topbar,
+  nav,
+  .export-btn-wrap,
+  .chart-toggle-group {
+    display: none !important;
+  }
+
+  /* Show and reset the ancestor chain */
+  body,
+  .main-wrapper,
+  .main-content,
+  #analytics-content {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-report-header {
+    display: flex !important;
+  }
+
+  .chart-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 20px !important;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  .row { break-inside: avoid; }
+
+  @page {
+    margin: 18mm 15mm;
+    size: A4;
+  }
+}
+
+  /* ── Print Report Header (hidden on screen) ──────────────── */
+  .print-report-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 2px solid #1e293b;
+    margin-bottom: 22px;
+  }
+  .print-report-header .org-name {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Georgia', serif;
+    color: #1e293b;
+  }
+  .print-report-header .report-meta {
+    font-size: 11px;
+    color: #64748b;
+    text-align: right;
+    font-family: sans-serif;
+  }
+
+  /* ── Toast Notification ──────────────────────────────────── */
+  .export-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: #1e293b;
+    color: #f8fafc;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Georgia', serif;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.2);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .export-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .export-toast svg { flex-shrink: 0; }

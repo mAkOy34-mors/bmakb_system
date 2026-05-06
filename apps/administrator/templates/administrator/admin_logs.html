@@ -155,7 +155,6 @@
           <th>Target</th>
           <th>Description</th>
           <th style="width:90px;">Severity</th>
-          <th style="width:110px;">IP Address</th>
         </tr>
       </thead>
       <tbody>
@@ -269,13 +268,6 @@
             {% else %}
               <span class="badge-inactive">Danger</span>
             {% endif %}
-          </td>
-
-          <!-- IP -->
-          <td>
-            <span style="font-family:monospace;font-size:11px;color:var(--muted);">
-              {{ log.ip_address|default:"—" }}
-            </span>
           </td>
 
         </tr>
