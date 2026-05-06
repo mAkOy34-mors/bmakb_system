@@ -39,7 +39,15 @@ def admin_register(request):
         form = AdminRegisterForm(request.POST, request.FILES)
         if form.is_valid():
             admin = form.save()
+
             login(request, admin)
+
+            AdminLog.objects.create(
+                admin=admin,
+                action='register',
+                status='registered',
+                description=f'New administrator account created for {admin.get_full_name()}.',
+            )
             messages.success(
                 request,
                 f'Welcome, {admin.get_full_name()}! Your account has been created.'
@@ -68,7 +76,6 @@ def admin_login(request):
                 action='login',
                 status='session_start',
                 description='Administrator logged in.',
-                ip_address=get_client_ip(request),
             )
             messages.success(request, f'Welcome back, {user.get_full_name()}!')
             return redirect(request.GET.get('next', 'administrator:dashboard'))
@@ -456,6 +463,7 @@ def admin_logs(request):
     deleted_logs = AdminLog.objects.filter(status='deleted').count()
     login_logs = AdminLog.objects.filter(status='session_start').count()
     logout_logs = AdminLog.objects.filter(status='session_end').count()
+    registered = AdminLog.objects.filter(status='registered').count()
 
     context = {
         'page_obj':          page_obj,
@@ -472,6 +480,7 @@ def admin_logs(request):
         'deleted_logs':       deleted_logs,
         'login_logs':        login_logs,
         'logout_logs':       logout_logs,
+        'registered': registered,
     }
     return render(request, 'administrator/admin_logs.html', context)
 

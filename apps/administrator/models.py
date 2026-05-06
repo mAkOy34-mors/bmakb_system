@@ -52,6 +52,7 @@ class AdminLog(models.Model):
         ('added', 'Added'),
         ('session_start', 'Session Started'),
         ('session_end', 'Session Ended'),
+        ('registered', 'Registered'),
     ]
 
     admin = models.ForeignKey(

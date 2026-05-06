@@ -274,6 +274,8 @@
     <span class="badge-active">Login</span>
   {% elif log.status == "session_end" %}
     <span class="badge-inactive">Logout</span>
+  {% elif log.status == "registered" %}
+    <span class="badge-associate">Register</span>
   {% endif %}
 </td>
 
