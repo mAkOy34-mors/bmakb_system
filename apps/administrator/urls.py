@@ -16,4 +16,5 @@ urlpatterns = [
     path('verify-otp/',       views.verify_otp,      name='verify_otp'),
     path('resend-otp/',       views.resend_otp,      name='resend_otp'),
     path('reset-password/',   views.reset_password,  name='reset_password'),
+    path('analytics/export-pdf/', views.analytics_pdf_export, name='analytics_pdf_export'),
 ]

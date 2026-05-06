@@ -359,4 +359,5 @@
 <script src="{% static 'administrator/js/apexcharts.min.js' %}"></script>
 <script src="{% static 'administrator/js/analytics.js' %}"></script>
 <script src="{% static 'administrator/js/analytics-export.js' %}"></script>
+<script>window.ANALYTICS_PDF_URL = "{% url 'administrator:analytics_pdf_export' %}";</script>
 {% endblock %}

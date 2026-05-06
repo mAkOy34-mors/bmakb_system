@@ -38,3 +38,4 @@ factory-boy>=3.3              # Model factories for tests
 
 # ── Production Server ─────────────────────────────────────────────────────────
 gunicorn>=22.0                # WSGI server for production
+xhtml2pdf

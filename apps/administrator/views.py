@@ -1,28 +1,32 @@
 # apps/administrator/views.py
 
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q, Count, Sum, ExpressionWrapper, DecimalField, F
-from django.db.models.functions import TruncMonth, TruncWeek, TruncDay
+from django.db.models.functions import TruncWeek, TruncDay
 from django.urls import reverse
-from django.utils import timezone
 from datetime import timedelta
-from collections import defaultdict
 import json
 
 from .forms import AdminRegisterForm, AdminLoginForm
 from .models import AdminLog
-from .log_utils import log_action, get_client_ip
-from apps.membership.models import Member, MemberTransaction
+from .log_utils import get_client_ip
+from apps.membership.models import Member
 
-from django.core.mail import send_mail, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils.crypto import get_random_string
 import random
+
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.db.models import Count, Sum, Q, ExpressionWrapper, DecimalField, F
+from django.db.models.functions import TruncMonth
+from collections import defaultdict
+from io import BytesIO
+from xhtml2pdf import pisa
 
 User = get_user_model()
 
@@ -856,3 +860,416 @@ def reset_password(request):
                 return redirect('administrator:forgot_password')
 
     return render(request, 'administrator/reset_password.html')
+
+@login_required
+def analytics_pdf_export(request):
+    """
+    Generates and downloads the analytics report as a real PDF file.
+    Uses xhtml2pdf — pure Python, works on Windows/Linux/Mac with no system libs.
+    Data is fetched directly from the same querysets used in the analytics view.
+    """
+
+    # ── Re-run the same querysets from your analytics view ───────────────────
+    from apps.membership.models import Member
+
+    # Monthly membership trend
+    monthly_qs = (
+        Member.objects
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+    monthly_labels = [e['month'].strftime('%b %Y') for e in monthly_qs]
+    monthly_data   = [e['count'] for e in monthly_qs]
+
+    # Membership types
+    regular_count   = Member.objects.filter(type_of_membership='regular').count()
+    associate_count = Member.objects.filter(type_of_membership='associate').count()
+    type_labels     = ['Regular', 'Associate']
+    type_values     = [regular_count, associate_count]
+
+    # Gender counts
+    total_members  = Member.objects.count()
+    male_members   = Member.objects.filter(gender='male').count()
+    female_members = Member.objects.filter(gender='female').count()
+    other_members  = Member.objects.filter(gender='other').count()
+
+    # Barangay breakdown
+    barangay_map = defaultdict(lambda: {'total': 0, 'male': 0, 'female': 0})
+    for m in Member.objects.values('address', 'gender'):
+        raw      = (m['address'] or '').strip()
+        barangay = raw.split(',')[0].strip() if raw else 'Unknown'
+        barangay_map[barangay]['total'] += 1
+        if m['gender'] == 'male':
+            barangay_map[barangay]['male'] += 1
+        elif m['gender'] == 'female':
+            barangay_map[barangay]['female'] += 1
+
+    sorted_barangays = sorted(
+        barangay_map.items(),
+        key=lambda x: x[1]['total'],
+        reverse=True,
+    )[:20]
+    barangay_labels = [item[0]           for item in sorted_barangays]
+    barangay_data   = [item[1]['total']  for item in sorted_barangays]
+    barangay_male   = [item[1]['male']   for item in sorted_barangays]
+    barangay_female = [item[1]['female'] for item in sorted_barangays]
+
+    # Revenue trend (CBU + Subscription + Savings)
+    revenue_qs = (
+        Member.objects
+        .annotate(month=TruncMonth('date_joined'))
+        .values('month')
+        .annotate(
+            total=Sum(
+                ExpressionWrapper(
+                    F('con') + F('subscription') + F('savings'),
+                    output_field=DecimalField()
+                )
+            )
+        )
+        .order_by('month')
+    )
+    revenue_labels = [e['month'].strftime('%b %Y') for e in revenue_qs]
+    revenue_data   = [float(e['total'] or 0) for e in revenue_qs]
+
+    # CBU trend
+    cbu_qs = (
+        Member.objects
+        .annotate(month=TruncMonth('date_joined'))
+        .values('month')
+        .annotate(total=Sum('con'))
+        .order_by('month')
+    )
+    cbu_labels = [e['month'].strftime('%b %Y') for e in cbu_qs]
+    cbu_data   = [float(e['total'] or 0) for e in cbu_qs]
+
+    # Subscription trend
+    sub_qs = (
+        Member.objects
+        .filter(subscription__gt=0)
+        .annotate(month=TruncMonth('date_joined'))
+        .values('month')
+        .annotate(total=Sum('subscription'))
+        .order_by('month')
+    )
+    subscription_labels = [e['month'].strftime('%b %Y') for e in sub_qs]
+    subscription_data   = [float(e['total'] or 0) for e in sub_qs]
+
+    # Initial Paid-Up trend
+    ip_qs = (
+        Member.objects
+        .filter(initial_paid_up__gt=0)
+        .annotate(month=TruncMonth('date_joined'))
+        .values('month')
+        .annotate(total=Sum('initial_paid_up'))
+        .order_by('month')
+    )
+    initial_paid_up_labels = [e['month'].strftime('%b %Y') for e in ip_qs]
+    initial_paid_up_data   = [float(e['total'] or 0) for e in ip_qs]
+
+    # Savings trend
+    sav_qs = (
+        Member.objects
+        .filter(savings__gt=0)
+        .annotate(month=TruncMonth('date_joined'))
+        .values('month')
+        .annotate(total=Sum('savings'))
+        .order_by('month')
+    )
+    savings_labels = [e['month'].strftime('%b %Y') for e in sav_qs]
+    savings_data   = [float(e['total'] or 0) for e in sav_qs]
+
+    # Active vs Inactive trend
+    status_qs = (
+        Member.objects
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(
+            active=Count('id', filter=Q(is_active=True)),
+            inactive=Count('id', filter=Q(is_active=False)),
+        )
+        .order_by('month')
+    )
+    status_labels        = [e['month'].strftime('%b %Y') for e in status_qs]
+    status_active_data   = [e['active']   for e in status_qs]
+    status_inactive_data = [e['inactive'] for e in status_qs]
+
+    # Totals
+    total_revenue        = sum(revenue_data)
+    total_cbu            = float(Member.objects.aggregate(t=Sum('con'))['t'] or 0)
+    total_subscription   = sum(subscription_data)
+    total_initial_paidup = sum(initial_paid_up_data)
+    total_savings        = float(Member.objects.aggregate(t=Sum('savings'))['t'] or 0)
+    total_active         = Member.objects.filter(is_active=True).count()
+    total_inactive       = Member.objects.filter(is_active=False).count()
+    gender_total         = male_members + female_members + other_members
+    type_total           = regular_count + associate_count
+
+    # ── Helpers ───────────────────────────────────────────────────────────────
+    def peso(val):
+        try:
+            return '&#8369;{:,.2f}'.format(float(val or 0))
+        except (ValueError, TypeError):
+            return '&#8369;0.00'
+
+    def num(val):
+        try:
+            return '{:,}'.format(int(float(val or 0)))
+        except (ValueError, TypeError):
+            return '0'
+
+    def pct(part, total):
+        try:
+            return '{:.1f}%'.format(float(part) / float(total) * 100) if float(total) else '0.0%'
+        except (ValueError, TypeError, ZeroDivisionError):
+            return '0.0%'
+
+    def cumsum(lst):
+        total, result = 0.0, []
+        for v in (lst or []):
+            total += float(v or 0)
+            result.append(round(total, 2))
+        return result
+
+    now_str = timezone.now().strftime('%B %d, %Y %I:%M %p')
+
+    # ── Table builder ─────────────────────────────────────────────────────────
+    def make_table(headers, rows, footer=None, right_cols=None):
+        right_cols = right_cols or list(range(1, len(headers)))
+        if not rows:
+            return '<p class="no-data">No data available.</p>'
+
+        def align(i):
+            return 'text-align:right;' if i in right_cols else ''
+
+        head = ''.join(
+            f'<th style="text-align:left;{align(i)}">{h}</th>'
+            for i, h in enumerate(headers)
+        )
+        body = ''
+        for ri, row in enumerate(rows):
+            bg = '#ffffff' if ri % 2 == 0 else '#f8fafc'
+            cells = ''.join(
+                f'<td style="background:{bg};{align(i)}">{cell}</td>'
+                for i, cell in enumerate(row)
+            )
+            body += f'<tr>{cells}</tr>'
+
+        foot = ''
+        if footer:
+            cells = ''.join(
+                f'<td style="background:#f1f5f9;font-weight:700;border-top:2px solid #cbd5e1;{align(i)}">{cell}</td>'
+                for i, cell in enumerate(footer)
+            )
+            foot = f'<tfoot><tr>{cells}</tr></tfoot>'
+
+        return (
+            f'<table class="data-table">'
+            f'<thead><tr>{head}</tr></thead>'
+            f'<tbody>{body}</tbody>'
+            f'{foot}'
+            f'</table>'
+        )
+
+    def section_title(label, color):
+        return (
+            f'<div style="border-bottom:2px solid #1e293b;margin-bottom:8px;'
+            f'padding-bottom:5px;margin-top:18px;">'
+            f'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;'
+            f'background:{color};margin-right:7px;vertical-align:middle;"></span>'
+            f'<span style="font-size:11px;font-weight:700;text-transform:uppercase;'
+            f'letter-spacing:.07em;color:#1e293b;">{label}</span>'
+            f'</div>'
+        )
+
+    # ── Pre-build rows ────────────────────────────────────────────────────────
+    cbu_cum = cumsum(cbu_data)
+    sav_cum = cumsum(savings_data)
+
+    member_rows = [
+        [lbl, num(monthly_data[i] if i < len(monthly_data) else 0)]
+        for i, lbl in enumerate(monthly_labels)
+    ]
+    type_rows = [
+        [lbl,
+         num(type_values[i] if i < len(type_values) else 0),
+         pct(type_values[i] if i < len(type_values) else 0, type_total)]
+        for i, lbl in enumerate(type_labels)
+    ]
+    gender_rows = [
+        ['Male',   num(male_members),   pct(male_members,   gender_total)],
+        ['Female', num(female_members), pct(female_members, gender_total)],
+        ['Other',  num(other_members),  pct(other_members,  gender_total)],
+    ]
+    barangay_rows = [
+        [lbl,
+         num(barangay_data[i]   if i < len(barangay_data)   else 0),
+         num(barangay_male[i]   if i < len(barangay_male)   else 0),
+         num(barangay_female[i] if i < len(barangay_female) else 0),
+         num(max(0, int(barangay_data[i]   if i < len(barangay_data)   else 0)
+                  - int(barangay_male[i]   if i < len(barangay_male)   else 0)
+                  - int(barangay_female[i] if i < len(barangay_female) else 0)))]
+        for i, lbl in enumerate(barangay_labels)
+    ]
+    revenue_rows = [
+        [lbl, peso(revenue_data[i] if i < len(revenue_data) else 0)]
+        for i, lbl in enumerate(revenue_labels)
+    ]
+    cbu_rows = [
+        [lbl,
+         peso(cbu_data[i] if i < len(cbu_data) else 0),
+         peso(cbu_cum[i]  if i < len(cbu_cum)  else 0)]
+        for i, lbl in enumerate(cbu_labels)
+    ]
+    sub_rows = [
+        [lbl, peso(subscription_data[i] if i < len(subscription_data) else 0)]
+        for i, lbl in enumerate(subscription_labels)
+    ]
+    ip_rows = [
+        [lbl, peso(initial_paid_up_data[i] if i < len(initial_paid_up_data) else 0)]
+        for i, lbl in enumerate(initial_paid_up_labels)
+    ]
+    sav_rows = [
+        [lbl,
+         peso(savings_data[i] if i < len(savings_data) else 0),
+         peso(sav_cum[i]      if i < len(sav_cum)      else 0)]
+        for i, lbl in enumerate(savings_labels)
+    ]
+    status_rows = [
+        [lbl,
+         f'<b style="color:#1d6a5b;">{num(status_active_data[i]   if i < len(status_active_data)   else 0)}</b>',
+         f'<span style="color:#dc2626;">{num(status_inactive_data[i] if i < len(status_inactive_data) else 0)}</span>']
+        for i, lbl in enumerate(status_labels)
+    ]
+
+    # ── Full HTML document ────────────────────────────────────────────────────
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BMAKB Analytics Report</title>
+<style>
+  @page {{ size: A4; margin: 16mm 14mm; }}
+  body {{ font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1e293b; }}
+  .data-table {{ width: 100%; border-collapse: collapse; font-size: 10.5px; margin-bottom: 4px; }}
+  .data-table th {{ background: #1e293b; color: #f8fafc; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 5px 8px; }}
+  .data-table td {{ padding: 4px 8px; border-bottom: 1px solid #f1f5f9; color: #334155; }}
+  .cards-table {{ width: 100%; border-collapse: separate; border-spacing: 6px 0; margin-bottom: 18px; }}
+  .card-cell {{ background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; width: 25%; vertical-align: top; }}
+  .card-label {{ font-size: 8px; text-transform: uppercase; letter-spacing: .07em; color: #64748b; margin-bottom: 2px; }}
+  .card-value {{ font-size: 15px; font-weight: 700; color: #1e293b; }}
+  .card-value.money {{ font-size: 12px; color: #1d6a5b; }}
+  .card-sub {{ font-size: 8.5px; color: #94a3b8; margin-top: 2px; }}
+  .two-col-table {{ width: 100%; border-collapse: separate; border-spacing: 12px 0; }}
+  .two-col-cell {{ width: 50%; vertical-align: top; }}
+  .no-data {{ color: #94a3b8; font-size: 10px; text-align: center; padding: 10px 0; }}
+  .report-footer {{ border-top: 1px solid #e2e8f0; margin-top: 28px; padding-top: 7px; font-size: 9px; color: #94a3b8; }}
+</style>
+</head>
+<body>
+
+<!-- Report Header -->
+<table width="100%" style="border-bottom:3px solid #1e293b;padding-bottom:12px;margin-bottom:16px;">
+  <tr>
+    <td>
+      <div style="font-size:20px;font-weight:700;color:#1e293b;">BMAKB</div>
+      <div style="font-size:10px;color:#64748b;margin-top:2px;">Analytics Report &mdash; Membership &amp; Financial Dashboard</div>
+    </td>
+    <td style="text-align:right;font-size:10px;color:#475569;vertical-align:top;">
+      Generated: <b>{now_str}</b><br>
+      Total Members: <b>{num(total_members)}</b><br>
+      Active: <b>{num(total_active)}</b> &nbsp;&middot;&nbsp; Inactive: <b>{num(total_inactive)}</b>
+    </td>
+  </tr>
+</table>
+
+<!-- Summary Cards -->
+<table class="cards-table">
+  <tr>
+    <td class="card-cell">
+      <div class="card-label">Total Members</div>
+      <div class="card-value">{num(total_members)}</div>
+      <div class="card-sub">Active: {num(total_active)} &middot; Inactive: {num(total_inactive)}</div>
+    </td>
+    <td class="card-cell">
+      <div class="card-label">Total Revenue</div>
+      <div class="card-value money">{peso(total_revenue)}</div>
+      <div class="card-sub">{len(revenue_labels)} periods</div>
+    </td>
+    <td class="card-cell">
+      <div class="card-label">Total CBU</div>
+      <div class="card-value money">{peso(total_cbu)}</div>
+      <div class="card-sub">Capital Build-Up</div>
+    </td>
+    <td class="card-cell">
+      <div class="card-label">Total Savings</div>
+      <div class="card-value money">{peso(total_savings)}</div>
+      <div class="card-sub">Cumulative savings</div>
+    </td>
+  </tr>
+</table>
+
+{section_title('Monthly Membership Trend', '#db2777')}
+{make_table(['Month', 'New Members'], member_rows)}
+
+<table class="two-col-table"><tr>
+  <td class="two-col-cell">
+    {section_title('Membership Breakdown', '#7c3aed')}
+    {make_table(['Type', 'Count', '% Share'], type_rows)}
+  </td>
+  <td class="two-col-cell">
+    {section_title('Gender Breakdown', '#f43f5e')}
+    {make_table(['Gender', 'Count', '% Share'], gender_rows)}
+  </td>
+</tr></table>
+
+{section_title('Members by Barangay', '#10b981')}
+{make_table(['Barangay', 'Total', 'Male', 'Female', 'Other'], barangay_rows, right_cols=[1,2,3,4])}
+
+{section_title('Revenue Trend', '#2563eb')}
+{make_table(['Month', 'Revenue'], revenue_rows, footer=['Total', peso(total_revenue)])}
+
+{section_title('CBU Accumulation Trend', '#6366f1')}
+{make_table(['Month', 'Monthly CBU', 'Cumulative CBU'], cbu_rows, footer=['Total', peso(total_cbu), '&mdash;'])}
+
+<table class="two-col-table"><tr>
+  <td class="two-col-cell">
+    {section_title('Subscription Trend', '#f43f5e')}
+    {make_table(['Month', 'Amount'], sub_rows, footer=['Total', peso(total_subscription)])}
+  </td>
+  <td class="two-col-cell">
+    {section_title('Initial Paid-Up Trend', '#0ea5e9')}
+    {make_table(['Month', 'Amount'], ip_rows, footer=['Total', peso(total_initial_paidup)])}
+  </td>
+</tr></table>
+
+{section_title('Savings Trend', '#14b8a6')}
+{make_table(['Month', 'Monthly Savings', 'Cumulative Savings'], sav_rows, footer=['Total', peso(total_savings), '&mdash;'])}
+
+{section_title('Active vs Inactive Members', '#10b981')}
+{make_table(['Month', 'Active', 'Inactive'], status_rows)}
+
+<!-- Footer -->
+<div class="report-footer">
+  <table width="100%"><tr>
+    <td>BMAKB Analytics Report</td>
+    <td style="text-align:right;">Generated: {now_str}</td>
+  </tr></table>
+</div>
+
+</body>
+</html>"""
+
+    # ── Render HTML → PDF ─────────────────────────────────────────────────────
+    buffer = BytesIO()
+    pisa_status = pisa.CreatePDF(html, dest=buffer)
+
+    if pisa_status.err:
+        return HttpResponse('PDF generation failed.', status=500)
+
+    filename = f"BMAKB_Analytics_{timezone.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
