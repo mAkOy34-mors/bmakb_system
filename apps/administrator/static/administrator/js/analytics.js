@@ -5,24 +5,90 @@ document.addEventListener('DOMContentLoaded', function () {
   // ── Lucide Icons ─────────────────────────────────────────
   lucide.createIcons();
 
-  // ── Read Data from Canvas Data Attributes ────────────────
-  const memberCanvas  = document.getElementById('memberChart');
-  const revenueCanvas = document.getElementById('revenueChart');
-  const typeCanvas    = document.getElementById('typeChart');
+  // ── Safe JSON parser ──────────────────────────────────────
+  function parse(el, key) {
+    try { return JSON.parse((el && el.dataset[key]) || '[]'); }
+    catch { return []; }
+  }
 
-  const monthlyLabels = JSON.parse(memberCanvas.dataset.labels   || '[]');
-  const monthlyData   = JSON.parse(memberCanvas.dataset.values   || '[]');
-  const revenueLabels = JSON.parse(revenueCanvas.dataset.labels  || '[]');
-  const revenueData   = JSON.parse(revenueCanvas.dataset.values  || '[]');
-  const typeLabels    = JSON.parse(typeCanvas.dataset.labels     || '["Regular","Associate"]');
-  const typeValues    = JSON.parse(typeCanvas.dataset.values     || '[0,0]');
+  // ── Grab all chart elements ───────────────────────────────
+  const memberCanvas      = document.getElementById('memberChart');
+  const revenueCanvas     = document.getElementById('revenueChart');
+  const typeCanvas        = document.getElementById('typeChart');
+  const genderEl          = document.getElementById('genderChart');
+  const barangayEl        = document.getElementById('barangayChart');
+  const cbuEl             = document.getElementById('cbuChart');
+  const subscriptionEl    = document.getElementById('subscriptionChart');
+  const initialPaidUpEl   = document.getElementById('initialPaidUpChart');
+  const savingsEl         = document.getElementById('savingsChart');
+  const statusEl          = document.getElementById('statusChart');
+
+  // ── Parse all data ────────────────────────────────────────
+  const monthlyLabels  = parse(memberCanvas, 'labels');
+  const monthlyData    = parse(memberCanvas, 'values');
+  const dailyLabels    = parse(memberCanvas, 'dailyLabels');
+  const dailyData      = parse(memberCanvas, 'dailyValues');
+  const weeklyLabels   = parse(memberCanvas, 'weeklyLabels');
+  const weeklyData     = parse(memberCanvas, 'weeklyValues');
+
+  const revenueLabels  = parse(revenueCanvas, 'labels');
+  const revenueData    = parse(revenueCanvas, 'values');
+
+  const typeLabels     = parse(typeCanvas, 'labels');
+  const typeValues     = parse(typeCanvas, 'values');
+
+  const genderLabels   = parse(genderEl, 'labels');
+  const genderValues   = parse(genderEl, 'values');
+
+  const bLabels        = parse(barangayEl, 'labels');
+  const bTotal         = parse(barangayEl, 'values');
+  const bMale          = parse(barangayEl, 'male');
+  const bFemale        = parse(barangayEl, 'female');
+
+  const cbuLabels      = parse(cbuEl, 'labels');
+  const cbuValues      = parse(cbuEl, 'values');
+
+  const subLabels      = parse(subscriptionEl, 'labels');
+  const subValues      = parse(subscriptionEl, 'values');
+
+  const ipLabels       = parse(initialPaidUpEl, 'labels');
+  const ipValues       = parse(initialPaidUpEl, 'values');
+
+  const savLabels      = parse(savingsEl, 'labels');
+  const savValues      = parse(savingsEl, 'values');
+
+  const statusLabels   = parse(statusEl, 'labels');
+  const statusActive   = parse(statusEl, 'active');
+  const statusInactive = parse(statusEl, 'inactive');
+
+  // ── Expose ALL data globally for analytics-export.js ─────
+  window.BMAKB_DATA = {
+    monthlyLabels,  monthlyData,
+    dailyLabels,    dailyData,
+    weeklyLabels,   weeklyData,
+    typeLabels,     typeValues,
+    genderLabels,   genderValues,
+    barangayLabels: bLabels,
+    barangayData:   bTotal,
+    barangayMale:   bMale,
+    barangayFemale: bFemale,
+    revenueLabels,  revenueData,
+    cbuLabels,      cbuData:            cbuValues,
+    subscriptionLabels: subLabels,
+    subscriptionData:   subValues,
+    initialPaidUpLabels: ipLabels,
+    initialPaidUpData:   ipValues,
+    savingsLabels:  savLabels,
+    savingsData:    savValues,
+    statusLabels,   statusActive,       statusInactive,
+  };
 
   // ── Consistent Chart Sizes ────────────────────────────────
-  const HEIGHT_LINE = 260;   // area / line charts
-  const HEIGHT_BAR  = 260;   // bar charts
-  const HEIGHT_PIE  = 300;   // pie charts (needs more room for legend)
+  const HEIGHT_LINE = 260;
+  const HEIGHT_BAR  = 260;
+  const HEIGHT_PIE  = 300;
 
-  // ── Academic / Textbook Theme ─────────────────────────────
+  // ── Theme ─────────────────────────────────────────────────
   const fontFamily  = "'Georgia', 'Times New Roman', serif";
   const gridColor   = 'rgba(0,0,0,0.12)';
   const axisColor   = 'rgba(0,0,0,0.5)';
@@ -32,40 +98,26 @@ document.addEventListener('DOMContentLoaded', function () {
   const sharedXaxis = {
     labels: { style: labelStyle },
     axisBorder: { show: true, color: axisColor },
-    axisTicks:  { show: true,  color: axisColor },
+    axisTicks:  { show: true, color: axisColor },
   };
-  const sharedYaxis = {
-    labels: { style: labelStyle },
-  };
-  const sharedGrid = {
-    borderColor: gridColor,
-    strokeDashArray: 5,
+  const sharedYaxis = { labels: { style: labelStyle } };
+  const sharedGrid  = {
+    borderColor: gridColor, strokeDashArray: 5,
     xaxis: { lines: { show: false } },
     yaxis: { lines: { show: true  } },
   };
-  const tooltipStyle = {
-    theme: 'light',
-    style: { fontSize: '12px', fontFamily },
-  };
+  const tooltipStyle = { theme: 'light', style: { fontSize: '12px', fontFamily } };
 
   const COLORS = {
-    amber:   '#e5950a',
-    green:   '#1d6a5b',
-    blue:    '#2563eb',
-    purple:  '#7c3aed',
-    red:     '#dc2626',
-    teal:    '#0d9488',
-    pink:    '#db2777',
-    indigo:  '#4f46e5',
-    sky:     '#0284c7',
+    amber:  '#e5950a', green:  '#1d6a5b',
+    blue:   '#2563eb', purple: '#7c3aed',
+    red:    '#dc2626', teal:   '#0d9488',
+    pink:   '#db2777', indigo: '#4f46e5', sky: '#0284c7',
   };
 
-  // ── Shared legend config ──────────────────────────────────
   const sharedLegend = {
-    position: 'top',
-    horizontalAlign: 'left',
-    fontSize: '12px',
-    fontFamily,
+    position: 'top', horizontalAlign: 'left',
+    fontSize: '12px', fontFamily,
     labels: { colors: tickColor },
     markers: { width: 12, height: 12, radius: 2 },
   };
@@ -74,11 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const memberOptions = {
     series: [{ name: 'New Members', data: monthlyData }],
     chart: {
-      type: 'area',
-      height: HEIGHT_LINE,
-      fontFamily,
-      toolbar: { show: false },
-      zoom: { enabled: false },
+      type: 'area', height: HEIGHT_LINE, fontFamily,
+      toolbar: { show: false }, zoom: { enabled: false },
       animations: { enabled: true, easing: 'easeinout', speed: 600 },
     },
     stroke: { curve: 'smooth', width: 3 },
@@ -86,10 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
     fill: {
       type: 'gradient',
       gradient: {
-        shade: 'light', type: 'vertical',
-        shadeIntensity: 0.2,
-        gradientToColors: [COLORS.pink],
-        opacityFrom: 0.3, opacityTo: 0.02,
+        shade: 'light', type: 'vertical', shadeIntensity: 0.2,
+        gradientToColors: [COLORS.pink], opacityFrom: 0.3, opacityTo: 0.02,
       },
     },
     markers: {
@@ -98,8 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
       shape: 'circle', hover: { size: 7 },
     },
     xaxis: {
-      categories: monthlyLabels,
-      ...sharedXaxis,
+      categories: monthlyLabels, ...sharedXaxis,
       title: { text: 'Month', style: { color: tickColor, fontSize: '11px', fontFamily } },
     },
     yaxis: {
@@ -117,47 +163,30 @@ document.addEventListener('DOMContentLoaded', function () {
   memberChart.render();
 
   // ── 2. Bar Chart — Revenue Trend ─────────────────────────
-  const revenueOptions = {
+  new ApexCharts(document.getElementById('revenueChart'), {
     series: [{ name: 'Revenue', data: revenueData }],
-    chart: {
-      type: 'bar',
-      height: HEIGHT_BAR,
-      fontFamily,
-      toolbar: { show: false },
-      animations: { enabled: false },
-    },
+    chart: { type: 'bar', height: HEIGHT_BAR, fontFamily, toolbar: { show: false }, animations: { enabled: false } },
     colors: [COLORS.blue],
     plotOptions: { bar: { borderRadius: 0, columnWidth: '60%' } },
     fill: { type: 'solid', opacity: 1 },
     xaxis: {
-      categories: revenueLabels,
-      ...sharedXaxis,
+      categories: revenueLabels, ...sharedXaxis,
       title: { text: 'Month', style: { color: tickColor, fontSize: '11px', fontFamily } },
     },
     yaxis: {
       ...sharedYaxis,
       title: { text: 'Revenue (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
-      labels: {
-        style: labelStyle,
-        formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val),
-      },
+      labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val/1000).toFixed(0)+'k' : val) },
     },
     grid: sharedGrid,
     tooltip: { ...tooltipStyle, y: { formatter: val => '₱' + val.toLocaleString() } },
     dataLabels: { enabled: false },
-  };
-
-  new ApexCharts(document.getElementById('revenueChart'), revenueOptions).render();
+  }).render();
 
   // ── 3. Pie Chart — Membership Types ──────────────────────
-  const typeOptions = {
+  new ApexCharts(document.getElementById('typeChart'), {
     series: typeValues,
-    chart: {
-      type: 'pie',
-      height: HEIGHT_PIE,
-      fontFamily,
-      animations: { enabled: false },
-    },
+    chart: { type: 'pie', height: HEIGHT_PIE, fontFamily, animations: { enabled: false } },
     labels: typeLabels,
     colors: [COLORS.green, COLORS.blue, COLORS.amber, COLORS.purple],
     legend: {
@@ -167,23 +196,16 @@ document.addEventListener('DOMContentLoaded', function () {
       itemMargin: { horizontal: 10, vertical: 4 },
     },
     dataLabels: {
-      enabled: true,
-      formatter: val => val.toFixed(1) + '%',
+      enabled: true, formatter: val => val.toFixed(1) + '%',
       style: { fontSize: '11px', fontFamily, fontWeight: '600', colors: ['#fff'] },
       dropShadow: { enabled: false },
     },
     stroke: { width: 2, colors: ['#fff'] },
     tooltip: { ...tooltipStyle, y: { formatter: val => val + ' members' } },
-  };
-
-  new ApexCharts(document.getElementById('typeChart'), typeOptions).render();
+  }).render();
 
   // ── 4. Pie Chart — Gender Breakdown ──────────────────────
-  const genderEl = document.getElementById('genderChart');
   if (genderEl) {
-    const genderLabels = JSON.parse(genderEl.dataset.labels || '["Male","Female","Other"]');
-    const genderValues = JSON.parse(genderEl.dataset.values || '[0,0,0]');
-
     new ApexCharts(genderEl, {
       series: genderValues,
       chart: { type: 'pie', height: HEIGHT_PIE, fontFamily, animations: { enabled: false } },
@@ -196,8 +218,7 @@ document.addEventListener('DOMContentLoaded', function () {
         itemMargin: { horizontal: 10, vertical: 4 },
       },
       dataLabels: {
-        enabled: true,
-        formatter: val => val.toFixed(1) + '%',
+        enabled: true, formatter: val => val.toFixed(1) + '%',
         style: { fontSize: '11px', fontFamily, fontWeight: '600', colors: ['#fff'] },
         dropShadow: { enabled: false },
       },
@@ -207,19 +228,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ── 5. Horizontal Stacked Bar — Members by Barangay ──────
-  const barangayEl = document.getElementById('barangayChart');
   if (barangayEl) {
-    const bLabels = JSON.parse(barangayEl.dataset.labels  || '[]');
-    const bTotal  = JSON.parse(barangayEl.dataset.values  || '[]');
-    const bMale   = JSON.parse(barangayEl.dataset.male    || '[]');
-    const bFemale = JSON.parse(barangayEl.dataset.female  || '[]');
-
     if (!bLabels.length) {
       barangayEl.innerHTML =
         '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No barangay data yet.</p>';
     } else {
-      const bOther = bTotal.map((t, i) => Math.max(0, t - (bMale[i] || 0) - (bFemale[i] || 0)));
-      // Each barangay row = 44px; min 300px so short lists don't look sparse
+      const bOther      = bTotal.map((t, i) => Math.max(0, t - (bMale[i]||0) - (bFemale[i]||0)));
       const chartHeight = Math.max(300, bLabels.length * 44 + 80);
 
       new ApexCharts(barangayEl, {
@@ -245,36 +259,25 @@ document.addEventListener('DOMContentLoaded', function () {
         yaxis: { labels: { style: { colors: tickColor, fontSize: '12px', fontFamily }, maxWidth: 180 } },
         legend: { ...sharedLegend },
         dataLabels: {
-          enabled: true,
-          formatter: val => (val > 0 ? val : ''),
+          enabled: true, formatter: val => (val > 0 ? val : ''),
           style: { fontSize: '11px', fontFamily, fontWeight: '600', colors: ['#fff'] },
           dropShadow: { enabled: false },
         },
-        tooltip: {
-          shared: true, intersect: false, ...tooltipStyle,
-          y: { formatter: val => val + ' members' },
-        },
+        tooltip: { shared: true, intersect: false, ...tooltipStyle, y: { formatter: val => val + ' members' } },
         grid: { ...sharedGrid, xaxis: { lines: { show: true } }, yaxis: { lines: { show: false } } },
       }).render();
     }
   }
 
   // ── 6. Area Chart — CBU Accumulation Trend ───────────────
-  const cbuEl = document.getElementById('cbuChart');
   if (cbuEl) {
-    const cbuLabels = JSON.parse(cbuEl.dataset.labels || '[]');
-    const cbuValues = JSON.parse(cbuEl.dataset.values || '[]');
-    const hasData   = cbuLabels.length > 0 && cbuValues.some(v => v > 0);
-
-    if (!hasData) {
+    if (!cbuLabels.length || !cbuValues.some(v => v > 0)) {
       cbuEl.innerHTML =
         '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No CBU data yet.</p>';
     } else {
       const cbuCumulative = cbuValues.reduce((acc, val, i) => {
-        acc.push(+((acc[i - 1] || 0) + val).toFixed(2));
-        return acc;
+        acc.push(+((acc[i-1]||0) + val).toFixed(2)); return acc;
       }, []);
-
       new ApexCharts(cbuEl, {
         series: [
           { name: 'Monthly CBU',    data: cbuValues     },
@@ -302,7 +305,7 @@ document.addEventListener('DOMContentLoaded', function () {
         yaxis: {
           ...sharedYaxis,
           title: { text: 'CBU (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
-          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val) },
+          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val/1000).toFixed(0)+'k' : val) },
         },
         grid: sharedGrid,
         tooltip: { shared: true, intersect: false, ...tooltipStyle, y: { formatter: val => '₱' + val.toLocaleString() } },
@@ -313,11 +316,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ── 7. Bar Chart — Subscription Trend ────────────────────
-  const subscriptionEl = document.getElementById('subscriptionChart');
   if (subscriptionEl) {
-    const subLabels = JSON.parse(subscriptionEl.dataset.labels || '[]');
-    const subValues = JSON.parse(subscriptionEl.dataset.values || '[]');
-
     if (!subLabels.length || !subValues.some(v => v > 0)) {
       subscriptionEl.innerHTML =
         '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No subscription data yet.</p>';
@@ -335,7 +334,7 @@ document.addEventListener('DOMContentLoaded', function () {
         yaxis: {
           ...sharedYaxis,
           title: { text: 'Amount (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
-          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val) },
+          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val/1000).toFixed(0)+'k' : val) },
         },
         grid: sharedGrid,
         tooltip: { ...tooltipStyle, y: { formatter: val => '₱' + val.toLocaleString() } },
@@ -345,11 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ── 8. Bar Chart — Initial Paid-Up Trend ─────────────────
-  const initialPaidUpEl = document.getElementById('initialPaidUpChart');
   if (initialPaidUpEl) {
-    const ipLabels = JSON.parse(initialPaidUpEl.dataset.labels || '[]');
-    const ipValues = JSON.parse(initialPaidUpEl.dataset.values || '[]');
-
     if (!ipLabels.length || !ipValues.some(v => v > 0)) {
       initialPaidUpEl.innerHTML =
         '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No initial paid-up data yet.</p>';
@@ -367,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function () {
         yaxis: {
           ...sharedYaxis,
           title: { text: 'Amount (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
-          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val) },
+          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val/1000).toFixed(0)+'k' : val) },
         },
         grid: sharedGrid,
         tooltip: { ...tooltipStyle, y: { formatter: val => '₱' + val.toLocaleString() } },
@@ -377,21 +372,14 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ── 9. Area Chart — Savings Trend ────────────────────────
-  const savingsEl = document.getElementById('savingsChart');
   if (savingsEl) {
-    const savLabels = JSON.parse(savingsEl.dataset.labels || '[]');
-    const savValues = JSON.parse(savingsEl.dataset.values || '[]');
-    const savHasData = savLabels.length > 0 && savValues.some(v => v > 0);
-
-    if (!savHasData) {
+    if (!savLabels.length || !savValues.some(v => v > 0)) {
       savingsEl.innerHTML =
         '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No savings data yet.</p>';
     } else {
       const savCumulative = savValues.reduce((acc, val, i) => {
-        acc.push(+((acc[i - 1] || 0) + val).toFixed(2));
-        return acc;
+        acc.push(+((acc[i-1]||0) + val).toFixed(2)); return acc;
       }, []);
-
       new ApexCharts(savingsEl, {
         series: [
           { name: 'Monthly Savings',    data: savValues     },
@@ -419,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function () {
         yaxis: {
           ...sharedYaxis,
           title: { text: 'Savings (₱)', style: { color: tickColor, fontSize: '11px', fontFamily } },
-          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val) },
+          labels: { style: labelStyle, formatter: val => '₱' + (val >= 1000 ? (val/1000).toFixed(0)+'k' : val) },
         },
         grid: sharedGrid,
         tooltip: { shared: true, intersect: false, ...tooltipStyle, y: { formatter: val => '₱' + val.toLocaleString() } },
@@ -430,12 +418,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // ── 10. Area Chart — Active vs Inactive Members ───────────
-  const statusEl = document.getElementById('statusChart');
   if (statusEl) {
-    const statusLabels   = JSON.parse(statusEl.dataset.labels   || '[]');
-    const statusActive   = JSON.parse(statusEl.dataset.active   || '[]');
-    const statusInactive = JSON.parse(statusEl.dataset.inactive || '[]');
-
     if (!statusLabels.length) {
       statusEl.innerHTML =
         '<p style="text-align:center;color:#9ca3af;padding:48px 0;">No status data yet.</p>';
@@ -473,8 +456,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tooltip: { shared: true, intersect: false, ...tooltipStyle, y: { formatter: val => val + ' members' } },
         legend: { ...sharedLegend },
         dataLabels: {
-          enabled: true,
-          formatter: val => val > 0 ? val : '',
+          enabled: true, formatter: val => val > 0 ? val : '',
           style: { fontSize: '11px', fontFamily, fontWeight: '600' },
           background: { enabled: true, borderRadius: 2, borderWidth: 0, opacity: 0.85 },
           dropShadow: { enabled: false },
@@ -483,25 +465,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // ── Period Toggle (re-renders member chart) ───────────────
+  // ── Period Toggle ─────────────────────────────────────────
   document.querySelectorAll('#memberToggle .chart-toggle').forEach(btn => {
     btn.addEventListener('click', function () {
       document.querySelectorAll('#memberToggle .chart-toggle')
         .forEach(b => b.classList.remove('active'));
       this.classList.add('active');
-
-      const period       = this.dataset.period;
-      const dailyLabels  = JSON.parse(memberCanvas.dataset.dailyLabels  || '[]');
-      const dailyValues  = JSON.parse(memberCanvas.dataset.dailyValues  || '[]');
-      const weeklyLabels = JSON.parse(memberCanvas.dataset.weeklyLabels || '[]');
-      const weeklyValues = JSON.parse(memberCanvas.dataset.weeklyValues || '[]');
-
+      const period = this.dataset.period;
       if (period === 'daily') {
         memberChart.updateOptions({ xaxis: { categories: dailyLabels } });
-        memberChart.updateSeries([{ data: dailyValues }]);
+        memberChart.updateSeries([{ data: dailyData }]);
       } else if (period === 'weekly') {
         memberChart.updateOptions({ xaxis: { categories: weeklyLabels } });
-        memberChart.updateSeries([{ data: weeklyValues }]);
+        memberChart.updateSeries([{ data: weeklyData }]);
       } else {
         memberChart.updateOptions({ xaxis: { categories: monthlyLabels } });
         memberChart.updateSeries([{ data: monthlyData }]);

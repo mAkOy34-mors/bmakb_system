@@ -11,6 +11,80 @@
 
 {% block content %}
 
+<!-- ── Print Report Header (only visible when printing) ───── -->
+<div class="print-report-header" id="printHeader">
+  <div>
+    <div class="org-name">BMAKB — Analytics Report</div>
+    <div style="font-size:12px;color:#475569;font-family:sans-serif;margin-top:3px;">
+      Membership & Financial Dashboard
+    </div>
+  </div>
+  <div class="report-meta">
+    Generated: <span id="printDate"></span><br>
+    Total Members: {{ total_members }}<br>
+    Active: {{ total_active }} · Inactive: {{ total_inactive }}
+  </div>
+</div>
+
+<!-- ── Export Button ──────────────────────────────────────── -->
+<div class="export-btn-wrap" id="exportBtnWrap">
+  <button class="export-main-btn" id="exportMainBtn" onclick="exportReport('print')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16
+        a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+    </svg>
+    Export Report
+  </button>
+  <button class="export-caret-btn" id="exportCaretBtn" title="More export options">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </button>
+
+  <div class="export-dropdown" id="exportDropdown">
+    <div class="export-dropdown-header">Export As</div>
+    <button class="export-option" onclick="exportReport('print')">
+      <span class="exp-icon print-ic">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16
+            a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+        </svg>
+      </span>
+      <span class="exp-label">Print Report<small>Opens system print dialog</small></span>
+    </button>
+    <button class="export-option" onclick="exportReport('pdf')">
+      <span class="exp-icon pdf-ic">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+      </span>
+      <span class="exp-label">Export as PDF<small>Save to PDF via print dialog</small></span>
+    </button>
+    <button class="export-option" onclick="exportReport('excel')">
+      <span class="exp-icon excel-ic">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>
+          <polyline points="10 9 8 9"/><polyline points="14 9 16 9"/>
+        </svg>
+      </span>
+      <span class="exp-label">Export as Excel<small>Download .xlsx spreadsheet</small></span>
+    </button>
+  </div>
+</div>
+
+<!-- ── Wrap all charts so print targets them ─────────────── -->
+<div id="analytics-content">
+
 <!-- ── Charts Row 1 — Line + Donut ────────────────────────── -->
 <div class="row g-3 mb-4">
 
@@ -262,10 +336,24 @@
   </div>
 </div>
 
+</div>{# /analytics-content #}
+
+<!-- ── Toast ─────────────────────────────────────────────── -->
+<div class="export-toast" id="exportToast">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+    fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+  <span id="toastMsg">Downloading…</span>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'administrator/js/lucide.min.js' %}"></script>
 <script src="{% static 'administrator/js/apexcharts.min.js' %}"></script>
+<!-- SheetJS for Excel export -->
+<script src="{% static 'administrator/js/xlsx.full.min.js' %}"></script>
 <script src="{% static 'administrator/js/analytics.js' %}"></script>
+<script src="{% static 'administrator/js/analytics-export.js' %}"></script>
 {% endblock %}

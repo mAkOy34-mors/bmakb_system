@@ -48,5 +48,4 @@ def log_action(request, action, *,
         target_name=target_name,
         target_id=target_id,
         description=description,
-        ip_address=get_client_ip(request),
     )
