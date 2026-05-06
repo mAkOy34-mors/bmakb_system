@@ -461,6 +461,7 @@ def admin_logs(request):
 
     total_logs   = AdminLog.objects.count()
     today_logs   = AdminLog.objects.filter(timestamp__date=now.date()).count()
+    added_logs = AdminLog.objects.filter(status='added').count()
     updated_logs = AdminLog.objects.filter(status='updated').count()
     deleted_logs = AdminLog.objects.filter(status='deleted').count()
 
@@ -474,6 +475,7 @@ def admin_logs(request):
         'date_range':        date_range,
         'total_logs':        total_logs,
         'today_logs':        today_logs,
+        'added_logs':        added_logs,
         'updated_logs':      updated_logs,
         'deleted_logs':       deleted_logs,
     }

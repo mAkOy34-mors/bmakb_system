@@ -49,6 +49,7 @@ class AdminLog(models.Model):
         ('viewed', 'Viewed'),
         ('updated', 'Updated'),
         ('deleted', 'Deleted'),
+        ('added', 'Added'),
     ]
 
     admin = models.ForeignKey(

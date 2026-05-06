@@ -260,15 +260,17 @@
           </td>
 
           <!-- Status -->
-          <td>
-            {% if log.status == "viewed" %}
-              <span class="badge-active">Viewed</span>
-            {% elif log.status == "updated" %}
-              <span class="badge-associate">Updated</span>
-            {% elif log.status == "deleted" %}
-              <span class="badge-inactive">Deleted</span>
-            {% endif %}
-          </td>
+<td>
+  {% if log.status == "viewed" %}
+    <span class="badge-active">Viewed</span>
+  {% elif log.status == "added" %}
+    <span class="badge-teal">Added</span>
+  {% elif log.status == "updated" %}
+    <span class="badge-associate">Updated</span>
+  {% elif log.status == "deleted" %}
+    <span class="badge-inactive">Deleted</span>
+  {% endif %}
+</td>
 
         </tr>
         {% endfor %}

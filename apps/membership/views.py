@@ -64,6 +64,7 @@ def member_add(request):
                     f"TIN: {member.tin}. "
                     f"Subscription: ₱{member.subscription:,.2f}."
                 ),
+                log_status='added',
             )
 
             messages.success(
@@ -198,6 +199,7 @@ def add_transaction(request, pk):
                 target_name=member.name,
                 target_id=member.account_number,
                 description=f"Added {txn.get_type_display()} of ₱{txn.amount} for {member.name}.",
+                log_status='added',
             )
             messages.success(request, 'Transaction recorded successfully.')
             return redirect('membership:member_detail', pk=member.pk)
