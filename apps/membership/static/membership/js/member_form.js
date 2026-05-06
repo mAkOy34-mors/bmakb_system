@@ -43,33 +43,35 @@
   dobInput?.addEventListener("input",  updateAge);
   updateAge();
 
- // ── 2. LIVE CBU PREVIEW FROM INITIAL PAID-UP ─────────────────────────── //
-const paidUpInput   = $("id_initial_paid_up");
-const conInput      = $("id_con");
-const cbuPreview    = $("cbu-preview");
-const cbuPreviewVal = $("cbu-preview-value");
+  /* ─────────────────────────────────────────────
+     2. LIVE CBU PREVIEW FROM INITIAL PAID-UP
+  ───────────────────────────────────────────── */
+  const paidUpInput   = $("id_initial_paid_up");
+  const conInput      = $("id_con");
+  const cbuPreview    = $("cbu-preview");
+  const cbuPreviewVal = $("cbu-preview-value");
 
-function formatPHP(amount) {
-  return "₱" + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-
-function updateCBUPreview() {
-  if (!paidUpInput || !conInput) return;
-  const paidUp    = parseFloat(paidUpInput.value) || 0;
-  const currentCBU = parseFloat(conInput.value) || 0;
-  const projected = currentCBU + paidUp;
-  if (paidUp > 0 || currentCBU > 0) {
-    cbuPreviewVal.textContent = formatPHP(projected);
-    cbuPreview.style.display  = "flex";
-  } else {
-    cbuPreview.style.display  = "none";
+  function formatPHP(amount) {
+    return "₱" + amount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
-}
 
-paidUpInput?.addEventListener("input",  updateCBUPreview);
-paidUpInput?.addEventListener("change", updateCBUPreview);
-conInput?.addEventListener("input",  updateCBUPreview);
-conInput?.addEventListener("change", updateCBUPreview);
+  function updateCBUPreview() {
+    if (!paidUpInput || !conInput) return;
+    const paidUp     = parseFloat(paidUpInput.value) || 0;
+    const currentCBU = parseFloat(conInput.value) || 0;
+    const projected  = currentCBU + paidUp;
+    if (paidUp > 0 || currentCBU > 0) {
+      cbuPreviewVal.textContent = formatPHP(projected);
+      cbuPreview.style.display  = "flex";
+    } else {
+      cbuPreview.style.display  = "none";
+    }
+  }
+
+  paidUpInput?.addEventListener("input",  updateCBUPreview);
+  paidUpInput?.addEventListener("change", updateCBUPreview);
+  conInput?.addEventListener("input",     updateCBUPreview);
+  conInput?.addEventListener("change",    updateCBUPreview);
 
   /* ─────────────────────────────────────────────
      3. BARANGAY ADDRESS AUTOCOMPLETE
@@ -97,7 +99,7 @@ conInput?.addEventListener("change", updateCBUPreview);
     "San Isidro, Bayawan City, Negros Oriental",
     "Suba (Poblacion), Bayawan City, Negros Oriental",
     "Tinago (Poblacion), Bayawan City, Negros Oriental",
-    "Ubos (Poblacion), Bayawan City, Negros Oriental"
+    "Ubos (Poblacion), Bayawan City, Negros Oriental",
   ];
 
   const addressField  = $("id_address");
@@ -202,15 +204,27 @@ conInput?.addEventListener("change", updateCBUPreview);
   const submitIcon  = $("txnSubmitIcon");
   const submitLabel = $("txnSubmitLabel");
 
+  // ── Term Years Toggle ─────────────────────────────────────
+  const termYearsGroup = $("termYearsGroup");
+
+  function toggleTermYears(value) {
+    if (termYearsGroup) {
+      termYearsGroup.style.display = value === "subscription" ? "block" : "none";
+    }
+  }
+
   if (overlay) {
     // Open
     openBtn?.addEventListener("click", () => {
       overlay.classList.add("active");
-      if (window.lucide) lucide.createIcons(); // re-render icons inside modal
+      if (window.lucide) lucide.createIcons();
     });
 
     // Close helpers
-    const closeModal = () => overlay.classList.remove("active");
+    const closeModal = () => {
+      overlay.classList.remove("active");
+      toggleTermYears(""); // hide term years field on close
+    };
     closeBtn?.addEventListener("click", closeModal);
     cancelBtn?.addEventListener("click", closeModal);
     overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
@@ -225,6 +239,7 @@ conInput?.addEventListener("change", updateCBUPreview);
         cards.forEach((c) => c.classList.remove("selected"));
         card.classList.add("selected");
         if (typeSelect) typeSelect.value = card.dataset.value;
+        toggleTermYears(card.dataset.value); // show/hide term years
       });
     });
 
@@ -242,33 +257,33 @@ conInput?.addEventListener("change", updateCBUPreview);
   ───────────────────────────────────────────── */
 
   // Deactivation Modal Elements
-  const deactivateBtn = $("deactivateBtn");
-  const deactivationModal = $("deactivationModal");
+  const deactivateBtn          = $("deactivateBtn");
+  const deactivationModal      = $("deactivationModal");
   const closeDeactivationModal = $("closeDeactivationModal");
-  const cancelDeactivation = $("cancelDeactivation");
-  const confirmDeactivation = $("confirmDeactivation");
-  const reasonSelect = $("deactivationReasonSelect");
-  const otherReasonGroup = $("otherReasonGroup");
-  const otherReasonInput = $("otherReasonInput");
-  const resolutionText = $("resolutionText");
+  const cancelDeactivation     = $("cancelDeactivation");
+  const confirmDeactivation    = $("confirmDeactivation");
+  const reasonSelect           = $("deactivationReasonSelect");
+  const otherReasonGroup       = $("otherReasonGroup");
+  const otherReasonInput       = $("otherReasonInput");
+  const resolutionText         = $("resolutionText");
 
   // Reactivation Modal Elements
-  const reactivateBtn = $("reactivateBtn");
-  const reactivationModal = $("reactivationModal");
+  const reactivateBtn          = $("reactivateBtn");
+  const reactivationModal      = $("reactivationModal");
   const closeReactivationModal = $("closeReactivationModal");
-  const cancelReactivation = $("cancelReactivation");
-  const confirmReactivation = $("confirmReactivation");
-  const reactivationNotes = $("reactivationNotes");
+  const cancelReactivation     = $("cancelReactivation");
+  const confirmReactivation    = $("confirmReactivation");
+  const reactivationNotes      = $("reactivationNotes");
 
   // Hidden fields
-  const isActiveField = $("is_active_field");
-  const deactivationReasonField = $("deactivation_reason_field");
+  const isActiveField              = $("is_active_field");
+  const deactivationReasonField    = $("deactivation_reason_field");
   const deactivationResolutionField = $("deactivation_resolution_field");
-  const memberForm = $("memberForm");
+  const memberForm                 = $("memberForm");
 
   // Show "Other" input when "Other" is selected
   if (reasonSelect) {
-    reasonSelect.addEventListener("change", function() {
+    reasonSelect.addEventListener("change", function () {
       if (this.value === "other") {
         if (otherReasonGroup) otherReasonGroup.style.display = "block";
       } else {
@@ -280,7 +295,7 @@ conInput?.addEventListener("change", updateCBUPreview);
 
   // Open Deactivation Modal
   if (deactivateBtn) {
-    deactivateBtn.addEventListener("click", function() {
+    deactivateBtn.addEventListener("click", function () {
       if (deactivationModal) {
         deactivationModal.classList.add("active");
         if (window.lucide) lucide.createIcons();
@@ -291,25 +306,26 @@ conInput?.addEventListener("change", updateCBUPreview);
   // Close Deactivation Modal
   function closeDeactivationModalFunc() {
     if (deactivationModal) deactivationModal.classList.remove("active");
-    if (reasonSelect) reasonSelect.value = "";
-    if (otherReasonGroup) otherReasonGroup.style.display = "none";
-    if (otherReasonInput) otherReasonInput.value = "";
-    if (resolutionText) resolutionText.value = "";
+    if (reasonSelect)      reasonSelect.value = "";
+    if (otherReasonGroup)  otherReasonGroup.style.display = "none";
+    if (otherReasonInput)  otherReasonInput.value = "";
+    if (resolutionText)    resolutionText.value = "";
   }
 
-  if (closeDeactivationModal) closeDeactivationModal.addEventListener("click", closeDeactivationModalFunc);
-  if (cancelDeactivation) cancelDeactivation.addEventListener("click", closeDeactivationModalFunc);
+  if (closeDeactivationModal)
+    closeDeactivationModal.addEventListener("click", closeDeactivationModalFunc);
+  if (cancelDeactivation)
+    cancelDeactivation.addEventListener("click", closeDeactivationModalFunc);
 
-  // Close on backdrop click
   if (deactivationModal) {
-    deactivationModal.addEventListener("click", function(e) {
+    deactivationModal.addEventListener("click", function (e) {
       if (e.target === deactivationModal) closeDeactivationModalFunc();
     });
   }
 
   // Confirm Deactivation
   if (confirmDeactivation) {
-    confirmDeactivation.addEventListener("click", function() {
+    confirmDeactivation.addEventListener("click", function () {
       let reason = reasonSelect ? reasonSelect.value : "";
       if (!reason) {
         alert("Please select a reason for deactivation");
@@ -326,19 +342,17 @@ conInput?.addEventListener("change", updateCBUPreview);
 
       const resolution = resolutionText ? resolutionText.value.trim() : "";
 
-      // Set hidden fields
-      if (isActiveField) isActiveField.value = "false";
-      if (deactivationReasonField) deactivationReasonField.value = reason;
+      if (isActiveField)              isActiveField.value = "false";
+      if (deactivationReasonField)    deactivationReasonField.value = reason;
       if (deactivationResolutionField) deactivationResolutionField.value = resolution;
 
-      // Submit the form
       if (memberForm) memberForm.submit();
     });
   }
 
   // Open Reactivation Modal
   if (reactivateBtn) {
-    reactivateBtn.addEventListener("click", function() {
+    reactivateBtn.addEventListener("click", function () {
       if (reactivationModal) {
         reactivationModal.classList.add("active");
         if (window.lucide) lucide.createIcons();
@@ -352,34 +366,27 @@ conInput?.addEventListener("change", updateCBUPreview);
     if (reactivationNotes) reactivationNotes.value = "";
   }
 
-  if (closeReactivationModal) closeReactivationModal.addEventListener("click", closeReactivationModalFunc);
-  if (cancelReactivation) cancelReactivation.addEventListener("click", closeReactivationModalFunc);
+  if (closeReactivationModal)
+    closeReactivationModal.addEventListener("click", closeReactivationModalFunc);
+  if (cancelReactivation)
+    cancelReactivation.addEventListener("click", closeReactivationModalFunc);
 
-  // Close on backdrop click
   if (reactivationModal) {
-    reactivationModal.addEventListener("click", function(e) {
+    reactivationModal.addEventListener("click", function (e) {
       if (e.target === reactivationModal) closeReactivationModalFunc();
     });
   }
 
   // Confirm Reactivation
   if (confirmReactivation) {
-    confirmReactivation.addEventListener("click", function() {
-      const notes = reactivationNotes ? reactivationNotes.value.trim() : "";
-
-      // Set hidden fields
+    confirmReactivation.addEventListener("click", function () {
       if (isActiveField) isActiveField.value = "true";
-
-      // You can add notes to a hidden field if needed
-      // if (reactivationNotesField) reactivationNotesField.value = notes;
-
-      // Submit the form
       if (memberForm) memberForm.submit();
     });
   }
 
   // Close modals on Escape key
-  document.addEventListener("keydown", function(e) {
+  document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") {
       if (deactivationModal && deactivationModal.classList.contains("active")) {
         closeDeactivationModalFunc();

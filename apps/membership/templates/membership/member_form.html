@@ -353,8 +353,9 @@
           <option value="voluntary_withdrawal">Voluntary withdrawal</option>
           <option value="expired_term">Membership term expired</option>
           <option value="violation">Violation of cooperative policies</option>
-          <option value="death">Death of member</option>
+          <option value="death">Deceased</option>
           <option value="inactivity">Prolonged inactivity</option>
+          <option value="awol">Absence without official leave</option>
           <option value="other">Other</option>
         </select>
       </div>
@@ -515,6 +516,20 @@
           <span class="txn-amount-prefix">₱</span>
           <input type="number" name="amount" class="txn-amount-input" step="0.01" min="0.01" placeholder="0.00" required>
         </div>
+        <!-- ADD after the amount field in the txn modal -->
+<div id="termYearsGroup" style="display:none;">
+  <label class="txn-label">
+    Term (Years)
+    <span style="font-weight:400;text-transform:none;font-size:0.75rem;">(optional)</span>
+  </label>
+  <div class="txn-amount-wrapper">
+    <input type="number" name="term_years" class="txn-amount-input"
+           min="1" max="50" placeholder="e.g. 1">
+  </div>
+  <div style="font-size:11px;color:var(--muted);margin-top:4px;">
+    Updates the member's subscription term.
+  </div>
+</div>
         <label class="txn-label">Note <span style="font-weight:400;text-transform:none;font-size:0.75rem;">(optional)</span></label>
         <textarea name="note" class="txn-note-input" rows="2" placeholder="e.g. Monthly CBU deposit for May 2026"></textarea>
       </div>
