@@ -66,7 +66,7 @@ def admin_login(request):
             AdminLog.objects.create(
                 admin=user,
                 action='login',
-                severity='info',
+                status='session_start',
                 description='Administrator logged in.',
                 ip_address=get_client_ip(request),
             )
@@ -86,7 +86,7 @@ def admin_logout(request):
     AdminLog.objects.create(
         admin=request.user,
         action='logout',
-        severity='info',
+        status='session_end',
         description='Administrator logged out.',
         ip_address=get_client_ip(request),
     )
@@ -454,6 +454,8 @@ def admin_logs(request):
     added_logs = AdminLog.objects.filter(status='added').count()
     updated_logs = AdminLog.objects.filter(status='updated').count()
     deleted_logs = AdminLog.objects.filter(status='deleted').count()
+    login_logs = AdminLog.objects.filter(status='session_start').count()
+    logout_logs = AdminLog.objects.filter(status='session_end').count()
 
     context = {
         'page_obj':          page_obj,
@@ -468,6 +470,8 @@ def admin_logs(request):
         'added_logs':        added_logs,
         'updated_logs':      updated_logs,
         'deleted_logs':       deleted_logs,
+        'login_logs':        login_logs,
+        'logout_logs':       logout_logs,
     }
     return render(request, 'administrator/admin_logs.html', context)
 
