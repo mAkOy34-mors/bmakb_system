@@ -260,6 +260,7 @@
           </td>
 
           <!-- Status -->
+<!-- Status -->
 <td>
   {% if log.status == "viewed" %}
     <span class="badge-active">Viewed</span>
@@ -269,6 +270,10 @@
     <span class="badge-associate">Updated</span>
   {% elif log.status == "deleted" %}
     <span class="badge-inactive">Deleted</span>
+  {% elif log.status == "session_start" %}
+    <span class="badge-active">Login</span>
+  {% elif log.status == "session_end" %}
+    <span class="badge-inactive">Logout</span>
   {% endif %}
 </td>
 

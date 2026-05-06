@@ -50,6 +50,8 @@ class AdminLog(models.Model):
         ('updated', 'Updated'),
         ('deleted', 'Deleted'),
         ('added', 'Added'),
+        ('session_start', 'Session Started'),
+        ('session_end', 'Session Ended'),
     ]
 
     admin = models.ForeignKey(
@@ -59,7 +61,7 @@ class AdminLog(models.Model):
         related_name='activity_logs',
     )
     action      = models.CharField(max_length=30, choices=ACTION_CHOICES)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='viewed')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='viewed')
     target_name = models.CharField(max_length=200, blank=True,
                                    help_text='Human-readable target, e.g. member name')
     target_id   = models.CharField(max_length=50, blank=True,
