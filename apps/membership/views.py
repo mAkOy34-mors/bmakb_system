@@ -183,14 +183,18 @@ def add_transaction(request, pk):
 
             # ── Update member balance based on transaction type ────────────
             if txn.type == 'cbu':
-                member.con      += txn.amount
+                member.con += txn.amount
             elif txn.type == 'savings':
-                member.savings  += txn.amount
+                member.savings += txn.amount
             elif txn.type == 'initial_paid_up':
                 member.initial_paid_up += txn.amount
-                member.con             += txn.amount
+                member.con += txn.amount
+            elif txn.type == 'subscription':
+                member.subscription += txn.amount
+                if txn.term_years:
+                    member.term_years = txn.term_years
             elif txn.type == 'withdrawal':
-                member.savings  = max(0, member.savings - txn.amount)
+                member.savings = max(0, member.savings - txn.amount)
             member.save()
             # ─────────────────────────────────────────────────────────────
 
@@ -199,7 +203,7 @@ def add_transaction(request, pk):
                 target_name=member.name,
                 target_id=member.account_number,
                 description=f"Added {txn.get_type_display()} of ₱{txn.amount} for {member.name}.",
-                log_status='added',
+                log_status='updated',
             )
             messages.success(request, 'Transaction recorded successfully.')
             return redirect('membership:member_detail', pk=member.pk)

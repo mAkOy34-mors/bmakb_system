@@ -141,7 +141,7 @@ class MemberEditForm(forms.ModelForm):
 class MemberTransactionForm(forms.ModelForm):
     class Meta:
         model = MemberTransaction
-        fields = ['type', 'amount', 'note']
+        fields = ['type', 'amount','term_years', 'note']
         widgets = {
             'type': forms.Select(attrs={'class': 'form-select'}),
             'amount': forms.NumberInput(attrs={
@@ -149,6 +149,12 @@ class MemberTransactionForm(forms.ModelForm):
                 'step': '0.01',
                 'min': '0.01',
                 'placeholder': '0.00',
+            }),
+            'term_years': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': '1',
+                'max': '50',
+                'placeholder': 'e.g. 1',
             }),
             'note': forms.Textarea(attrs={
                 'class': 'form-control',

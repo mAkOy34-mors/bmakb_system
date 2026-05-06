@@ -32,9 +32,9 @@
   // ── Main export dispatcher ────────────────────────────────
   window.exportReport = function (type) {
     if (dropdown) dropdown.classList.remove('open');
-    if      (type === 'print') triggerPrint();
-    else if (type === 'pdf')   triggerPDF();
-    else if (type === 'excel') triggerExcel();
+    if      (type === 'print')   triggerPrint();
+    else if (type === 'pdf')     triggerPDF();
+    else if (type === 'viewpdf') triggerViewPDF();
   };
 
   // ── Cumulative sum helper ─────────────────────────────────
@@ -672,337 +672,52 @@
 </html>`;
   }
 
-  // ── Print ─────────────────────────────────────────────────
+  // ── Shared: inject report into hidden iframe and print ───
+  function printViaIframe(onAfter) {
+    const html = buildReportHTML();
+
+    // Remove any previous iframe
+    const old = document.getElementById('_bmakb_print_frame');
+    if (old) old.remove();
+
+    const iframe = document.createElement('iframe');
+    iframe.id = '_bmakb_print_frame';
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;border:0;';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    iframe.onload = function () {
+      setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        if (typeof onAfter === 'function') onAfter();
+      }, 600);
+    };
+  }
+
+  // ── Print (no new tab) ───────────────────────────────────
   function triggerPrint() {
-    const html   = buildReportHTML();
-    const win    = window.open('', '_blank', 'width=900,height=700');
-    if (!win) { showToast('Pop-up blocked — please allow pop-ups and retry.'); return; }
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    // Single delayed call — enough time for fonts/layout to settle.
-    // Do NOT use win.onload here: after document.write+close on a blank
-    // window it fires immediately (before paint), causing a double-print
-    // when combined with any setTimeout fallback.
-    setTimeout(() => win.print(), 600);
+    printViaIframe();
   }
 
-  // ── PDF (print-to-PDF via browser dialog) ─────────────────
+  // ── Save as PDF (print dialog → Save as PDF) ─────────────
   function triggerPDF() {
-    showToast('Opening PDF export\u2026');
-    triggerPrint();
+    showToast('Opening print dialog — select "Save as PDF"…');
+    printViaIframe(() => {
+      setTimeout(() => showToast('Use "Save as PDF" in the print dialog.'), 800);
+    });
   }
 
-  // ── Excel ─────────────────────────────────────────────────
-  function triggerExcel() {
-    if (typeof XLSX === 'undefined') {
-      showToast('SheetJS not loaded \u2014 check CDN connection.');
-      return;
-    }
-
-    const D = window.BMAKB_DATA;
-    if (!D) {
-      showToast('Chart data not ready yet. Please wait.');
-      return;
-    }
-
-    showToast('Preparing Excel file\u2026');
-
-    const wb   = XLSX.utils.book_new();
-    const now  = new Date().toLocaleDateString('en-PH', {
-      year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
-
-    // ── Helpers ───────────────────────────────────────────
-
-    // Build worksheet from AOA, auto-size columns, freeze header row
-    function makeWS(aoa) {
-      if (!aoa || !aoa.length) return null;
-      // If only a header row, add a no-data placeholder
-      const rows = aoa.length === 1 ? [...aoa, ['(No data yet)']] : aoa;
-      const ws   = XLSX.utils.aoa_to_sheet(rows);
-      // Auto column widths (min 12, max 40)
-      ws['!cols'] = rows[0].map((_, ci) => ({
-        wch: Math.min(40, Math.max(12,
-          ...rows.map(r => String(r[ci] !== undefined ? r[ci] : '').length)
-        ))
-      }));
-      // Freeze the header row
-      ws['!freeze'] = { xSplit: 0, ySplit: 1, topLeftCell: 'A2', activePane: 'bottomLeft' };
-      return ws;
-    }
-
-    function addSheet(name, aoa) {
-      const ws = makeWS(aoa);
-      if (ws) XLSX.utils.book_append_sheet(wb, ws, name);
-    }
-
-    // Running cumulative sum
-    function cumsum(arr) {
-      return (arr || []).reduce((acc, val, i) => {
-        acc.push(+((acc[i - 1] || 0) + (+val || 0)).toFixed(2));
-        return acc;
-      }, []);
-    }
-
-    // Totals
-    const totalRevenue       = (D.revenueData      || []).reduce((a, b) => a + (+b || 0), 0);
-    const totalCBU           = (D.cbuData           || []).reduce((a, b) => a + (+b || 0), 0);
-    const totalSubscription  = (D.subscriptionData  || []).reduce((a, b) => a + (+b || 0), 0);
-    const totalInitialPaidUp = (D.initialPaidUpData || []).reduce((a, b) => a + (+b || 0), 0);
-    const totalSavings       = (D.savingsData       || []).reduce((a, b) => a + (+b || 0), 0);
-    const totalMembers       = (D.genderValues      || []).reduce((a, b) => a + (+b || 0), 0);
-    const totalActive        = (D.statusActive      || []).reduce((a, b) => Math.max(a, +b || 0), 0);
-    const totalInactive      = (D.statusInactive    || []).reduce((a, b) => Math.max(a, +b || 0), 0);
-
-    // ── SHEET 0 — Full Detailed Report (mirrors PDF) ──────
-    const typeTotal = (D.typeValues  || []).reduce((a, b) => a + (+b || 0), 0);
-    const gTotal    = (D.genderValues|| []).reduce((a, b) => a + (+b || 0), 0);
-    const cbuCumR   = cumsum(D.cbuData);
-    const savCumR   = cumsum(D.savingsData);
-
-    // Section header row helper
-    function sec(title) {
-      return [
-        [''],
-        [title, '', '', '', ''],
-        ['─────────────────────────────────────────'],
-      ];
-    }
-
-    const report = [
-      // ── Cover ──────────────────────────────────────────
-      ['BMAKB — Analytics Report'],
-      ['Membership & Financial Dashboard'],
-      ['Generated:', now],
-      [''],
-
-      // ── Quick Stats ────────────────────────────────────
-      ['QUICK STATS', '', '', '', ''],
-      ['Total Members', 'Active', 'Inactive', 'Total Revenue (PHP)', 'Total Savings (PHP)'],
-      [totalMembers, totalActive, totalInactive, +totalRevenue.toFixed(2), +totalSavings.toFixed(2)],
-
-      // ── 1. Membership Type ─────────────────────────────
-      ...sec('1. MEMBERSHIP BREAKDOWN — Regular vs Associate'),
-      ['Membership Type', 'Count', '% Share'],
-      ...(D.typeLabels || []).map((l, i) => {
-        const v = +(D.typeValues[i] || 0);
-        return [l, v, typeTotal > 0 ? +((v / typeTotal * 100).toFixed(2)) : 0];
-      }),
-      ...(typeTotal > 0 ? [['TOTAL', typeTotal, 100]] : [['(No data yet)']]),
-
-      // ── 2. Gender Breakdown ────────────────────────────
-      ...sec('2. GENDER BREAKDOWN'),
-      ['Gender', 'Count', '% Share'],
-      ...(D.genderLabels || []).map((l, i) => {
-        const v = +(D.genderValues[i] || 0);
-        return [l, v, gTotal > 0 ? +((v / gTotal * 100).toFixed(2)) : 0];
-      }),
-      ...(gTotal > 0 ? [['TOTAL', gTotal, 100]] : [['(No data yet)']]),
-
-      // ── 3. Members by Barangay ─────────────────────────
-      ...sec('3. MEMBERS BY BARANGAY'),
-      ['Barangay', 'Total', 'Male', 'Female', 'Other'],
-      ...((D.barangayLabels || []).length
-        ? (D.barangayLabels || []).map((l, i) => {
-            const total  = +(D.barangayData[i]   || 0);
-            const male   = +(D.barangayMale[i]   || 0);
-            const female = +(D.barangayFemale[i] || 0);
-            return [l, total, male, female, Math.max(0, total - male - female)];
-          })
-        : [['(No data yet)']]),
-
-      // ── 4. Monthly Membership Trend ────────────────────
-      ...sec('4. MONTHLY MEMBERSHIP TREND'),
-      ['Month', 'New Members'],
-      ...((D.monthlyLabels || []).length
-        ? [
-            ...(D.monthlyLabels || []).map((l, i) => [l, +(D.monthlyData[i] || 0)]),
-            ['TOTAL', (D.monthlyData || []).reduce((a, b) => a + (+b || 0), 0)],
-          ]
-        : [['(No data yet)']]),
-
-      // ── 5. Active vs Inactive Trend ────────────────────
-      ...sec('5. ACTIVE vs INACTIVE MEMBERS'),
-      ['Month', 'Active', 'Inactive'],
-      ...((D.statusLabels || []).length
-        ? (D.statusLabels || []).map((l, i) => [
-            l,
-            +(D.statusActive[i]   || 0),
-            +(D.statusInactive[i] || 0),
-          ])
-        : [['(No data yet)']]),
-
-      // ── 6. Revenue Trend ───────────────────────────────
-      ...sec('6. REVENUE TREND'),
-      ['Month', 'Revenue (PHP)'],
-      ...((D.revenueLabels || []).length
-        ? [
-            ...(D.revenueLabels || []).map((l, i) => [l, +(D.revenueData[i] || 0)]),
-            ['TOTAL', +totalRevenue.toFixed(2)],
-          ]
-        : [['(No data yet)']]),
-
-      // ── 7. CBU Accumulation ────────────────────────────
-      ...sec('7. CBU ACCUMULATION TREND'),
-      ['Month', 'Monthly CBU (PHP)', 'Cumulative CBU (PHP)'],
-      ...((D.cbuLabels || []).length
-        ? [
-            ...(D.cbuLabels || []).map((l, i) => [l, +(D.cbuData[i] || 0), cbuCumR[i] || 0]),
-            ['TOTAL', +totalCBU.toFixed(2), +totalCBU.toFixed(2)],
-          ]
-        : [['(No data yet)']]),
-
-      // ── 8. Subscription Trend ──────────────────────────
-      ...sec('8. SUBSCRIPTION TREND'),
-      ['Month', 'Subscription (PHP)'],
-      ...((D.subscriptionLabels || []).length
-        ? [
-            ...(D.subscriptionLabels || []).map((l, i) => [l, +(D.subscriptionData[i] || 0)]),
-            ['TOTAL', +totalSubscription.toFixed(2)],
-          ]
-        : [['(No data yet)']]),
-
-      // ── 9. Initial Paid-Up Trend ───────────────────────
-      ...sec('9. INITIAL PAID-UP TREND'),
-      ['Month', 'Initial Paid-Up (PHP)'],
-      ...((D.initialPaidUpLabels || []).length
-        ? [
-            ...(D.initialPaidUpLabels || []).map((l, i) => [l, +(D.initialPaidUpData[i] || 0)]),
-            ['TOTAL', +totalInitialPaidUp.toFixed(2)],
-          ]
-        : [['(No data yet)']]),
-
-      // ── 10. Savings Trend ──────────────────────────────
-      ...sec('10. SAVINGS TREND'),
-      ['Month', 'Monthly Savings (PHP)', 'Cumulative Savings (PHP)'],
-      ...((D.savingsLabels || []).length
-        ? [
-            ...(D.savingsLabels || []).map((l, i) => [l, +(D.savingsData[i] || 0), savCumR[i] || 0]),
-            ['TOTAL', +totalSavings.toFixed(2), +totalSavings.toFixed(2)],
-          ]
-        : [['(No data yet)']]),
-
-      [''],
-      ['— End of Report —'],
-    ];
-
-    // Build the report sheet with wide columns
-    {
-      const ws = XLSX.utils.aoa_to_sheet(report);
-      ws['!cols'] = [
-        { wch: 32 }, { wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 18 },
-      ];
-      XLSX.utils.book_append_sheet(wb, ws, 'Full Report');
-    }
-
-    // ── SHEET 1 — Monthly Membership ─────────────────────
-    addSheet('Monthly Members', [
-      ['Month', 'New Members'],
-      ...(D.monthlyLabels || []).map((l, i) => [l, +(D.monthlyData[i] || 0)]),
-      ...(D.monthlyLabels||[]).length ? [['TOTAL', (D.monthlyData||[]).reduce((a,b)=>a+(+b||0),0)]] : [],
-    ]);
-
-    // ── SHEET 2 — Daily Membership ────────────────────────
-    addSheet('Daily Members', [
-      ['Day', 'New Members'],
-      ...(D.dailyLabels || []).map((l, i) => [l, +(D.dailyData[i] || 0)]),
-      ...(D.dailyLabels||[]).length ? [['TOTAL', (D.dailyData||[]).reduce((a,b)=>a+(+b||0),0)]] : [],
-    ]);
-
-    // ── SHEET 3 — Weekly Membership ───────────────────────
-    addSheet('Weekly Members', [
-      ['Week', 'New Members'],
-      ...(D.weeklyLabels || []).map((l, i) => [l, +(D.weeklyData[i] || 0)]),
-      ...(D.weeklyLabels||[]).length ? [['TOTAL', (D.weeklyData||[]).reduce((a,b)=>a+(+b||0),0)]] : [],
-    ]);
-
-    // ── SHEET 4 — Membership Types ────────────────────────
-    addSheet('Membership Types', [
-      ['Membership Type', 'Count', '% Share'],
-      ...(D.typeLabels || []).map((l, i) => {
-        const v = +(D.typeValues[i] || 0);
-        return [l, v, typeTotal > 0 ? +((v / typeTotal * 100).toFixed(2)) : 0];
-      }),
-      ...(typeTotal > 0 ? [['TOTAL', typeTotal, 100]] : []),
-    ]);
-
-    // ── SHEET 5 — Gender ──────────────────────────────────
-    addSheet('Gender', [
-      ['Gender', 'Count', '% Share'],
-      ...(D.genderLabels || []).map((l, i) => {
-        const v = +(D.genderValues[i] || 0);
-        return [l, v, gTotal > 0 ? +((v / gTotal * 100).toFixed(2)) : 0];
-      }),
-      ...(gTotal > 0 ? [['TOTAL', gTotal, 100]] : []),
-    ]);
-
-    // ── SHEET 6 — Barangay ───────────────────────────────
-    addSheet('Barangay', [
-      ['Barangay', 'Total', 'Male', 'Female', 'Other'],
-      ...(D.barangayLabels || []).map((l, i) => {
-        const total  = +(D.barangayData[i]   || 0);
-        const male   = +(D.barangayMale[i]   || 0);
-        const female = +(D.barangayFemale[i] || 0);
-        return [l, total, male, female, Math.max(0, total - male - female)];
-      }),
-    ]);
-
-    // ── SHEET 7 — Revenue ─────────────────────────────────
-    addSheet('Revenue', [
-      ['Month', 'Revenue (PHP)'],
-      ...(D.revenueLabels || []).map((l, i) => [l, +(D.revenueData[i] || 0)]),
-      ...(totalRevenue > 0 ? [['TOTAL', +totalRevenue.toFixed(2)]] : []),
-    ]);
-
-    // ── SHEET 8 — CBU ─────────────────────────────────────
-    {
-      const cbuCum = cumsum(D.cbuData);
-      addSheet('CBU', [
-        ['Month', 'Monthly CBU (PHP)', 'Cumulative CBU (PHP)'],
-        ...(D.cbuLabels || []).map((l, i) => [l, +(D.cbuData[i] || 0), cbuCum[i] || 0]),
-        ...(totalCBU > 0 ? [['TOTAL', +totalCBU.toFixed(2), +totalCBU.toFixed(2)]] : []),
-      ]);
-    }
-
-    // ── SHEET 9 — Subscription ────────────────────────────
-    addSheet('Subscription', [
-      ['Month', 'Subscription (PHP)'],
-      ...(D.subscriptionLabels || []).map((l, i) => [l, +(D.subscriptionData[i] || 0)]),
-      ...(totalSubscription > 0 ? [['TOTAL', +totalSubscription.toFixed(2)]] : []),
-    ]);
-
-    // ── SHEET 10 — Initial Paid-Up ────────────────────────
-    addSheet('Initial Paid-Up', [
-      ['Month', 'Initial Paid-Up (PHP)'],
-      ...(D.initialPaidUpLabels || []).map((l, i) => [l, +(D.initialPaidUpData[i] || 0)]),
-      ...(totalInitialPaidUp > 0 ? [['TOTAL', +totalInitialPaidUp.toFixed(2)]] : []),
-    ]);
-
-    // ── SHEET 11 — Savings ────────────────────────────────
-    {
-      const savCum = cumsum(D.savingsData);
-      addSheet('Savings', [
-        ['Month', 'Monthly Savings (PHP)', 'Cumulative Savings (PHP)'],
-        ...(D.savingsLabels || []).map((l, i) => [l, +(D.savingsData[i] || 0), savCum[i] || 0]),
-        ...(totalSavings > 0 ? [['TOTAL', +totalSavings.toFixed(2), +totalSavings.toFixed(2)]] : []),
-      ]);
-    }
-
-    // ── SHEET 12 — Active vs Inactive ────────────────────
-    addSheet('Active vs Inactive', [
-      ['Month', 'Active', 'Inactive'],
-      ...(D.statusLabels || []).map((l, i) => [
-        l,
-        +(D.statusActive[i]   || 0),
-        +(D.statusInactive[i] || 0),
-      ]),
-    ]);
-
-    const dateStr = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, 'BMAKB_Analytics_' + dateStr + '.xlsx');
-    setTimeout(() => showToast('Excel file downloaded!'), 400);
+  // ── View PDF (open in new tab for reading) ────────────────
+  function triggerViewPDF() {
+    const html = buildReportHTML();
+    const blob = new Blob([html], { type: 'text/html' });
+    const url  = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   }
 
 })();

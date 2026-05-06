@@ -23,8 +23,9 @@ class Member(models.Model):
         ('voluntary_withdrawal', 'Voluntary withdrawal'),
         ('expired_term', 'Membership term expired'),
         ('violation', 'Violation of cooperative policies'),
-        ('death', 'Death of member'),
+        ('death', 'Deceased'),
         ('inactivity', 'Prolonged inactivity'),
+        ('awol', 'Absence without official leave'),
         ('other', 'Other'),
     ]
 
@@ -213,6 +214,8 @@ class MemberTransaction(models.Model):
     type        = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
     amount      = models.DecimalField(max_digits=12, decimal_places=2)
     note        = models.TextField(blank=True)
+    term_years = models.PositiveSmallIntegerField(null=True, blank=True,
+                                                  help_text='If set, updates the member term when type is subscription.')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,  # changed from 'auth.User'
         on_delete=models.SET_NULL,

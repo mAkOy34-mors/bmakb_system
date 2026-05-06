@@ -319,37 +319,23 @@ def analytics(request):
     total_subscription    = sum(subscription_data)
     total_initial_paid_up = sum(initial_paid_up_data)
 
-    # ── Active vs Inactive trend ──────────────────────────────────────────────
-    active_qs = (
+    # ── Active vs Inactive trend ──────────────────────────────────────────
+    # Use created_at for all members to get unified month range
+    all_members_qs = (
         Member.objects
-        .filter(is_active=True)
         .annotate(month=TruncMonth('created_at'))
         .values('month')
-        .annotate(count=Count('id'))
+        .annotate(
+            total=Count('id'),
+            active=Count('id', filter=Q(is_active=True)),
+            inactive=Count('id', filter=Q(is_active=False)),
+        )
         .order_by('month')
     )
 
-    inactive_qs = (
-        Member.objects
-        .filter(is_active=False)
-        .annotate(month=TruncMonth('deactivation_date'))
-        .values('month')
-        .annotate(count=Count('id'))
-        .order_by('month')
-    )
-
-    # Merge both into a unified set of months
-    all_months = sorted(set(
-        [e['month'] for e in active_qs if e['month']] +
-        [e['month'] for e in inactive_qs if e['month']]
-    ))
-
-    active_map = {e['month']: e['count'] for e in active_qs if e['month']}
-    inactive_map = {e['month']: e['count'] for e in inactive_qs if e['month']}
-
-    status_labels = [m.strftime('%b %Y') for m in all_months]
-    status_active_data = [active_map.get(m, 0) for m in all_months]
-    status_inactive_data = [inactive_map.get(m, 0) for m in all_months]
+    status_labels = [e['month'].strftime('%b %Y') for e in all_members_qs]
+    status_active_data = [e['active'] for e in all_members_qs]
+    status_inactive_data = [e['inactive'] for e in all_members_qs]
 
     context = {
         # ── Stat cards ────────────────────────────────────────────────────
