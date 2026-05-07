@@ -289,6 +289,8 @@
 /* Modal body */
 .txn-modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 220px);
 }
 
 /* ── Transaction type cards ───────────────────────────────────────────────── */
@@ -531,7 +533,24 @@
   font-weight: 700;
   color: #0f172a;
 }
+/* ── Transaction modal scrollbar ────────────────────────────────────────── */
+.txn-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
 
+.txn-modal-body::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.txn-modal-body::-webkit-scrollbar-thumb {
+  background: #0d9488;
+  border-radius: 10px;
+}
+
+.txn-modal-body::-webkit-scrollbar-thumb:hover {
+  background: #0f766e;
+}
 /* ── Status Display ──────────────────────────────────────────────────────── */
 .status-display {
   background: #f9fafb;

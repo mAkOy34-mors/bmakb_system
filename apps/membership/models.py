@@ -217,7 +217,7 @@ class MemberTransaction(models.Model):
     term_years = models.PositiveSmallIntegerField(null=True, blank=True,
                                                   help_text='If set, updates the member term when type is subscription.')
     created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,  # changed from 'auth.User'
+        settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         editable=False
