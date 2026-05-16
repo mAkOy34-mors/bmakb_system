@@ -27,30 +27,34 @@ from django.db.models.functions import TruncMonth
 from collections import defaultdict
 from io import BytesIO
 from xhtml2pdf import pisa
-
+from django.contrib.auth.decorators import login_required, user_passes_test
 User = get_user_model()
 
 # ── Register ──────────────────────────────────────────────────────────────────
+
+def is_superuser(user):
+    return user.is_superuser
+
+@login_required(login_url='administrator:login')
+@user_passes_test(is_superuser, login_url='administrator:login')
 def admin_register(request):
-    if request.user.is_authenticated:
-        return redirect('administrator:login')
+    # Remove the is_authenticated check — it was incorrectly blocking superusers
 
     if request.method == 'POST':
         form = AdminRegisterForm(request.POST, request.FILES)
         if form.is_valid():
             admin = form.save()
 
-            login(request, admin)
-
+            # Don't call login(request, admin) — keep the superuser's session
             AdminLog.objects.create(
-                admin=admin,
+                admin=request.user,  # log under the superuser, not the new account
                 action='register',
                 status='registered',
                 description=f'New administrator account created for {admin.get_full_name()}.',
             )
             messages.success(
                 request,
-                f'Welcome, {admin.get_full_name()}! Your account has been created.'
+                f'Administrator account for {admin.get_full_name()} has been created successfully.'
             )
             return redirect('administrator:dashboard')
         else:
@@ -59,7 +63,6 @@ def admin_register(request):
         form = AdminRegisterForm()
 
     return render(request, 'administrator/register.html', {'form': form})
-
 
 # ── Login ─────────────────────────────────────────────────────────────────────
 def admin_login(request):

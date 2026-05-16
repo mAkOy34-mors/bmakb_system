@@ -300,13 +300,6 @@
           <a href="{% url 'membership:member_list' %}" class="btn-outline w-100 justify-content-center cancel-btn">
             Cancel
           </a>
-          {% if member %}
-          <hr class="form-divider"/>
-          <a href="{% url 'membership:member_delete' member.pk %}"
-             class="btn-outline w-100 justify-content-center delete-btn">
-            <i data-lucide="trash-2" style="width:15px;height:15px;"></i> Delete Member
-          </a>
-          {% endif %}
         </div>
       </div>
     </div>

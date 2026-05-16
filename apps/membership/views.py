@@ -1,5 +1,5 @@
 # apps/membership/views.py
-
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -28,14 +28,19 @@ def member_list(request):
     if membership_type:
         members = members.filter(type_of_membership=membership_type)
 
+    # ── Pagination ────────────────────────────────────────────
+    paginator = Paginator(members, 15)  # 15 members per page
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'members':         members,
+        'members':         page_obj,        # ← changed from members to page_obj
+        'page_obj':        page_obj,        # ← added
         'query':           query,
         'membership_type': membership_type,
         'total':           members.count(),
     }
     return render(request, 'membership/member_list.html', context)
-
 
 # ── Add Member ────────────────────────────────────────────────────────────────
 @login_required
