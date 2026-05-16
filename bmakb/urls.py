@@ -9,6 +9,7 @@ urlpatterns = [
     path('', RedirectView.as_view(url='/administrator/')),
     path('administrator/', include('apps.administrator.urls')),
     path('members/',       include('apps.membership.urls')),
+    path('register/', RedirectView.as_view(url='/administrator/login/')),
 ]
 
 if settings.DEBUG:

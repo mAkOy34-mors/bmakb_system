@@ -20,7 +20,6 @@ from django.contrib.auth import get_user_model
 import random
 
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db.models import Count, Sum, Q, ExpressionWrapper, DecimalField, F
 from django.db.models.functions import TruncMonth
@@ -35,19 +34,23 @@ User = get_user_model()
 def is_superuser(user):
     return user.is_superuser
 
+
 @login_required(login_url='/administrator/login/')
 @user_passes_test(is_superuser, login_url='/administrator/login/')
 def admin_register(request):
-    # Remove the is_authenticated check — it was incorrectly blocking superusers
+
+    if not request.user.is_authenticated:
+        return redirect('/administrator/login/')
+
+    if not request.user.is_superuser:
+        return redirect('/administrator/login/')
 
     if request.method == 'POST':
         form = AdminRegisterForm(request.POST, request.FILES)
         if form.is_valid():
             admin = form.save()
-
-            # Don't call login(request, admin) — keep the superuser's session
             AdminLog.objects.create(
-                admin=request.user,  # log under the superuser, not the new account
+                admin=request.user,
                 action='register',
                 status='registered',
                 description=f'New administrator account created for {admin.get_full_name()}.',
@@ -63,7 +66,6 @@ def admin_register(request):
         form = AdminRegisterForm()
 
     return render(request, 'administrator/register.html', {'form': form})
-
 # ── Login ─────────────────────────────────────────────────────────────────────
 def admin_login(request):
     if request.user.is_authenticated:
