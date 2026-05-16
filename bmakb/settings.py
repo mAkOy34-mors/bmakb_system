@@ -31,15 +31,9 @@ ALLOWED_HOSTS = ['bmakbmis.pythonanywhere.com']
 # Tell Django to use your custom Administrator model instead of the default User
 AUTH_USER_MODEL = 'administrator.Administrator'
 
-# Redirect to login page when @login_required is triggered
-LOGIN_URL = '/login/'
-
-# Redirect after successful login
-LOGIN_REDIRECT_URL = '/'
-
-# Redirect after logout
-LOGOUT_REDIRECT_URL = '/login/'
-
+LOGIN_URL = '/administrator/login/'
+LOGIN_REDIRECT_URL = '/administrator/'
+LOGOUT_REDIRECT_URL = '/administrator/login/'
 # Application definition
 
 INSTALLED_APPS = [
