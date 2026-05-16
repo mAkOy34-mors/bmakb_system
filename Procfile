@@ -1,1 +1,0 @@
-web: gunicorn bmakb_system.wsgi:application

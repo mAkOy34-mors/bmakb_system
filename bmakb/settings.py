@@ -25,18 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-oqri%nd6e&^_+5ps4!0j9kh&j8&bl79wn-&-d)npnae&vi-nfe'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
-
-ALLOWED_HOSTS = [
-    config('RAILWAY_STATIC_URL', default=''),
-    'localhost',
-    '127.0.0.1',
-    '.railway.app',  # ← allows all railway subdomains
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    f"https://*.railway.app",
-]
+DEBUG = False
+ALLOWED_HOSTS = ['bmakbmis.pythonanywhere.com']
 
 # Tell Django to use your custom Administrator model instead of the default User
 AUTH_USER_MODEL = 'administrator.Administrator'
@@ -67,7 +57,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,7 +81,6 @@ TEMPLATES = [
         },
     },
 ]
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 WSGI_APPLICATION = 'bmakb.wsgi.application'
 
@@ -102,12 +90,8 @@ WSGI_APPLICATION = 'bmakb.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='3306'),
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
