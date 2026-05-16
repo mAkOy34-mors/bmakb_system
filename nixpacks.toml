@@ -1,6 +1,9 @@
+[phases.setup]
+nixPkgs = ["cairo", "pkg-config"]
+
 [phases.build]
 cmds = [
-  "pip install -r requirements.txt",
-  "python manage.py collectstatic --noinput",
-  "python manage.py migrate"
+    "pip install -r requirements.txt",
+    "python manage.py collectstatic --noinput",
+    "python manage.py migrate"
 ]
