@@ -96,9 +96,6 @@
               <a href="{% url 'membership:member_edit' member.pk %}" class="btn-outline action-btn" title="Edit">
                 <i class="bi bi-pencil"></i>
               </a>
-              <a href="{% url 'membership:member_delete' member.pk %}" class="btn-outline action-btn action-btn-danger" title="Delete">
-                <i class="bi bi-trash"></i>
-              </a>
             </div>
           </td>
         </tr>
@@ -117,5 +114,68 @@
     </table>
   </div>
 </div>
+
+<!-- ── Pagination ───────────────────────────────────────────── -->
+{% if page_obj.has_other_pages %}
+<div style="padding:16px 0;display:flex;align-items:center;
+            justify-content:space-between;flex-wrap:wrap;gap:10px;">
+
+  <span style="font-size:12px;color:var(--muted);">
+    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    &nbsp;·&nbsp; {{ total }} member{{ total|pluralize }}
+  </span>
+
+  <div style="display:flex;gap:4px;align-items:center;">
+
+    <!-- First -->
+    {% if page_obj.has_previous %}
+      <a href="?q={{ query }}&type={{ membership_type }}&page=1"
+         class="btn-outline" style="padding:6px 12px;font-size:12px;" title="First page">
+        <i class="bi bi-chevron-double-left"></i>
+      </a>
+    {% endif %}
+
+    <!-- Previous -->
+    {% if page_obj.has_previous %}
+      <a href="?q={{ query }}&type={{ membership_type }}&page={{ page_obj.previous_page_number }}"
+         class="btn-outline" style="padding:6px 12px;font-size:12px;">
+        <i class="bi bi-chevron-left"></i> Prev
+      </a>
+    {% endif %}
+
+    <!-- Page Numbers -->
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <span style="padding:6px 12px;font-size:12px;background:var(--teal);
+                     color:white;border-radius:6px;font-weight:600;">
+          {{ num }}
+        </span>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?q={{ query }}&type={{ membership_type }}&page={{ num }}"
+           class="btn-outline" style="padding:6px 12px;font-size:12px;">
+          {{ num }}
+        </a>
+      {% endif %}
+    {% endfor %}
+
+    <!-- Next -->
+    {% if page_obj.has_next %}
+      <a href="?q={{ query }}&type={{ membership_type }}&page={{ page_obj.next_page_number }}"
+         class="btn-teal" style="padding:6px 12px;font-size:12px;">
+        Next <i class="bi bi-chevron-right"></i>
+      </a>
+    {% endif %}
+
+    <!-- Last -->
+    {% if page_obj.has_next %}
+      <a href="?q={{ query }}&type={{ membership_type }}&page={{ page_obj.paginator.num_pages }}"
+         class="btn-outline" style="padding:6px 12px;font-size:12px;" title="Last page">
+        <i class="bi bi-chevron-double-right"></i>
+      </a>
+    {% endif %}
+
+  </div>
+</div>
+{% endif %}
 
 {% endblock %}

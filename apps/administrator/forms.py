@@ -75,6 +75,15 @@ class AdminRegisterForm(UserCreationForm):
             raise forms.ValidationError('This email is already registered.')
         return email
 
+    # ── Add this ──────────────────────────────────────────────────────────────
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.is_staff = True
+        user.is_superuser = False
+        if commit:
+            user.save()
+        return user
+
 
 # ── Login Form ────────────────────────────────────────────────────────────────
 class AdminLoginForm(AuthenticationForm):

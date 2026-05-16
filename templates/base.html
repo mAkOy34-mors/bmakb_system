@@ -12,9 +12,7 @@
 
   <!-- Bootstrap 5 -->
   <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet"/>
-
   <link href="{% static 'css/bootstrap-icons.css' %}" rel="stylesheet"/>
-
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   {% block extra_css %}{% endblock %}
 
@@ -28,8 +26,11 @@
 
 <!-- ── Sidebar ───────────────────────────────────────────── -->
 <aside class="sidebar" id="sidebar">
+
+  <!-- Brand / Logo → clicks to dashboard -->
   <div class="sidebar-brand">
-    <div style="display:flex; align-items:center; gap:10px;">
+    <a href="{% url 'administrator:dashboard' %}"
+       style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
       <img src="{% static 'images/BMAKB-LOGO.jpg' %}"
            alt="BMAKB Logo"
            style="width:42px; height:42px; object-fit:contain; border-radius:8px; flex-shrink:0;">
@@ -37,7 +38,7 @@
         <h1 style="margin:0;">BMAKB</h1>
         <p style="margin:0;">Membership Information System</p>
       </div>
-    </div>
+    </a>
     <!-- Close button (mobile only) -->
     <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close menu">
       <i class="bi bi-x-lg"></i>
@@ -74,20 +75,24 @@
     </a>
   </nav>
 
+  <!-- Sidebar Footer — username initial + username -->
   <div class="sidebar-footer">
     <div class="admin-info">
       <div class="admin-avatar">
-        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+        {{ user.username|first|upper }}
       </div>
       <div>
-        <div class="admin-name">{{ user.get_full_name }}</div>
-        <div class="admin-role">Administrator</div>
+        <div class="admin-name">{{ user.username }}</div>
+        <div class="admin-role">
+          {% if user.is_superuser %}Super Admin{% else %}Administrator{% endif %}
+        </div>
       </div>
     </div>
     <a href="{% url 'administrator:logout' %}" class="logout-btn">
       <i class="bi bi-box-arrow-left"></i> Log out
     </a>
   </div>
+
 </aside>
 {% endif %}
 
@@ -105,9 +110,12 @@
         {% block topbar_title %}Dashboard{% endblock %}
       </div>
     </div>
+    <!-- Topbar right — username + role -->
     <div style="font-size:13px; color:var(--muted);">
-      {{ user.get_full_name }} &nbsp;·&nbsp;
-      <span style="color:var(--teal); font-weight:600;">Administrator</span>
+      {{ user.username }} &nbsp;·&nbsp;
+      <span style="color:var(--teal); font-weight:600;">
+        {% if user.is_superuser %}Super Admin{% else %}Administrator{% endif %}
+      </span>
     </div>
   </div>
   {% endif %}
@@ -130,10 +138,7 @@
 </main>
 
 <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-
-<!-- ── Sidebar toggle script ────────────────────────────── -->
-<script src="{% static 'js/base.js' %}"> </script>
-
+<script src="{% static 'js/base.js' %}"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>

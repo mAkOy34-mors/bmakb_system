@@ -230,52 +230,67 @@
   </div>
 
   <!-- Quick Actions -->
-  <div class="col-lg-4">
-    <div class="data-card h-100">
-      <div class="data-card-header">
-        <div class="data-card-title">
-          <i data-lucide="zap" style="width:16px;height:16px;color:var(--teal)"></i>
-          Quick Actions
-        </div>
-      </div>
-      <div class="quick-actions-list">
-
-        <a href="{% url 'membership:member_add' %}" class="quick-action-item">
-          <div class="quick-action-icon qa-teal">
-            <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
-          </div>
-          <div class="quick-action-text">
-            <div class="quick-action-title">Add New Member</div>
-            <div class="quick-action-sub">Register a new member</div>
-          </div>
-          <i data-lucide="chevron-right" class="quick-action-arrow"></i>
-        </a>
-
-        <a href="{% url 'membership:member_list' %}" class="quick-action-item">
-          <div class="quick-action-icon qa-blue">
-            <i data-lucide="users" style="width:18px;height:18px;"></i>
-          </div>
-          <div class="quick-action-text">
-            <div class="quick-action-title">View All Members</div>
-            <div class="quick-action-sub">Browse member directory</div>
-          </div>
-          <i data-lucide="chevron-right" class="quick-action-arrow"></i>
-        </a>
-
-        <a href="{% url 'administrator:analytics' %}" class="quick-action-item">
-          <div class="quick-action-icon qa-violet">
-            <i data-lucide="bar-chart-2" style="width:18px;height:18px;"></i>
-          </div>
-          <div class="quick-action-text">
-            <div class="quick-action-title">View Analytics</div>
-            <div class="quick-action-sub">Charts and statistics</div>
-          </div>
-          <i data-lucide="chevron-right" class="quick-action-arrow"></i>
-        </a>
-
+  <!-- Quick Actions -->
+<div class="col-lg-4">
+  <div class="data-card h-100">
+    <div class="data-card-header">
+      <div class="data-card-title">
+        <i data-lucide="zap" style="width:16px;height:16px;color:var(--teal)"></i>
+        Quick Actions
       </div>
     </div>
+    <div class="quick-actions-list">
+
+      <a href="{% url 'membership:member_add' %}" class="quick-action-item">
+        <div class="quick-action-icon qa-teal">
+          <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+        </div>
+        <div class="quick-action-text">
+          <div class="quick-action-title">Add New Member</div>
+          <div class="quick-action-sub">Register a new member</div>
+        </div>
+        <i data-lucide="chevron-right" class="quick-action-arrow"></i>
+      </a>
+
+      <a href="{% url 'membership:member_list' %}" class="quick-action-item">
+        <div class="quick-action-icon qa-blue">
+          <i data-lucide="users" style="width:18px;height:18px;"></i>
+        </div>
+        <div class="quick-action-text">
+          <div class="quick-action-title">View All Members</div>
+          <div class="quick-action-sub">Browse member directory</div>
+        </div>
+        <i data-lucide="chevron-right" class="quick-action-arrow"></i>
+      </a>
+
+      <a href="{% url 'administrator:analytics' %}" class="quick-action-item">
+        <div class="quick-action-icon qa-violet">
+          <i data-lucide="bar-chart-2" style="width:18px;height:18px;"></i>
+        </div>
+        <div class="quick-action-text">
+          <div class="quick-action-title">View Analytics</div>
+          <div class="quick-action-sub">Charts and statistics</div>
+        </div>
+        <i data-lucide="chevron-right" class="quick-action-arrow"></i>
+      </a>
+
+      <!-- ── Superuser only ───────────────────────────────── -->
+      {% if request.user.is_superuser %}
+      <a href="{% url 'administrator:register' %}" class="quick-action-item">
+        <div class="quick-action-icon qa-red">
+          <i data-lucide="shield-plus" style="width:18px;height:18px;"></i>
+        </div>
+        <div class="quick-action-text">
+          <div class="quick-action-title">Add Administrator</div>
+          <div class="quick-action-sub">Create a new admin account</div>
+        </div>
+        <i data-lucide="chevron-right" class="quick-action-arrow"></i>
+      </a>
+      {% endif %}
+
+    </div>
   </div>
+</div>
 
 </div>
 
