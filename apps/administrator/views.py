@@ -35,8 +35,8 @@ User = get_user_model()
 def is_superuser(user):
     return user.is_superuser
 
-@login_required(login_url='administrator:login')
-@user_passes_test(is_superuser, login_url='administrator:login')
+@login_required(login_url='/administrator/login/')
+@user_passes_test(is_superuser, login_url='/administrator/login/')
 def admin_register(request):
     # Remove the is_authenticated check — it was incorrectly blocking superusers
 
@@ -91,7 +91,7 @@ def admin_login(request):
 
 
 # ── Logout ────────────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def admin_logout(request):
     AdminLog.objects.create(
         admin=request.user,
@@ -107,7 +107,7 @@ def admin_logout(request):
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
 # ── Dashboard ─────────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def dashboard(request):
     monthly_qs = (
         Member.objects
@@ -186,7 +186,7 @@ def dashboard(request):
     return render(request, 'administrator/dashboard.html', context)
 
 # ── Analytics ─────────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def analytics(request):
     # ── Membership trend (monthly / daily / weekly) ───────────────────────
     monthly_qs = (
@@ -424,7 +424,7 @@ def analytics(request):
     return render(request, 'administrator/analytics.html', context)
 
 # ── Admin Logs ────────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def admin_logs(request):
     qs = AdminLog.objects.select_related('admin').all()
 
@@ -877,7 +877,7 @@ def reset_password(request):
 
     return render(request, 'administrator/reset_password.html')
 
-@login_required
+@login_required(login_url='/administrator/login/')
 def analytics_pdf_export(request):
     """
     Generates and downloads the analytics report as a real PDF file.

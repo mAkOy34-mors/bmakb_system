@@ -26,7 +26,15 @@ SECRET_KEY = 'django-insecure-oqri%nd6e&^_+5ps4!0j9kh&j8&bl79wn-&-d)npnae&vi-nfe
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
-ALLOWED_HOSTS = ['bmakbmis.pythonanywhere.com']
+ALLOWED_HOSTS = [
+    'bmakbmis.pythonanywhere.com',
+    'localhost',
+    '127.0.0.1',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://bmakbmis.pythonanywhere.com',
+]
 
 # Tell Django to use your custom Administrator model instead of the default User
 AUTH_USER_MODEL = 'administrator.Administrator'

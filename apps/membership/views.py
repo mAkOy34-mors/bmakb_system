@@ -11,7 +11,7 @@ from apps.administrator.log_utils import log_action
 
 
 # ── Member List ───────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def member_list(request):
     query           = request.GET.get('q', '')
     membership_type = request.GET.get('type', '')
@@ -43,7 +43,7 @@ def member_list(request):
     return render(request, 'membership/member_list.html', context)
 
 # ── Add Member ────────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def member_add(request):
     if request.method == 'POST':
         form = MemberForm(request.POST)
@@ -92,7 +92,7 @@ def member_add(request):
 
 
 # ── Member Detail ─────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def member_detail(request, pk):
     member       = get_object_or_404(Member, pk=pk)
     transactions = member.transactions.select_related('created_by').order_by('-created_at')
@@ -112,7 +112,7 @@ def member_detail(request, pk):
     })
 
 # ── Edit Member ───────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def member_edit(request, pk):
     member = get_object_or_404(Member, pk=pk)
 
@@ -146,7 +146,7 @@ def member_edit(request, pk):
         'btn_label': 'Update Member',
     })
 # ── Delete Member ─────────────────────────────────────────────────────────────
-@login_required
+@login_required(login_url='/administrator/login/')
 def member_delete(request, pk):
     member = get_object_or_404(Member, pk=pk)
 
@@ -174,7 +174,7 @@ def member_delete(request, pk):
 
     return render(request, 'membership/member_confirm_delete.html', {'member': member})
 
-@login_required
+@login_required(login_url='/administrator/login/')
 def add_transaction(request, pk):
     member = get_object_or_404(Member, pk=pk)
 
