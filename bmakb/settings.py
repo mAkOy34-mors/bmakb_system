@@ -36,6 +36,19 @@ CSRF_TRUSTED_ORIGINS = [
     'https://bmakbmis.pythonanywhere.com',
 ]
 
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_AGE = 86400
+
+# ── Security ──────────────────────────────────────────────────
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = False
+
 # Tell Django to use your custom Administrator model instead of the default User
 AUTH_USER_MODEL = 'administrator.Administrator'
 
