@@ -9,3 +9,11 @@ function togglePassword(inputId, btn) {
       icon.classList.replace('bi-eye-slash', 'bi-eye');
     }
   }
+
+  document.addEventListener('DOMContentLoaded', function () {
+  const inner  = document.querySelector('.auth-card-inner');
+  const alerts = inner ? inner.querySelectorAll('.alert') : [];
+  if (alerts.length > 0) {
+    inner.classList.add('has-alerts');
+  }
+});
