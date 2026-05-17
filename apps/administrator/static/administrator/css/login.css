@@ -247,17 +247,20 @@ html, body {
 .alert-danger  { background: #fef2f2; color: #991b1b; }
 .alert-success { background: #f0fdf4; color: #166534; }
 
-/* ── Footer (below card) ─────────── */
+/* ── Footer (fixed to very bottom of screen) ─────────── */
 .auth-footer {
-  margin-top: 14px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 10px 16px;
   font-size: 11px;
   color: rgba(255, 255, 255, 0.65);
   letter-spacing: .3px;
   text-align: center;
-  white-space: normal;
-  word-break: break-word;
-  padding: 0 16px;
   line-height: 1.6;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.35), transparent);
 }
 
 /* ── OTP styles ──────────────────── */
@@ -313,11 +316,11 @@ html, body {
   .page-bg {
     position: relative;
     align-items: flex-start;
-    padding: 16px 12px;
+    padding: 16px 12px 60px; /* bottom padding so card never hides behind footer */
     min-height: 100dvh;
   }
 
-  .modal-wrap       { padding: 12px 0 20px; }
+  .modal-wrap       { padding: 12px 0 0; }
   .auth-card-inner  { padding: 22px 18px 18px; }
 
   .logo-ring        { width: 64px; height: 64px; }
@@ -328,15 +331,8 @@ html, body {
   .otp-digit        { width: 40px; height: 48px; font-size: 18px; }
   .otp-boxes        { gap: 7px; }
 
-  /* Footer fully visible */
-  .auth-footer {
-    font-size: 10px;
-    margin-top: 10px;
-    padding: 0 8px;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.6;
-  }
+  /* Footer stays fixed — just shrink font */
+  .auth-footer      { font-size: 10px; padding: 8px 10px; }
 }
 
 /* ── Short screens (≤700px height) ──────────────────────────── */
@@ -346,7 +342,7 @@ html, body {
   .page-bg {
     position: relative;
     align-items: flex-start;
-    padding: 16px 20px;
+    padding: 16px 20px 60px; /* bottom padding so card never hides behind footer */
     min-height: 100dvh;
   }
 
@@ -359,14 +355,8 @@ html, body {
   .auth-sub         { margin-bottom: 12px; }
   .btn-auth         { margin-top: 4px; }
 
-  .auth-footer {
-    font-size: 10px;
-    margin-top: 10px;
-    padding: 0 12px;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.6;
-  }
+  /* Footer stays fixed — just shrink font */
+  .auth-footer      { font-size: 10px; padding: 8px 12px; }
 }
 
 /* ── Very small phones (≤360px) ──────────────────────────────── */
