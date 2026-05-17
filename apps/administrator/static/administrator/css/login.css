@@ -251,14 +251,13 @@ html, body {
 .auth-footer {
   margin-top: 14px;
   font-size: 11px;
- color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.65);
   letter-spacing: .3px;
   text-align: center;
-
-  /* ADD THESE: */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  padding: 0 16px;
+  line-height: 1.6;
 }
 
 /* ── OTP styles ──────────────────── */
@@ -302,54 +301,113 @@ html, body {
 .pw-strength-label { font-size: 11px; font-weight: 600; margin-top: 4px; min-height: 16px; }
 .pw-match-label    { font-size: 11px; font-weight: 600; margin-top: 5px; min-height: 16px; }
 
-/* ── Responsive ──────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Small phones (≤480px) ───────────────────────────────────── */
 @media (max-width: 480px) {
-  .modal-wrap    { padding: 12px 0; }
-  .auth-card-inner { padding: 22px 18px 18px; }
-  .logo-ring     { width: 64px; height: 64px; }
-  .auth-logo     { width: 46px; height: 46px; }
-  .auth-brand h1 { font-size: 22px; }
+  /* Allow page to scroll on very small phones */
+  html, body        { overflow: auto; }
+
+  .page-bg {
+    position: relative;
+    align-items: flex-start;
+    padding: 16px 12px;
+    min-height: 100dvh;
+  }
+
+  .modal-wrap       { padding: 12px 0 20px; }
+  .auth-card-inner  { padding: 22px 18px 18px; }
+
+  .logo-ring        { width: 64px; height: 64px; }
+  .auth-logo        { width: 46px; height: 46px; }
+  .auth-brand h1    { font-size: 22px; }
+
+  /* OTP digits smaller */
+  .otp-digit        { width: 40px; height: 48px; font-size: 18px; }
+  .otp-boxes        { gap: 7px; }
+
+  /* Footer fully visible */
+  .auth-footer {
+    font-size: 10px;
+    margin-top: 10px;
+    padding: 0 8px;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.6;
+  }
 }
 
+/* ── Short screens (≤700px height) ──────────────────────────── */
 @media (max-height: 700px) {
-  .auth-brand    { margin-bottom: 10px; }
-  .logo-ring     { width: 60px; height: 60px; }
-  .auth-logo     { width: 42px; height: 42px; }
-  .auth-brand h1 { font-size: 22px; }
-  .auth-card-inner { padding: 18px 28px 16px; }
-  .auth-sub      { margin-bottom: 12px; }
-  .btn-auth      { margin-top: 4px; }
-}
-/* DM Sans */
-@font-face {
-    font-family: 'DM Sans';
-    font-style: normal;
-    font-weight: 300;
-    src: url('../fonts/dm-sans-300.woff2') format('woff2');
-}
-@font-face {
-    font-family: 'DM Sans';
-    font-style: normal;
-    font-weight: 400;
-    src: url('../fonts/dm-sans-400.woff2') format('woff2');
-}
-@font-face {
-    font-family: 'DM Sans';
-    font-style: normal;
-    font-weight: 500;
-    src: url('../fonts/dm-sans-500.woff2') format('woff2');
-}
-@font-face {
-    font-family: 'DM Sans';
-    font-style: normal;
-    font-weight: 600;
-    src: url('../fonts/dm-sans-600.woff2') format('woff2');
+  html, body        { overflow: auto; }
+
+  .page-bg {
+    position: relative;
+    align-items: flex-start;
+    padding: 16px 20px;
+    min-height: 100dvh;
+  }
+
+  .auth-brand       { margin-bottom: 10px; }
+  .logo-ring        { width: 60px; height: 60px; }
+  .auth-logo        { width: 42px; height: 42px; }
+  .auth-brand h1    { font-size: 22px; }
+  .auth-card-inner  { padding: 18px 28px 16px; max-height: none; }
+  .auth-card        { max-height: none; }
+  .auth-sub         { margin-bottom: 12px; }
+  .btn-auth         { margin-top: 4px; }
+
+  .auth-footer {
+    font-size: 10px;
+    margin-top: 10px;
+    padding: 0 12px;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.6;
+  }
 }
 
-/* DM Serif Display */
+/* ── Very small phones (≤360px) ──────────────────────────────── */
+@media (max-width: 360px) {
+  .auth-card-inner  { padding: 18px 14px 14px; }
+  .auth-brand h1    { font-size: 20px; }
+  .otp-digit        { width: 36px; height: 44px; font-size: 16px; }
+  .otp-boxes        { gap: 5px; }
+  .btn-auth         { font-size: 13px; padding: 11px; }
+}
+
+/* ── DM Sans Font ────────────────────────────────────────────── */
 @font-face {
-    font-family: 'DM Serif Display';
-    font-style: normal;
-    font-weight: 400;
-    src: url('../fonts/dm-serif-display.woff2') format('woff2');
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../fonts/dm-sans-300.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/dm-sans-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/dm-sans-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/dm-sans-600.woff2') format('woff2');
+}
+
+/* ── DM Serif Display Font ───────────────────────────────────── */
+@font-face {
+  font-family: 'DM Serif Display';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/dm-serif-display.woff2') format('woff2');
 }
