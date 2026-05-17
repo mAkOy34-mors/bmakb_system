@@ -191,3 +191,150 @@
     transform: translateY(0);
   }
   .export-toast svg { flex-shrink: 0; }
+
+/* ── Tablets (769px–1024px) ──────────────────────────────────── */
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  /* Stat cards: 2x2 */
+  .row-cols-5 > .col,
+  .row-cols-4 > .col {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Chart cards: full width */
+  .col-lg-8, .col-lg-4,
+  .col-md-6 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Export button */
+  .export-btn-wrap { margin-bottom: 1rem; }
+  .export-main-btn { font-size: 12px; padding: 8px 14px; }
+
+  /* Chart toggle group wraps */
+  .chart-toggle-group { flex-wrap: wrap; }
+  .chart-toggle       { font-size: 11px; padding: 4px 10px; }
+}
+
+/* ── Mobile (≤768px) ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* All stat cards: 2 per row */
+  .row-cols-5 > .col,
+  .row-cols-4 > .col,
+  .row-cols-3 > .col {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .stat-value            { font-size: 26px; }
+  .stat-value--financial { font-size: 15px; }
+  .stat-label            { font-size: 9px; }
+  .stat-icon-wrap        { width: 36px; height: 36px; margin-bottom: 8px; }
+
+  /* All chart cards: full width */
+  .col-lg-8, .col-lg-4,
+  .col-md-6, .col-md-4,
+  [class*="col-"] {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Chart body: reduce padding */
+  .chart-body    { padding: 12px; }
+  .chart-header  { padding: 12px 14px 10px; flex-wrap: wrap; gap: 8px; }
+  .chart-title   { font-size: 13px; }
+  .chart-sub     { font-size: 11px; }
+
+  /* Toggle group */
+  .chart-toggle-group { flex-wrap: wrap; gap: 2px; }
+  .chart-toggle       { font-size: 11px; padding: 4px 8px; }
+
+  /* Export button full width */
+  .export-btn-wrap        { justify-content: stretch; }
+  .export-main-btn        { flex: 1; font-size: 12px; padding: 8px 12px; }
+  .export-caret-btn       { padding: 8px 10px; }
+
+  /* Export dropdown full width */
+  .export-dropdown { right: 0; left: 0; min-width: unset; }
+  .export-option   { font-size: 12px; padding: 10px 14px; }
+
+  /* Toast notification */
+  .export-toast {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+
+  /* Data card header */
+  .data-card-header { flex-wrap: wrap; gap: 8px; padding: 12px 14px; }
+  .data-card-title  { font-size: 13px; }
+}
+
+/* ── Small phones (≤480px) ───────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* 1 card per row */
+  .row-cols-5 > .col,
+  .row-cols-4 > .col,
+  .row-cols-3 > .col {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .stat-value            { font-size: 28px; }
+  .stat-value--financial { font-size: 16px; }
+
+  /* Chart height smaller on phone */
+  canvas { max-height: 220px !important; }
+
+  /* Export dropdown covers full width */
+  .export-dropdown { left: 0; right: 0; }
+
+  /* Toggle: 2 per row */
+  .chart-toggle-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .chart-toggle { text-align: center; }
+
+  /* Hide chart sub-text */
+  .chart-sub { display: none; }
+
+  /* Chart header stacks */
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ── Print styles (already in analytics.css, enhanced here) ──── */
+@media print {
+  .export-btn-wrap,
+  .chart-toggle-group,
+  .sidebar,
+  .topbar,
+  .hamburger-btn {
+    display: none !important;
+  }
+
+  .main    { margin-left: 0 !important; }
+  .col-lg-8, .col-lg-4,
+  .col-md-6 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+
+  .chart-card {
+    break-inside: avoid;
+    margin-bottom: 16px !important;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+
+  canvas { max-height: 260px !important; }
+}

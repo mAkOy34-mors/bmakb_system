@@ -173,20 +173,20 @@
 
           <!-- Admin -->
           <td>
-            {% if log.admin %}
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div style="width:30px;height:30px;border-radius:50%;
-                            background:linear-gradient(135deg,var(--teal),var(--blue));
-                            display:flex;align-items:center;justify-content:center;
-                            color:white;font-size:11px;font-weight:600;flex-shrink:0;">
-                  {{ log.admin.first_name|first|upper }}{{ log.admin.last_name|first|upper }}
-                </div>
-                <span style="font-size:13px;font-weight:500;">{{ log.admin.get_full_name }}</span>
-              </div>
-            {% else %}
-              <span style="color:var(--muted);font-size:12px;">—</span>
-            {% endif %}
-          </td>
+  {% if log.admin %}
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div style="width:30px;height:30px;border-radius:50%;
+                  background:linear-gradient(135deg,var(--teal),var(--blue));
+                  display:flex;align-items:center;justify-content:center;
+                  color:white;font-size:11px;font-weight:600;flex-shrink:0;">
+        {{ log.admin.username|first|upper }}
+      </div>
+      <span style="font-size:13px;font-weight:500;">{{ log.admin.username }}</span>
+    </div>
+  {% else %}
+    <span style="color:var(--muted);font-size:12px;">—</span>
+  {% endif %}
+</td>
 
           <!-- Action badge -->
           <td>

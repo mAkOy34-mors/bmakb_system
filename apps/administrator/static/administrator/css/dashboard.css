@@ -418,3 +418,110 @@
     display: none; /* hide "Type" col on small screens */
   }
 }
+/* ── Small laptops (1024px–1280px) ──────────────────────────── */
+@media (max-width: 1280px) and (min-width: 1025px) {
+  .stat-value--financial { font-size: 15px; }
+  .members-modal { max-width: 700px; }
+}
+
+/* ── Tablets (769px–1024px) ──────────────────────────────────── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  /* Financial cards: 2 per row */
+  .row.g-3.mb-4.row-cols-5 > .col {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  .stat-value--financial { font-size: 16px; }
+
+  /* Modal full width on tablet */
+  .members-modal { max-width: 95vw; }
+}
+
+/* ── Mobile (≤768px) ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Member count cards: 2 per row */
+  .row-cols-5 > .col {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Financial cards: 1 per row */
+  .row.g-3.mb-4.row-cols-5 > .col {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Recent Members table — hide less important columns */
+  .table thead th:nth-child(3),
+  .table tbody td:nth-child(3),
+  .table thead th:nth-child(4),
+  .table tbody td:nth-child(4) {
+    display: none;
+  }
+
+  /* Quick actions stack */
+  .quick-actions-list { padding: 12px; gap: 8px; }
+  .quick-action-item  { padding: 10px 12px; }
+
+  /* Modal: slide up from bottom */
+  .members-modal-backdrop {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .members-modal {
+    max-height: 90vh;
+    border-radius: 18px 18px 0 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  .members-modal-header { padding: 18px 16px 0; }
+  .members-modal-divider { margin: 12px 16px 0; }
+  .members-modal-summary { margin: 10px 16px 0; }
+  .members-modal-search-wrap { padding: 10px 16px 0; }
+  .members-modal-body { padding: 10px 16px 4px; }
+  .members-modal-footer { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+
+  /* Hide type col in modal on mobile */
+  .members-modal-table thead th:nth-child(3),
+  .members-modal-table tbody td:nth-child(3),
+  .members-modal-table thead th:nth-child(4),
+  .members-modal-table tbody td:nth-child(4) {
+    display: none;
+  }
+
+  /* Footer actions stack */
+  .modal-footer-actions { flex: 1; justify-content: flex-end; }
+  .modal-count-text { font-size: 11px; }
+}
+
+/* ── Small phones (≤480px) ───────────────────────────────────── */
+@media (max-width: 480px) {
+
+  /* 1 card per row on very small screens */
+  .row-cols-5 > .col,
+  .row.g-3.mb-4.row-cols-5 > .col {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .stat-value           { font-size: 28px; }
+  .stat-value--financial{ font-size: 16px; }
+  .stat-icon-wrap       { width: 36px; height: 36px; }
+
+  /* Hide view button text on mobile table */
+  .table .btn-outline { padding: 5px 8px; font-size: 11px; }
+
+  /* Modal search input smaller */
+  .members-modal-search input { font-size: 12px; }
+  .members-modal-title        { font-size: 15px; }
+  .members-modal-subtitle     { font-size: 12px; }
+
+  /* Stack footer buttons */
+  .members-modal-footer       { flex-direction: column; align-items: stretch; }
+  .modal-footer-actions       { justify-content: stretch; }
+  .modal-btn-primary,
+  .modal-btn-secondary        { justify-content: center; width: 100%; }
+  .modal-count-text           { text-align: center; }
+}
