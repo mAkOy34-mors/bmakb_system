@@ -1,7 +1,3 @@
-/* ══════════════════════════════════════════════════════════════
-   dashboard.css  —  Member Modal Styles
-   ══════════════════════════════════════════════════════════════ */
-
 /* ── Clickable stat cards ────────────────────────────────────── */
 .stat-card.clickable {
   cursor: pointer;
@@ -9,16 +5,13 @@
   user-select: none;
   position: relative;
 }
-
 .stat-card.clickable:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
-
 .stat-card.clickable:active {
   transform: translateY(-1px);
 }
-
 .stat-card.clickable::after {
   content: '';
   position: absolute;
@@ -29,11 +22,9 @@
   transition: opacity 0.15s ease;
   pointer-events: none;
 }
-
 .stat-card.clickable:hover::after {
   opacity: 1;
 }
-
 .stat-card-tap-hint {
   font-size: 10px;
   letter-spacing: 0.04em;
@@ -58,11 +49,9 @@
   padding: 16px;
   animation: backdropFadeIn 0.22s ease forwards;
 }
-
 .members-modal-backdrop.active {
   display: flex;
 }
-
 @keyframes backdropFadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -83,16 +72,9 @@
   animation: modalSlideUp 0.26s cubic-bezier(0.34, 1.30, 0.64, 1) forwards;
   overflow: hidden;
 }
-
 @keyframes modalSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 /* ── Modal Header ────────────────────────────────────────────── */
@@ -104,13 +86,11 @@
   padding: 22px 24px 0;
   flex-shrink: 0;
 }
-
 .members-modal-header-left {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .members-modal-icon {
   width: 42px;
   height: 42px;
@@ -120,7 +100,6 @@
   justify-content: center;
   flex-shrink: 0;
 }
-
 .members-modal-icon.blue   { background: rgba(59,  130, 246, 0.12); color: #3b82f6; }
 .members-modal-icon.green  { background: rgba(34,  197, 94,  0.12); color: #22c55e; }
 .members-modal-icon.amber  { background: rgba(245, 158, 11,  0.12); color: #f59e0b; }
@@ -133,14 +112,12 @@
   color: var(--text, #111);
   line-height: 1.25;
 }
-
 .members-modal-subtitle {
   font-size: 13px;
   color: var(--muted, #6b7280);
   margin-top: 3px;
   line-height: 1.4;
 }
-
 .members-modal-close {
   background: none;
   border: none;
@@ -155,7 +132,6 @@
   flex-shrink: 0;
   margin-top: -2px;
 }
-
 .members-modal-close:hover {
   background: rgba(0, 0, 0, 0.06);
   color: var(--text, #111);
@@ -181,7 +157,6 @@
   gap: 8px;
   flex-shrink: 0;
 }
-
 .members-modal-summary.blue   { background: rgba(59,  130, 246, 0.08); color: #1d4ed8; border: 1px solid rgba(59,  130, 246, 0.18); }
 .members-modal-summary.green  { background: rgba(34,  197, 94,  0.08); color: #15803d; border: 1px solid rgba(34,  197, 94,  0.18); }
 .members-modal-summary.amber  { background: rgba(245, 158, 11,  0.08); color: #92400e; border: 1px solid rgba(245, 158, 11,  0.18); }
@@ -193,11 +168,7 @@
   padding: 12px 24px 0;
   flex-shrink: 0;
 }
-
-.members-modal-search {
-  position: relative;
-}
-
+.members-modal-search { position: relative; }
 .members-modal-search input {
   width: 100%;
   padding: 9px 14px 9px 36px;
@@ -209,12 +180,10 @@
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-
 .members-modal-search input:focus {
   border-color: var(--teal, #14b8a6);
   box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12);
 }
-
 .members-modal-search .search-icon {
   position: absolute;
   left: 11px;
@@ -231,15 +200,12 @@
   padding: 14px 24px 6px;
   flex: 1;
 }
-
-/* Scrollbar styling */
 .members-modal-body::-webkit-scrollbar { width: 5px; }
 .members-modal-body::-webkit-scrollbar-track { background: transparent; }
 .members-modal-body::-webkit-scrollbar-thumb {
   background: var(--border, #d1d5db);
   border-radius: 10px;
 }
-
 .members-modal-body::-webkit-scrollbar-thumb:hover {
   background: var(--muted, #9ca3af);
 }
@@ -250,7 +216,6 @@
   border-spacing: 0;
   font-size: 13px;
 }
-
 .members-modal-table thead th {
   position: sticky;
   top: 0;
@@ -265,27 +230,19 @@
   white-space: nowrap;
   z-index: 2;
 }
-
-.members-modal-table tbody tr {
-  transition: background 0.12s;
-}
-
+.members-modal-table tbody tr { transition: background 0.12s; }
 .members-modal-table tbody tr:hover {
   background: var(--hover-bg, rgba(0,0,0,0.03));
 }
-
 .members-modal-table tbody td {
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-light, #f3f4f6);
   color: var(--text, #111);
   vertical-align: middle;
 }
+.members-modal-table tbody tr:last-child td { border-bottom: none; }
 
-.members-modal-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Badges inside modal table */
+/* Badges inside modal */
 .modal-badge {
   display: inline-block;
   padding: 2px 9px;
@@ -294,7 +251,6 @@
   font-weight: 600;
   letter-spacing: 0.02em;
 }
-
 .modal-badge-active   { background: rgba(34,  197, 94,  0.12); color: #15803d; }
 .modal-badge-inactive { background: rgba(239, 68,  68,  0.10); color: #b91c1c; }
 .modal-badge-regular  { background: rgba(245, 158, 11,  0.12); color: #92400e; }
@@ -316,7 +272,6 @@
   transition: border-color 0.15s, background 0.15s, color 0.15s;
   white-space: nowrap;
 }
-
 .modal-view-btn:hover {
   border-color: var(--teal, #14b8a6);
   background: rgba(20, 184, 166, 0.07);
@@ -330,11 +285,7 @@
   color: var(--muted, #9ca3af);
   font-size: 13px;
 }
-
-.modal-empty-state svg {
-  opacity: 0.3;
-  margin-bottom: 10px;
-}
+.modal-empty-state svg { opacity: 0.3; margin-bottom: 10px; }
 
 /* ── Modal Footer ────────────────────────────────────────────── */
 .members-modal-footer {
@@ -346,16 +297,8 @@
   flex-shrink: 0;
   gap: 12px;
 }
-
-.modal-count-text {
-  font-size: 12px;
-  color: var(--muted, #6b7280);
-}
-
-.modal-footer-actions {
-  display: flex;
-  gap: 8px;
-}
+.modal-count-text { font-size: 12px; color: var(--muted, #6b7280); }
+.modal-footer-actions { display: flex; gap: 8px; }
 
 .modal-btn-secondary {
   padding: 8px 16px;
@@ -372,7 +315,6 @@
   align-items: center;
   gap: 6px;
 }
-
 .modal-btn-secondary:hover {
   background: var(--hover-bg, rgba(0,0,0,0.04));
   border-color: #9ca3af;
@@ -393,135 +335,152 @@
   align-items: center;
   gap: 6px;
 }
-
 .modal-btn-primary:hover {
   background: var(--teal-dark, #0d9488);
   box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
   color: #fff;
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 640px) {
-  .members-modal {
-    max-height: 94vh;
-    border-radius: 14px 14px 0 0;
-    margin-top: auto;
-  }
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS — Single clean set, no duplicates
+   ══════════════════════════════════════════════════════════════ */
 
-  .members-modal-backdrop {
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  .members-modal-table thead th:nth-child(3),
-  .members-modal-table tbody td:nth-child(3) {
-    display: none; /* hide "Type" col on small screens */
-  }
-}
-/* ── Small laptops (1024px–1280px) ──────────────────────────── */
+/* ── Small laptops (1025px–1280px) ──────────────────────────── */
 @media (max-width: 1280px) and (min-width: 1025px) {
   .stat-value--financial { font-size: 15px; }
-  .members-modal { max-width: 700px; }
+  .members-modal         { max-width: 700px; }
 }
 
 /* ── Tablets (769px–1024px) ──────────────────────────────────── */
 @media (max-width: 1024px) and (min-width: 769px) {
-  /* Financial cards: 2 per row */
-  .row.g-3.mb-4.row-cols-5 > .col {
-    flex: 0 0 50%;
-    max-width: 50%;
+  .row-cols-5 > .col {
+    flex: 0 0 33.333% !important;
+    max-width: 33.333% !important;
   }
-
   .stat-value--financial { font-size: 16px; }
-
-  /* Modal full width on tablet */
-  .members-modal { max-width: 95vw; }
+  .members-modal         { max-width: 95vw; }
+  .col-lg-8, .col-lg-4 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+  }
 }
 
 /* ── Mobile (≤768px) ─────────────────────────────────────────── */
 @media (max-width: 768px) {
 
-  /* Member count cards: 2 per row */
+  /* Page padding */
+  .page-content { padding: 10px !important; }
+
+  /* Row gaps */
+  .row.g-3 {
+    --bs-gutter-x: 0.5rem !important;
+    --bs-gutter-y: 0.5rem !important;
+  }
+
+  /* All stat cards: 2 per row */
   .row-cols-5 > .col {
-    flex: 0 0 50%;
-    max-width: 50%;
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    padding: 4px !important;
   }
 
-  /* Financial cards: 1 per row */
-  .row.g-3.mb-4.row-cols-5 > .col {
-    flex: 0 0 50%;
-    max-width: 50%;
+  /* Stat card tighter */
+  .stat-card           { padding: 12px 10px 10px !important; }
+  .stat-icon-wrap      { width: 32px !important; height: 32px !important; margin-bottom: 8px !important; }
+  .stat-icon-wrap .lucide-icon { width: 15px !important; height: 15px !important; }
+  .stat-label          { font-size: 8px !important; letter-spacing: 0.4px !important; }
+  .stat-value          { font-size: 26px !important; }
+  .stat-value--financial { font-size: 14px !important; word-break: break-word !important; }
+  .stat-sub            { font-size: 10px !important; }
+  .stat-card-tap-hint  { font-size: 9px !important; }
+
+  /* Stack recent members + quick actions */
+  .col-lg-8, .col-lg-4 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
   }
 
-  /* Recent Members table — hide less important columns */
+  /* Topbar */
+  .topbar       { padding: 10px 12px !important; }
+  .topbar-title { font-size: 14px !important; }
+
+  /* Data card header */
+  .data-card-header { padding: 12px 14px !important; flex-wrap: wrap; gap: 8px; }
+  .data-card-title  { font-size: 13px !important; }
+
+  /* Recent members table */
+  .table thead th { font-size: 10px !important; padding: 8px !important; white-space: nowrap; }
+  .table tbody td { font-size: 11px !important; padding: 8px !important; }
+
+  /* Hide Type and Date Joined */
   .table thead th:nth-child(3),
   .table tbody td:nth-child(3),
   .table thead th:nth-child(4),
-  .table tbody td:nth-child(4) {
-    display: none;
-  }
+  .table tbody td:nth-child(4) { display: none !important; }
 
-  /* Quick actions stack */
-  .quick-actions-list { padding: 12px; gap: 8px; }
-  .quick-action-item  { padding: 10px 12px; }
+  /* Quick actions */
+  .quick-actions-list { padding: 10px !important; }
+  .quick-action-item  { padding: 10px 12px !important; }
+  .quick-action-title { font-size: 13px !important; }
+  .quick-action-sub   { font-size: 11px !important; }
 
   /* Modal: slide up from bottom */
-  .members-modal-backdrop {
-    align-items: flex-end;
-    padding: 0;
-  }
+  .members-modal-backdrop { align-items: flex-end !important; padding: 0 !important; }
   .members-modal {
     max-height: 90vh;
-    border-radius: 18px 18px 0 0;
-    width: 100%;
-    max-width: 100%;
+    border-radius: 18px 18px 0 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
-  .members-modal-header { padding: 18px 16px 0; }
-  .members-modal-divider { margin: 12px 16px 0; }
-  .members-modal-summary { margin: 10px 16px 0; }
+  .members-modal-header      { padding: 18px 16px 0; }
+  .members-modal-divider     { margin: 12px 16px 0; }
+  .members-modal-summary     { margin: 10px 16px 0; font-size: 12px; }
   .members-modal-search-wrap { padding: 10px 16px 0; }
-  .members-modal-body { padding: 10px 16px 4px; }
-  .members-modal-footer { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .members-modal-body        { padding: 10px 16px 4px; }
+  .members-modal-footer      { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .modal-footer-actions      { flex: 1; justify-content: flex-end; }
+  .modal-count-text          { font-size: 11px; }
 
-  /* Hide type col in modal on mobile */
+  /* Hide Type + Date in modal table */
   .members-modal-table thead th:nth-child(3),
   .members-modal-table tbody td:nth-child(3),
   .members-modal-table thead th:nth-child(4),
-  .members-modal-table tbody td:nth-child(4) {
-    display: none;
-  }
-
-  /* Footer actions stack */
-  .modal-footer-actions { flex: 1; justify-content: flex-end; }
-  .modal-count-text { font-size: 11px; }
+  .members-modal-table tbody td:nth-child(4) { display: none !important; }
 }
 
 /* ── Small phones (≤480px) ───────────────────────────────────── */
 @media (max-width: 480px) {
 
-  /* 1 card per row on very small screens */
-  .row-cols-5 > .col,
-  .row.g-3.mb-4.row-cols-5 > .col {
-    flex: 0 0 100%;
-    max-width: 100%;
+  /* 1 card per row */
+  .row-cols-5 > .col {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
   }
 
-  .stat-value           { font-size: 28px; }
-  .stat-value--financial{ font-size: 16px; }
-  .stat-icon-wrap       { width: 36px; height: 36px; }
+  .stat-value            { font-size: 30px !important; }
+  .stat-value--financial { font-size: 16px !important; }
 
-  /* Hide view button text on mobile table */
-  .table .btn-outline { padding: 5px 8px; font-size: 11px; }
+  /* Hide Status column */
+  .table thead th:nth-child(5),
+  .table tbody td:nth-child(5) { display: none !important; }
 
-  /* Modal search input smaller */
-  .members-modal-search input { font-size: 12px; }
-  .members-modal-title        { font-size: 15px; }
-  .members-modal-subtitle     { font-size: 12px; }
+  /* Hide topbar user info */
+  .topbar > div:last-child { display: none !important; }
 
-  /* Stack footer buttons */
-  .members-modal-footer       { flex-direction: column; align-items: stretch; }
-  .modal-footer-actions       { justify-content: stretch; }
+  /* Stack modal footer buttons */
+  .members-modal-footer    { flex-direction: column; align-items: stretch; }
+  .modal-footer-actions    { justify-content: stretch; }
   .modal-btn-primary,
-  .modal-btn-secondary        { justify-content: center; width: 100%; }
-  .modal-count-text           { text-align: center; }
+  .modal-btn-secondary     { justify-content: center; width: 100%; }
+  .modal-count-text        { text-align: center; }
+
+  /* Smaller modal text */
+  .members-modal-title    { font-size: 15px; }
+  .members-modal-subtitle { font-size: 12px; }
+  .members-modal-search input { font-size: 12px; }
+
+  /* View button compact */
+  .table .btn-outline { padding: 5px 8px; font-size: 11px; }
 }
