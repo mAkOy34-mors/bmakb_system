@@ -11,10 +11,9 @@
 /* ── Full-screen background ──────── */
 html, body {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
   font-family: 'DM Sans', sans-serif;
 }
-
 .page-bg {
   position: fixed;
   inset: 0;
